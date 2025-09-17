@@ -1,0 +1,11 @@
+
+c          wwwwwwwwwww
+cccccc    w l               w
+cnnn c    w  lll            w
+cnnn c    wwlwwwwwwww     h         h
+cccccc                           hhhhhhhhh
+c     c                          h         h
+
+
+
+桌子=c  navi=n 窗户=w  床=h

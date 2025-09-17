@@ -1,0 +1,16 @@
+{
+  "name": "Lain",
+  "class": "网络潜行者 (Net Diver)",
+  "level": 1,
+  "hp": {
+    "current": 100,
+    "max": 100
+  },
+  "attributes": {
+    "strength": 5,
+    "dexterity": 8,
+    "intelligence": 12
+  },
+  "inventory": [],
+  "location": "room_01"
+}
