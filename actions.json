@@ -1,0 +1,175 @@
+{
+  "enter_lain_room": {
+    "type": "location_change",
+    "payload": {
+      "new_location": "lain_room",
+      "story_file": "story/01_lain_room.md"
+    }
+  },
+  "go_downstairs": {
+    "type": "location_change",
+    "payload": {
+      "new_location": "downstairs",
+      "story_file": "story/02_downstairs.md"
+    }
+  },
+  "wait_one_minute": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/00a_wait_one_minute_endprologue.md"
+    }
+  },
+  "talk_to_figure": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/01c_talk_to_figure_endprologue.md"
+    }
+  },
+  "examine_navi": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/01a_examine_navi.md"
+    }
+  },
+  "return_to_entry": {
+    "type": "location_change",
+    "payload": {
+      "new_location": "entry",
+      "story_file": "story/00_entry.md"
+    }
+  },
+  "dad_reply_no": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02b_dad_reply_no.md"
+    }
+  },
+  "dad_ask_help": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02c_dad_ask_help.md"
+    }
+  },
+  "start_chapter_one": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/03_chapter_one_intro.md"
+    }
+  },
+  "navi_shutdown": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/01b_navi_shutdown.md"
+    }
+  },
+  "navi_reboot": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/01d_navi_reboot_endprologue.md"
+    }
+  },
+  "navi_connect": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/01e_navi_connect_endprologue.md"
+    }
+  },
+  "talk_to_dad": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02a_talk_to_dad.md"
+    }
+  },
+  "talk_to_mom": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02d_talk_to_mom_normal.md"
+    }
+  },
+  "get_milk": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02j_get_milk_endprologue.md"
+    }
+  },
+  "return_to_upstairs": {
+    "type": "location_change",
+    "payload": {
+      "new_location": "entry",
+      "story_file": "story/00_entry.md"
+    }
+  },
+  "return_to_living_room": {
+    "type": "location_change",
+    "payload": {
+      "new_location": "downstairs",
+      "story_file": "story/02_downstairs.md"
+    }
+  },
+  "mom_reply_fine": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02f_mom_reply_fine_endprologue.md"
+    }
+  },
+  "mom_reply_silent": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02g_mom_reply_silent_endprologue.md"
+    }
+  },
+  "mom_deny_vision": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02h_mom_deny_vision_endprologue.md"
+    }
+  },
+  "mom_agree_doctor": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02i_mom_agree_doctor_endprologue.md"
+    }
+  },
+  "mom_reply_silent_vision": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/02k_mom_silent_vision_endprologue.md"
+    }
+  },
+  "talk_to_sister": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/04_talk_to_sister.md"
+    }
+  },
+  "read_email_from_chisa": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/05_chisa_email.md"
+    }
+  },
+  "go_to_school": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/06_train_scene.md"
+    }
+  },
+  "delete_email_unread": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/06_train_scene.md"
+    }
+  },
+  "go_to_classroom": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/07_classroom.md"
+    }
+  },
+  "reply_im_fine": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/08a_reply_fine.md"
+    }
+  }
+}

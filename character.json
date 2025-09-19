@@ -12,5 +12,15 @@
     "intelligence": 12
   },
   "inventory": [],
-  "location": "room_01"
+  "location": "lain_room",
+  "overload": 0,
+  "pseudo_terminal_cwd": "/home/lain",
+  "unlocked_commands": [
+    "help",
+    "whoami",
+    "clear",
+    "cls",
+    "inventory",
+    "inv"
+  ]
 }

@@ -1,0 +1,14 @@
+{
+  "screwdriver": {
+    "name": "螺丝刀",
+    "description": "一把普通的十字螺丝刀，看起来可以拧开某些电子设备的外壳。"
+  },
+  "access_card_lvl1": {
+    "name": "1级访问卡",
+    "description": "一张印有'Tachibana Labs'标志的白色卡片。"
+  },
+  "floppy_disk_ke": {
+    "name": "软盘 (K&E)",
+    "description": "一张3.5英寸软盘，标签上手写着'Knights & Eastern'。"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "kurani_residence": {
+    "name": "仓谷家",
+    "description": "玲音目前物理上所居住的地方。这里很安静，但总感觉自己像个客人。",
+    "story_file": "",
+    "connections": {}
+  },
+  "hospital": {
+    "name": "综合医院",
+    "description": "冰冷的白色走廊，充满了消毒水的味道。",
+    "story_file": "",
+    "connections": {}
+  },
+  "mira_fuyuko_home": {
+    "name": "米良冬子家",
+    "description": "玲音的心理医生米良冬子的家。一栋看起来很西式（或美式）的独户住宅。",
+    "story_file": "",
+    "connections": {}
+  },
+  "alice_home": {
+    "name": "爱丽丝家",
+    "description": "瑞城爱丽丝的家，一个典型的中产阶级家庭。",
+    "story_file": "",
+    "connections": {}
+  },
+  "chisa_home": {
+    "name": "千砂家",
+    "description": "四方田千砂的家，如今已经人去楼空。",
+    "story_file": "",
+    "connections": {}
+  },
+  "shibuya_street": {
+    "name": "涉谷街道",
+    "description": "人潮汹涌的十字路口，巨大的广告牌上闪烁着光芒。",
+    "story_file": "",
+    "connections": {}
+  },
+  "train_station": {
+    "name": "电车站台",
+    "description": "电车进站的风带来了铁轨的气味，人们安静地等待着。",
+    "story_file": "",
+    "connections": {}
+  },
+  "school_classroom": {
+    "name": "学校教室",
+    "description": "课桌上刻着痕迹，窗外的操场传来了模糊的喧嚣。",
+    "story_file": "story/07_classroom.md",
+    "connections": {}
+  },
+  "convenience_store": {
+    "name": "便利店",
+    "description": "24小时亮着灯，提供着标准化的温暖和食物。",
+    "story_file": "",
+    "connections": {}
+  },
+  "cyberia_club": {
+    "name": "Cyberia 酒吧",
+    "description": "重低音和闪烁的灯光，空气中弥漫着汗水和电子的味道。孩子们在这里寻找归属。",
+    "story_file": "",
+    "connections": {}
+  },
+  "arcade": {
+    "name": "游戏厅",
+    "description": "各种电子音效混合在一起，形成一片嘈杂的交响乐。",
+    "story_file": "",
+    "connections": {}
+  }
+}
