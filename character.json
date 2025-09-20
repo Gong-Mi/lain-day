@@ -25,5 +25,6 @@
     "cls",
     "inventory",
     "inv"
-  ]
+  ],
+  "current_story_file": "story/00_entry.md"
 }
