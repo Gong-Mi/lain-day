@@ -7,7 +7,10 @@
 
 `lain`
 
-你打算怎么做？
+但底下的汉字被抹去了
+<!-- lain下面的汉字 有 你 玲 铃 灵 -->
+
+
 
 - [打开门](action:enter_lain_room)
 - [走下楼梯](action:go_downstairs)

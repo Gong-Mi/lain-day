@@ -8,7 +8,6 @@
 
 这台机器似乎正在执行某种深刻而底层的任务。在屏幕下方，有几个可用的指令选项。
 
-你打算怎么做？
 
 - [强制关闭Navi](action:navi_shutdown)
 - [重启Navi](action:navi_reboot)

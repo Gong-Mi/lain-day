@@ -33,17 +33,50 @@ def parse_story_file(file_path):
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
     except FileNotFoundError:
-        return f"错误：找不到故事文件 {file_path}", []
-    text_content = []
+        return [f"错误：找不到故事文件 {file_path}"], []
+
+    story_content = []
     choices = []
+    
     choice_pattern = re.compile(r'-\s*\[(.*?)\]\(action:(.*?)\)')
-    for line in content.splitlines():
-        match = choice_pattern.match(line.strip())
-        if match:
-            choices.append({"text": match.group(1).strip(), "action": match.group(2).strip()})
+    pause_pattern = re.compile(r'^\[PAUSE:([\d.]+)\]$')
+
+    text_buffer = []
+
+    for line in content.split('\n'):
+        stripped_line = line.strip()
+
+        if stripped_line.startswith('<!--') and stripped_line.endswith('-->'):
+            continue
+
+        choice_match = choice_pattern.match(stripped_line)
+        pause_match = pause_pattern.fullmatch(stripped_line)
+
+        if choice_match:
+            if text_buffer:
+                story_content.append("\n".join(text_buffer))
+            text_buffer = []
+            choices.append({"text": choice_match.group(1).strip(), "action": choice_match.group(2).strip()})
+        elif pause_match:
+            if text_buffer:
+                story_content.append("\n".join(text_buffer))
+            text_buffer = []
+            try:
+                story_content.append(("pause", float(pause_match.group(1))))
+            except (ValueError, IndexError):
+                text_buffer.append(line)
         else:
-            text_content.append(line)
-    return "\n".join(text_content), choices
+            text_buffer.append(line)
+
+    if text_buffer:
+        story_content.append("\n".join(text_buffer))
+
+    if story_content and story_content[0] == "":
+        story_content.pop(0)
+    if story_content and story_content[-1] == "":
+        story_content.pop(-1)
+
+    return story_content, choices
 
 # --- Terminal Command Handlers ---
 def get_jailed_path(world_root, sim_cwd, target_path):
@@ -212,8 +245,13 @@ def main():
     while True:
         if redraw_scene:
             os.system('cls' if os.name == 'nt' else 'clear')
-            story_text, available_choices = parse_story_file(current_story_file)
-            typewriter_print(story_text)
+            story_content, available_choices = parse_story_file(current_story_file)
+            for item in story_content:
+                if isinstance(item, tuple) and item[0] == 'pause':
+                    time.sleep(item[1])
+                elif isinstance(item, str):
+                    typewriter_print(item)
+            
             print("\n" + "="*30 + "\n")
 
             if not available_choices:

@@ -171,5 +171,23 @@
     "payload": {
       "story_file": "story/08a_reply_fine.md"
     }
+  },
+  "ask_teacher_knows": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/08b_ask_teacher.md"
+    }
+  },
+  "ask_about_proxy": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/08c_ask_proxy.md"
+    }
+  },
+  "ask_about_chisa": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/08d_ask_chisa.md"
+    }
   }
 }
