@@ -2,6 +2,9 @@
   "name": "Lain",
   "class": "网络潜行者 (Net Diver)",
   "level": 1,
+  "asked_teacher": 0,
+  "asked_proxy": 0,
+  "asked_chisa": 0,
   "hp": {
     "current": 100,
     "max": 100

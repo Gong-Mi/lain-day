@@ -173,21 +173,47 @@
     }
   },
   "ask_teacher_knows": {
-    "type": "story_change",
+    "type": "story_change_and_set_flags",
     "payload": {
-      "story_file": "story/08b_ask_teacher.md"
+      "story_file": "story/08b_ask_teacher.md",
+      "flags": [
+        { "name": "asked_teacher", "value": 1 }
+      ]
     }
   },
   "ask_about_proxy": {
-    "type": "story_change",
+    "type": "story_change_and_set_flags",
     "payload": {
-      "story_file": "story/08c_ask_proxy.md"
+      "story_file": "story/08c_ask_proxy.md",
+      "flags": [
+        { "name": "asked_proxy", "value": 1 }
+      ]
     }
   },
   "ask_about_chisa": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/08d_ask_chisa.md",
+      "flags": [
+        { "name": "asked_chisa", "value": 1 }
+      ]
+    }
+  },
+  "go_to_bar": {
     "type": "story_change",
     "payload": {
-      "story_file": "story/08d_ask_chisa.md"
+      "story_file": "story/09_cyberia.md"
+    }
+  },
+  "persuade_to_bar": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/09a_persuasion.md"
+    }
+  },
+  "ask_alice_scared": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/08e_ask_alice_scared.md"
     }
   }
-}

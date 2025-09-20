@@ -28,7 +28,7 @@ def typewriter_print(text, delay=0.04):
         time.sleep(delay)
 
 # --- Story Parser ---
-def parse_story_file(file_path):
+def parse_story_file(file_path, character_data):
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -38,10 +38,20 @@ def parse_story_file(file_path):
     story_content = []
     choices = []
     
+    # --- Patterns ---
     choice_pattern = re.compile(r'-\s*\[(.*?)\]\(action:(.*?)\)')
     pause_pattern = re.compile(r'^\[PAUSE:([\d.]+)\]$')
 
+    # --- State ---
     text_buffer = []
+    in_combinatorial_block = False
+    block_content = ""
+
+    def flush_text_buffer():
+        nonlocal text_buffer
+        if text_buffer:
+            story_content.append("\n".join(text_buffer))
+            text_buffer = []
 
     for line in content.split('\n'):
         stripped_line = line.strip()
@@ -49,33 +59,52 @@ def parse_story_file(file_path):
         if stripped_line.startswith('<!--') and stripped_line.endswith('-->'):
             continue
 
-        choice_match = choice_pattern.match(stripped_line)
-        pause_match = pause_pattern.fullmatch(stripped_line)
+        if not in_combinatorial_block:
+            if stripped_line == '{':
+                flush_text_buffer()
+                in_combinatorial_block = True
+                continue
+            
+            choice_match = choice_pattern.match(stripped_line)
+            pause_match = pause_pattern.fullmatch(stripped_line)
 
-        if choice_match:
-            if text_buffer:
-                story_content.append("\n".join(text_buffer))
-            text_buffer = []
-            choices.append({"text": choice_match.group(1).strip(), "action": choice_match.group(2).strip()})
-        elif pause_match:
-            if text_buffer:
-                story_content.append("\n".join(text_buffer))
-            text_buffer = []
-            try:
-                story_content.append(("pause", float(pause_match.group(1))))
-            except (ValueError, IndexError):
+            if choice_match:
+                flush_text_buffer()
+                choices.append({"text": choice_match.group(1).strip(), "action": choice_match.group(2).strip()})
+            elif pause_match:
+                flush_text_buffer()
+                try:
+                    story_content.append(("pause", float(pause_match.group(1))))
+                except (ValueError, IndexError):
+                    text_buffer.append(line) # Treat as normal text if format is wrong
+            else:
                 text_buffer.append(line)
-        else:
-            text_buffer.append(line)
+        
+        else: # We are in a combinatorial block
+            if stripped_line == '}':
+                in_combinatorial_block = False
+                try:
+                    rules = json.loads(block_content)
+                    generated_fragments = []
+                    for state_variable, options in rules.items():
+                        player_value = str(character_data.get(state_variable, "0"))
+                        
+                        if player_value in options:
+                            generated_fragments.append(options[player_value])
+                        elif "default" in options:
+                            generated_fragments.append(options["default"])
+                    
+                    final_text = " ".join(filter(None, generated_fragments))
+                    if final_text:
+                        story_content.append(final_text)
 
-    if text_buffer:
-        story_content.append("\n".join(text_buffer))
+                except json.JSONDecodeError:
+                    story_content.append("{\n" + block_content + "\n}") # On error, print block as is
+                block_content = ""
+            else:
+                block_content += line + '\n'
 
-    if story_content and story_content[0] == "":
-        story_content.pop(0)
-    if story_content and story_content[-1] == "":
-        story_content.pop(-1)
-
+    flush_text_buffer()
     return story_content, choices
 
 # --- Terminal Command Handlers ---
@@ -245,7 +274,7 @@ def main():
     while True:
         if redraw_scene:
             os.system('cls' if os.name == 'nt' else 'clear')
-            story_content, available_choices = parse_story_file(current_story_file)
+            story_content, available_choices = parse_story_file(current_story_file, character_data)
             for item in story_content:
                 if isinstance(item, tuple) and item[0] == 'pause':
                     time.sleep(item[1])
@@ -293,6 +322,11 @@ def main():
                             character_data['unlocked_commands'].append(cmd_to_unlock)
                             typewriter_print(f"\n[新指令已解锁: {cmd_to_unlock}]\n")
                             time.sleep(1.5)
+                    elif action_type == 'story_change_and_set_flags':
+                        if 'flags' in payload:
+                            for flag in payload['flags']:
+                                character_data[flag['name']] = flag['value']
+                        current_story_file = os.path.join(abs_path, payload.get('story_file'))
                     else: 
                         current_story_file = os.path.join(abs_path, payload.get('story_file'))
 

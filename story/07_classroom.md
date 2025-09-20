@@ -14,3 +14,4 @@
 - [“老师知道这个事情吗？”](action:ask_teacher_knows)
 - [“有没有可能是有人代发的？”](action:ask_about_proxy)
 - [“爱丽丝，千砂酱是什么样的人？”](action:ask_about_chisa)
+- [爱丽丝，你会害怕吗？](action:ask_alice_scared)
