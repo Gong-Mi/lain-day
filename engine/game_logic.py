@@ -45,6 +45,20 @@ def process_choice(choice_index, available_choices, character_data, actions, abs
                     for flag in payload['flags']:
                         character_data[flag['name']] = flag['value']
                 new_story_file = os.path.join(abs_path, payload.get('story_file'))
+            elif action_type == 'story_change_and_unlock_set':
+                commands_to_unlock = payload.get('commands', [])
+                newly_unlocked = []
+                if commands_to_unlock:
+                    for cmd in commands_to_unlock:
+                        if cmd not in character_data['unlocked_commands']:
+                            character_data['unlocked_commands'].append(cmd)
+                            newly_unlocked.append(cmd)
+                
+                if newly_unlocked:
+                    typewriter_print(f"\n[基础指令系统已解锁: {', '.join(newly_unlocked)}]\n")
+                    time.sleep(1.5)
+
+                new_story_file = os.path.join(abs_path, payload.get('story_file'))
             else: # Default to simple story change
                 new_story_file = os.path.join(abs_path, payload.get('story_file'))
 

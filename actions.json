@@ -185,21 +185,51 @@
     }
   },
   "read_email_from_chisa": {
-    "type": "story_change",
+    "type": "story_change_and_unlock_set",
     "payload": {
-      "story_file": "story/05_chisa_email.md"
+      "story_file": "story/05_chisa_email.md",
+      "commands": [
+        "help",
+        "ls",
+        "cd",
+        "cat",
+        "whoami",
+        "clear",
+        "inventory",
+        "inv"
+      ]
     }
   },
   "go_to_school": {
-    "type": "story_change",
+    "type": "story_change_and_unlock_set",
     "payload": {
-      "story_file": "story/06_train_scene.md"
+      "story_file": "story/06_train_scene.md",
+      "commands": [
+        "help",
+        "ls",
+        "cd",
+        "cat",
+        "whoami",
+        "clear",
+        "inventory",
+        "inv"
+      ]
     }
   },
   "delete_email_unread": {
-    "type": "story_change",
+    "type": "story_change_and_unlock_set",
     "payload": {
-      "story_file": "story/06_train_scene.md"
+      "story_file": "story/06_train_scene.md",
+      "commands": [
+        "help",
+        "ls",
+        "cd",
+        "cat",
+        "whoami",
+        "clear",
+        "inventory",
+        "inv"
+      ]
     }
   },
   "go_to_classroom": {
@@ -275,6 +305,45 @@
       "flags": [
         { "name": "overload_result", "value": "passive" }
       ]
+    }
+  },
+  "alice_agree_cyberia": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/10a_go_with_alice.md",
+      "flags": [
+        { "name": "chapter2_start", "value": "cyberia" }
+      ]
+    }
+  },
+  "alice_decline_personal": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/10b_alone_touko.md",
+      "flags": [
+        { "name": "chapter2_start", "value": "alone" }
+      ]
+    }
+  },
+  "alice_excuse_friends": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/10c_alone_chisa.md",
+      "flags": [
+        { "name": "chapter2_start", "value": "alone" }
+      ]
+    }
+  },
+  "trigger_ch2_cold_open": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/19_cold_open_ch2.md"
+    }
+  },
+  "start_chapter_two": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/20_chapter_two_intro.md"
     }
   }
 }
