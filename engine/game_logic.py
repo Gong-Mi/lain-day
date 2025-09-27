@@ -2,7 +2,7 @@ import os
 import time
 from .renderer import typewriter_print
 
-def process_choice(choice_index, available_choices, character_data, actions, abs_path):
+def process_choice(choice_index, available_choices, character_data, actions, abs_path, items_db):
     """
     Processes the player's validated numeric choice.
 
@@ -59,6 +59,32 @@ def process_choice(choice_index, available_choices, character_data, actions, abs
                     time.sleep(1.5)
 
                 new_story_file = os.path.join(abs_path, payload.get('story_file'))
+            elif action_type == 'acquire_item':
+                item_id = payload.get('item_id')
+                item_data = items_db.get(item_id)
+                if not item_data:
+                    typewriter_print(f"\n[错误: 物品 '{item_id}' 未在 items.json 中定义。]\n")
+                    time.sleep(1.5)
+                    return character_data, None, True
+
+                player_credit = character_data.get('credit_level', 0)
+                required_credit = item_data.get('required_credit', 1)
+
+                if player_credit >= required_credit:
+                    inventory = character_data.get('inventory', {})
+                    inventory[item_id] = inventory.get(item_id, 0) + 1
+                    character_data['inventory'] = inventory
+                    typewriter_print(f"\n[获得物品: {item_data.get('name', item_id)}]\n")
+                    time.sleep(1.5)
+                else:
+                    typewriter_print(f"\n[权限不足: 需要信用等级 {required_credit}]\n")
+                    time.sleep(1.5)
+                
+                if payload.get('story_file'):
+                    new_story_file = os.path.join(abs_path, payload.get('story_file'))
+                
+                return character_data, new_story_file, True
+
             else: # Default to simple story change
                 new_story_file = os.path.join(abs_path, payload.get('story_file'))
 

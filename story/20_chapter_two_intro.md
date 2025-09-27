@@ -18,6 +18,6 @@
 
 “Lain？Lain，你怎么了？”
 
-- [“……没什么。”](action:ch2_reply_nothing)
-- [（继续盯着地上的“尸体”）](action:ch2_stare_corpse)
+- [“……我很好。”](action:ch2_reply_nothing)
+- [抱紧爱丽丝](action:ch2_hug_alice)
 - [“那个是……谁？”](action:ch2_ask_who)

@@ -1,6 +1,7 @@
 import os
 import shlex
 import time
+import json
 
 # --- Terminal Command Handlers ---
 def get_jailed_path(world_root, sim_cwd, target_path):
@@ -28,6 +29,7 @@ def handle_help(character_data):
     if "help" in unlocked: print("  help              - 显示此帮助信息")
     if "inventory" in unlocked: print("  inventory/inv     - 显示物品栏")
     if "ls" in unlocked: print("  ls [路径]         - 列出文件和目录")
+    if "arls" in unlocked: print("  arls              - (AR) 扫描当前环境")
     if "cd" in unlocked: print("  cd <路径>         - 切换目录")
     if "cat" in unlocked: print("  cat <文件名>      - 查看文件内容")
     if "whoami" in unlocked: print("  whoami            - 显示当前用户")
@@ -35,18 +37,18 @@ def handle_help(character_data):
     if "cmake" in unlocked: print("  cmake .           - (模拟) 尝试构建当前目录的项目")
 
 def handle_inventory(character_data, items_db):
-    inventory_ids = character_data.get("inventory", [])
-    if not inventory_ids:
+    inventory = character_data.get("inventory", {})
+    if not inventory:
         print("你的物品栏是空的。")
         return
     
     print("物品栏:")
-    for item_id in inventory_ids:
+    for item_id, quantity in inventory.items():
         item = items_db.get(item_id)
         if item:
-            print(f"  - {item.get('name', item_id)}: {item.get('description', '')}")
+            print(f"  - {item.get('name', item_id)} (x{quantity}): {item.get('description', '')}")
         else:
-            print(f"  - {item_id} (未知物品)")
+            print(f"  - {item_id} (x{quantity}) (未知物品)")
 
 def handle_ls(args, world_root, sim_cwd):
     target_sim_path = args[0] if args else sim_cwd
@@ -58,6 +60,33 @@ def handle_ls(args, world_root, sim_cwd):
     
     for item in sorted(os.listdir(real_path)):
         print(item)
+
+def handle_arls(character_data, world_map):
+    current_location_id = character_data.get('location')
+    if not current_location_id:
+        print("错误: 无法确定当前位置。")
+        return
+
+    location_data = world_map.get(current_location_id)
+    if not location_data:
+        print(f"错误: 在世界地图中找不到当前位置 '{current_location_id}'。")
+        return
+
+    points_of_interest = location_data.get('points_of_interest', [])
+    if not points_of_interest:
+        print("AR扫描未发现任何兴趣点。")
+        return
+
+    print("正在启动环境扫描...")
+    time.sleep(0.5)
+    print("AR视觉增强已激活。")
+    time.sleep(0.3)
+    print("发现以下兴趣点:\n")
+    time.sleep(0.5)
+
+    for poi in points_of_interest:
+        print(f"  [ {poi.get('id', '未知')} ] - {poi.get('description', '无描述')}")
+        time.sleep(0.2)
 
 def handle_cd(args, world_root, sim_cwd):
     if not args:
@@ -111,7 +140,7 @@ def handle_cmake(args, world_root, sim_cwd):
             f.write("# This is a simulated Makefile.\nall:\n\t@echo Nothing to be done.")
 
 # --- Command Processor ---
-def process_command(command_line, character_data, world_root, items_db):
+def process_command(command_line, character_data, world_root, items_db, world_map):
     try:
         parts = shlex.split(command_line)
     except ValueError:
@@ -137,6 +166,8 @@ def process_command(command_line, character_data, world_root, items_db):
         handle_inventory(character_data, items_db)
     elif command == 'ls':
         handle_ls(args, world_root, sim_cwd)
+    elif command == 'arls':
+        handle_arls(character_data, world_map)
     elif command == 'cd':
         new_sim_cwd = handle_cd(args, world_root, sim_cwd)
         character_data['pseudo_terminal_cwd'] = new_sim_cwd

@@ -11,12 +11,44 @@ from engine.game_logic import process_choice
 
 # --- Core Helpers ---
 def load_json(file_path):
-    with open(file_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return None
 
 def save_json(file_path, data):
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
+
+def load_world_map_from_folders(abs_path):
+    world_map = {}
+    map_root = os.path.join(abs_path, 'map')
+    if not os.path.exists(map_root):
+        return {}
+
+    for location_id in os.listdir(map_root):
+        location_path = os.path.join(map_root, location_id)
+        if os.path.isdir(location_path):
+            try:
+                with open(os.path.join(location_path, 'name.txt'), 'r', encoding='utf-8') as f:
+                    name = f.read().strip()
+                with open(os.path.join(location_path, 'description.txt'), 'r', encoding='utf-8') as f:
+                    description = f.read().strip()
+                
+                connections = load_json(os.path.join(location_path, 'connections.json')) or {}
+                poi = load_json(os.path.join(location_path, 'poi.json')) or []
+
+                world_map[location_id] = {
+                    'name': name,
+                    'description': description,
+                    'connections': connections,
+                    'points_of_interest': poi
+                }
+            except FileNotFoundError as e:
+                print(f"警告: 跳过地点 '{location_id}'，因为缺少必要的文件: {e}")
+                continue
+    return world_map
 
 # --- Constants ---
 CHARACTER_FILE = 'character.json'
@@ -60,6 +92,7 @@ def main():
         character_data = load_json(character_file_path)
         actions = load_json(actions_file_path)
         items_db = load_json(items_file_path)
+        world_map = load_world_map_from_folders(abs_path)
     except FileNotFoundError as e:
         print(f"错误: 无法加载游戏数据文件: {e}")
         sys.exit(1)
@@ -69,7 +102,12 @@ def main():
     redraw_scene = True
     while True:
         if redraw_scene:
-            story_content, available_choices = parse_story_file(current_story_file, character_data)
+            story_content, available_choices, metadata = parse_story_file(current_story_file, character_data)
+            
+            # Update location based on story file metadata
+            if 'location' in metadata:
+                character_data['location'] = metadata['location']
+
             render_scene(story_content, available_choices)
 
             if not available_choices:
@@ -83,14 +121,14 @@ def main():
         try:
             choice_index = int(player_input) - 1
             character_data, new_story, redraw_scene = process_choice(
-                choice_index, available_choices, character_data, actions, abs_path
+                choice_index, available_choices, character_data, actions, abs_path, items_db
             )
             if new_story:
                 current_story_file = new_story
             
         except ValueError:
             character_data, redraw_scene = process_command(
-                player_input, character_data, world_root, items_db
+                player_input, character_data, world_root, items_db, world_map
             )
             if not redraw_scene:
                  print()

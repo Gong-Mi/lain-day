@@ -59,6 +59,12 @@
       "story_file": "story/02c_dad_ask_help.md"
     }
   },
+  "dad_ask_upgrade": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_dad_upgrade.md"
+    }
+  },
   "start_chapter_one": {
     "type": "story_change",
     "payload": {
@@ -344,6 +350,97 @@
     "type": "story_change",
     "payload": {
       "story_file": "story/20_chapter_two_intro.md"
+    }
+  },
+  "ch2_hug_alice": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/21a_hug_alice.md"
+    }
+  },
+  "ch2_reply_nothing": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/21b_reply_fine.md"
+    }
+  },
+  "ch2_ask_who": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_ch2_ask_who.md"
+    }
+  },
+  "ch2_hug_alice_continue": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_ch2_hug_alice_continue.md"
+    }
+  },
+  "ch2_bar_music_interrupt": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/22_cyberia_flashback.md"
+    }
+  },
+  "order_milk": {
+    "type": "acquire_item",
+    "payload": {
+      "item_id": "milk"
+    }
+  },
+  "order_coffee": {
+    "type": "acquire_item",
+    "payload": {
+      "item_id": "coffee"
+    }
+  },
+  "order_juice": {
+    "type": "acquire_item",
+    "payload": {
+      "item_id": "juice"
+    }
+  },
+  "ask_about_mika": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_ask_about_mika.md"
+    }
+  },
+  "reply_is_me": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_reply_is_me.md"
+    }
+  },
+  "acquire_alice_hat": {
+    "type": "acquire_item",
+    "payload": {
+      "item_id": "alice_hat",
+      "story_file": "story/22_cyberia_flashback.md"
+    }
+  },
+  "alice_asks_about_lain_and_boss": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_alice_asks_about_lain_and_boss.md"
+    }
+  },
+  "lain_asks_what_sister_does": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_lain_asks_what_sister_does.md"
+    }
+  },
+  "boss_offers_free_service": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_boss_offers_free_service.md"
+    }
+  },
+  "boss_invites_lain_to_sing": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_boss_invites_lain_to_to_sing.md"
     }
   }
 }

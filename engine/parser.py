@@ -38,16 +38,32 @@ def parse_story_file(file_path, character_data):
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
     except FileNotFoundError:
-        return [f"错误：找不到故事文件 {file_path}"], []
+        return [f"错误：找不到故事文件 {file_path}"], [], {}
 
     story_content = []
     choices = []
-    
-    choice_pattern = re.compile(r'-\s*\[(.*?)\]\(action:(.*?)\)')
+    metadata = {}
+    iterator = iter(lines)
+
+    # Handle Front Matter
+    try:
+        if next(iterator).strip() == '---':
+            for meta_line in iterator:
+                if meta_line.strip() == '---':
+                    break
+                parts = meta_line.strip().split(':', 1)
+                if len(parts) == 2:
+                    metadata[parts[0].strip()] = parts[1].strip()
+        else:
+            # Reset iterator if no front matter
+            iterator = iter(lines)
+    except StopIteration:
+        iterator = iter(lines) # Reset for empty files
+
+    choice_pattern = re.compile(r'-\s*\[([^\]]*)\]\(action:(.*?)\)')
     pause_pattern = re.compile(r'^\[PAUSE:([\d.]+)\]$')
 
     text_buffer = []
-    iterator = iter(lines)
 
     def flush_text_buffer():
         nonlocal text_buffer
@@ -119,4 +135,4 @@ def parse_story_file(file_path, character_data):
 
     flush_text_buffer()
     story_content = [s for s in story_content if s.strip()]
-    return story_content, choices
+    return story_content, choices, metadata

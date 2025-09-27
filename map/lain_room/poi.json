@@ -1,0 +1,5 @@
+[
+  { "id": "navi", "description": "一台大型的NAVI，上面布满了各种线缆和接口。", "status": "off" },
+  { "id": "bed", "description": "一张凌乱的床，被子揉成一团。" },
+  { "id": "window", "description": "窗外是普通的住宅区景色，电线杆像五线谱一样划过天空。" }
+]
