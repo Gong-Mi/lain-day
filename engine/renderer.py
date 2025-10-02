@@ -11,13 +11,14 @@ def typewriter_print(text, delay=0.04):
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def render_scene(story_content, available_choices):
+def render_scene(story_content, available_choices, character_data):
     clear_screen()
+    delay = character_data.get('typewriter_delay', 0.04)
     for item in story_content:
         if isinstance(item, tuple) and item[0] == 'pause':
             time.sleep(item[1])
         elif isinstance(item, str):
-            typewriter_print(item)
+            typewriter_print(item, delay=delay)
     
     print("\n" + "="*30 + "\n")
 

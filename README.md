@@ -48,3 +48,28 @@ python game.py
 1.  **故事创作**: 继续填充剩余的“断头路” (`todo_*.md` 文件)，丰富故事分支。
 2.  **引擎开发**: 实现 `use <物品>` 指令，让玩家可以使用物品栏中的物品来与环境或角色互动。
 3.  **内容完善**: 为所有故事文件添加 `location` 头部信息，并简化 `actions.json` 中的动作定义。
+
+## 未完成的功能点 (To-Do List)
+
+根据我们最近的盘点，项目中还有以下功能点和剧情分支等待实现：
+
+### 1. NAVI 内部未实现的功能 (NAVI Internal Features)
+
+*   **[退出NAVI] (`shutdown_navi_placeholder`)**: 目前只会刷新菜单，可以为其添加一个真正的关机动画或特殊剧情。
+*   **[声音设置] (`sound_settings_placeholder`)**: 声音设置界面还是空的，可以为其添加调整音量、音效等功能。
+*   **[语言选项] (`language_options_disabled`)**: 显示设置中为灰色不可用状态，可以为其添加多语言切换功能。
+*   **[参与讨论] (`join_chat_discussion`)**: 聊天室中的这个选项目前没有后续内容。
+
+### 2. 指向 `todo_` 文件的未完成剧情分支 (Unfinished Story Branches)
+
+这些是 `actions.json` 中定义的、但还没有对应具体故事内容的动作：
+
+*   `dad_ask_upgrade`: 爸爸帮忙升级电脑的剧情。
+*   `ch2_hug_alice_continue`: 第二章拥抱爱丽丝后的后续。
+*   `ask_about_mika`: 询问关于美香（Mika）的剧情。
+*   `reply_is_me`: 回复“是我”的剧情。
+*   `alice_asks_about_lain_and_boss`: 爱丽丝询问 Lain 和酒吧老板的关系。
+*   `lain_asks_what_sister_does`: Lain 询问姐姐的工作。
+*   `boss_offers_free_service`: 酒吧老板提供免费服务。
+*   `boss_invites_lain_to_sing`: 酒吧老板邀请 Lain 唱歌。
+*   `lain_asks_about_server_location`: Lain 询问服务器的位置。

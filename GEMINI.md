@@ -75,3 +75,33 @@ The game world is now defined by a modular directory structure:
         -   `connections.json`: Defines connections to other locations.
 -   **`actions.json`**: The "rulebook" connecting story choices to game events.
 -   **`items.json`**: A database of all in-game items, their descriptions, and their `required_credit`.
+
+---
+
+## Core World-Building and Gameplay Mechanics
+
+This section outlines the core narrative and gameplay loops designed to create a deep, immersive, and mysterious experience inspired by *Serial Experiments Lain*.
+
+### 1. Central Conflict: The Knights of the Eastern Calculus
+
+The primary driving force in the game world is a secretive and powerful hacker collective known as the **Knights of the Eastern Calculus**. Their goal is to build a "Digital Babel"—a unified computing network—to achieve a new level of power and consciousness within the Wired. Their ambitious plan is codenamed **Project Beowulf**.
+
+### 2. Gameplay Philosophy: Narrative-Driven Immersive Sim
+
+The game is designed to avoid repetitive open-world tropes. The core gameplay loop is centered on **mystery, investigation, and experimentation**, not on completing checklists. The player acts as a "digital archaeologist," piecing together the story and the world's hidden rules from fragmented documents and observing the emergent consequences of their actions.
+
+### 3. Key In-Game Technologies & Associated Mechanics
+
+These technologies are introduced to the player via in-game documents and form the basis of the core gameplay mechanics:
+
+-   **Project Beowulf (Unified Computing):**
+    -   **Lore:** The Knights' plan to unify all devices under a single, standardized dynamic library architecture.
+    -   **Mechanic:** This provides the in-universe justification for other mechanics. It also allows for a **Distributed Execution Environment**, which explains how the player's device can gain massive, temporary performance boosts by leveraging the power of an entire local network.
+
+-   **ToneBurst Protocol (Viral Propagation):**
+    -   **Lore:** A worm-like protocol that uses audio signals over telephone lines to broadcast data and infect/upgrade other devices.
+    -   **Mechanic:** This translates into a quantifiable **Regional Infection Probability**. The game world becomes a dynamic system where network events can cascade, and the player can witness or even trigger these changes.
+
+-   **MLC Density Doubler (High-Risk Tech):**
+    -   **Lore:** An experimental hack to force storage hardware to hold double its rated capacity, at extreme risk of data corruption.
+    -   **Mechanic:** Represents the high-risk, high-reward nature of the game's technology, where players can use dangerous, unsanctioned methods to achieve their goals.

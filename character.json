@@ -26,7 +26,22 @@
     "cls",
     "inventory",
     "inv",
-    "arls"
+    "arls",
+    "examine"
   ],
-  "current_story_file": "story/00_entry.md"
+  "current_story_file": "story/00_entry.md",
+  "return_to_story_file": null,
+  "drivers": {
+    "kwsk_ver3.1": "loaded",
+    "audio_subsystem_v4": "unloaded"
+  },
+  "typewriter_delay": 0.04,
+  "network_status": {
+    "protocols": {
+      "ipv4": "on",
+      "ipv6": "off",
+      "ip7": "off"
+    },
+    "scope": "地区局域网"
+  }
 }

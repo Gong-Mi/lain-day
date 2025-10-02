@@ -12,7 +12,10 @@
       "new_location": "downstairs",
       "story_file": "story/02_downstairs.md",
       "flags": [
-        { "name": "sister_mood", "value": "normal" }
+        {
+          "name": "sister_mood",
+          "value": "normal"
+        }
       ]
     }
   },
@@ -21,7 +24,10 @@
     "payload": {
       "story_file": "story/00a_wait_one_minute_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "cold" }
+        {
+          "name": "sister_mood",
+          "value": "cold"
+        }
       ]
     }
   },
@@ -30,14 +36,153 @@
     "payload": {
       "story_file": "story/01c_talk_to_figure_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "cold" }
+        {
+          "name": "sister_mood",
+          "value": "cold"
+        }
       ]
     }
   },
   "examine_navi": {
+    "type": "enter_story",
+    "payload": {
+      "story_file": "story/side_stories/navi.md"
+    }
+  },
+  "exit_to_main_story": {
+    "type": "exit_story",
+    "payload": {}
+  },
+  "enter_chatroom": {
+    "type": "conditional_story_change",
+    "payload": {
+      "flag_name": "active_chat_url",
+      "story_if_true": "story/side_stories/chatroom_real.md",
+      "story_if_false": "story/side_stories/chatroom_empty.md"
+    }
+  },
+  "return_to_navi_menu": {
     "type": "story_change",
     "payload": {
-      "story_file": "story/01a_examine_navi.md"
+      "story_file": "story/side_stories/navi.md"
+    }
+  },
+  "join_chat_discussion": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/navi.md"
+    }
+  },
+  "show_emails": {
+    "type": "story_change_and_unlock_set",
+    "payload": {
+      "story_file": "story/side_stories/email_client.md",
+      "commands": ["mail"]
+    }
+  },
+  "system_settings": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/system_settings.md"
+    }
+  },
+  "display_settings": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/display_settings.md"
+    }
+  },
+  "language_options_disabled": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/display_settings.md"
+    }
+  },
+  "adjust_font_interval": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/adjust_font_interval.md"
+    }
+  },
+  "set_font_speed_fast": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/side_stories/adjust_font_interval.md",
+      "flags": [{"name": "typewriter_delay", "value": 0.02}]
+    }
+  },
+  "set_font_speed_normal": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/side_stories/adjust_font_interval.md",
+      "flags": [{"name": "typewriter_delay", "value": 0.04}]
+    }
+  },
+  "set_font_speed_slow": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/side_stories/adjust_font_interval.md",
+      "flags": [{"name": "typewriter_delay", "value": 0.07}]
+    }
+  },
+  "sound_settings_placeholder": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/system_settings.md"
+    }
+  },
+  "network_status": {
+    "type": "story_change_and_unlock_set",
+    "payload": {
+      "story_file": "story/side_stories/network_status.md",
+      "commands": ["network"]
+    }
+  },
+  "toggle_ipv4": {
+    "type": "toggle_protocol",
+    "payload": {
+      "protocol_name": "ipv4"
+    }
+  },
+  "toggle_ipv6": {
+    "type": "toggle_protocol",
+    "payload": {
+      "protocol_name": "ipv6"
+    }
+  },
+  "toggle_ip7": {
+    "type": "toggle_protocol",
+    "payload": {
+      "protocol_name": "ip7"
+    }
+  },
+  "connect_to_regional": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/side_stories/network_status.md",
+      "flags": [{"name": "network_status.scope", "value": "地区局域网"}]
+    }
+  },
+  "connect_to_national": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/side_stories/network_status.md",
+      "flags": [{"name": "network_status.scope", "value": "全国互联网"}]
+    }
+  },
+  "shutdown_navi_placeholder": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/navi.md"
+    }
+  },
+  "driver_management": {
+    "type": "story_change_and_unlock_set",
+    "payload": {
+      "story_file": "story/side_stories/driver_management.md",
+      "commands": [
+        "driver"
+      ]
     }
   },
   "return_to_entry": {
@@ -76,7 +221,10 @@
     "payload": {
       "story_file": "story/01b_navi_shutdown.md",
       "flags": [
-        { "name": "sister_mood", "value": "curious" }
+        {
+          "name": "sister_mood",
+          "value": "curious"
+        }
       ]
     }
   },
@@ -85,7 +233,10 @@
     "payload": {
       "story_file": "story/01d_navi_reboot_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "curious" }
+        {
+          "name": "sister_mood",
+          "value": "curious"
+        }
       ]
     }
   },
@@ -94,7 +245,10 @@
     "payload": {
       "story_file": "story/01e_navi_connect_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "curious" }
+        {
+          "name": "sister_mood",
+          "value": "curious"
+        }
       ]
     }
   },
@@ -103,7 +257,10 @@
     "payload": {
       "story_file": "story/02a_talk_to_dad.md",
       "flags": [
-        { "name": "sister_mood", "value": "normal" }
+        {
+          "name": "sister_mood",
+          "value": "normal"
+        }
       ]
     }
   },
@@ -112,7 +269,10 @@
     "payload": {
       "story_file": "story/02d_talk_to_mom_normal.md",
       "flags": [
-        { "name": "sister_mood", "value": "normal" }
+        {
+          "name": "sister_mood",
+          "value": "normal"
+        }
       ]
     }
   },
@@ -121,7 +281,10 @@
     "payload": {
       "story_file": "story/02j_get_milk_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "normal" }
+        {
+          "name": "sister_mood",
+          "value": "normal"
+        }
       ]
     }
   },
@@ -144,7 +307,10 @@
     "payload": {
       "story_file": "story/02f_mom_reply_fine_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "normal" }
+        {
+          "name": "sister_mood",
+          "value": "normal"
+        }
       ]
     }
   },
@@ -153,7 +319,10 @@
     "payload": {
       "story_file": "story/02g_mom_reply_silent_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "cold" }
+        {
+          "name": "sister_mood",
+          "value": "cold"
+        }
       ]
     }
   },
@@ -162,7 +331,10 @@
     "payload": {
       "story_file": "story/02h_mom_deny_vision_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "normal" }
+        {
+          "name": "sister_mood",
+          "value": "normal"
+        }
       ]
     }
   },
@@ -171,7 +343,10 @@
     "payload": {
       "story_file": "story/02i_mom_agree_doctor_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "normal" }
+        {
+          "name": "sister_mood",
+          "value": "normal"
+        }
       ]
     }
   },
@@ -180,20 +355,30 @@
     "payload": {
       "story_file": "story/02k_mom_silent_vision_endprologue.md",
       "flags": [
-        { "name": "sister_mood", "value": "normal" }
+        {
+          "name": "sister_mood",
+          "value": "normal"
+        }
       ]
     }
   },
   "talk_to_sister": {
+    "type": "story_change_and_set_flags",
+    "payload": {
+      "story_file": "story/04_talk_to_sister.md",
+      "flags": [{"name": "has_talked_to_sister", "value": true}]
+    }
+  },
+  "trigger_shutdown_story": {
     "type": "story_change",
     "payload": {
-      "story_file": "story/04_talk_to_sister.md"
+      "story_file": "story/01b_navi_shutdown.md"
     }
   },
   "read_email_from_chisa": {
     "type": "story_change_and_unlock_set",
     "payload": {
-      "story_file": "story/05_chisa_email.md",
+      "story_file": "story/side_stories/email_client.md",
       "commands": [
         "help",
         "ls",
@@ -202,7 +387,8 @@
         "whoami",
         "clear",
         "inventory",
-        "inv"
+        "inv",
+        "mail"
       ]
     }
   },
@@ -255,7 +441,10 @@
     "payload": {
       "story_file": "story/08b_ask_teacher.md",
       "flags": [
-        { "name": "asked_teacher", "value": 1 }
+        {
+          "name": "asked_teacher",
+          "value": 1
+        }
       ]
     }
   },
@@ -264,7 +453,10 @@
     "payload": {
       "story_file": "story/08c_ask_proxy.md",
       "flags": [
-        { "name": "asked_proxy", "value": 1 }
+        {
+          "name": "asked_proxy",
+          "value": 1
+        }
       ]
     }
   },
@@ -273,7 +465,10 @@
     "payload": {
       "story_file": "story/08d_ask_chisa.md",
       "flags": [
-        { "name": "asked_chisa", "value": 1 }
+        {
+          "name": "asked_chisa",
+          "value": 1
+        }
       ]
     }
   },
@@ -300,7 +495,10 @@
     "payload": {
       "story_file": "story/06z_train_event_result.md",
       "flags": [
-        { "name": "overload_result", "value": "active" }
+        {
+          "name": "overload_result",
+          "value": "active"
+        }
       ]
     }
   },
@@ -309,7 +507,10 @@
     "payload": {
       "story_file": "story/06z_train_event_result.md",
       "flags": [
-        { "name": "overload_result", "value": "passive" }
+        {
+          "name": "overload_result",
+          "value": "passive"
+        }
       ]
     }
   },
@@ -318,7 +519,10 @@
     "payload": {
       "story_file": "story/10a_go_with_alice.md",
       "flags": [
-        { "name": "chapter2_start", "value": "cyberia" }
+        {
+          "name": "chapter2_start",
+          "value": "cyberia"
+        }
       ]
     }
   },
@@ -327,7 +531,10 @@
     "payload": {
       "story_file": "story/10b_alone_touko.md",
       "flags": [
-        { "name": "chapter2_start", "value": "alone" }
+        {
+          "name": "chapter2_start",
+          "value": "alone"
+        }
       ]
     }
   },
@@ -336,7 +543,10 @@
     "payload": {
       "story_file": "story/10c_alone_chisa.md",
       "flags": [
-        { "name": "chapter2_start", "value": "alone" }
+        {
+          "name": "chapter2_start",
+          "value": "alone"
+        }
       ]
     }
   },
@@ -367,7 +577,7 @@
   "ch2_ask_who": {
     "type": "story_change",
     "payload": {
-      "story_file": "story/todo_ch2_ask_who.md"
+      "story_file": "story/ch2_ask_who.md"
     }
   },
   "ch2_hug_alice_continue": {
@@ -441,6 +651,18 @@
     "type": "story_change",
     "payload": {
       "story_file": "story/todo_boss_invites_lain_to_to_sing.md"
+    }
+  },
+  "alice_asks_about_forum": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/alice_asks_about_forum.md"
+    }
+  },
+  "lain_asks_about_server_location": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_lain_asks_about_server_location.md"
     }
   }
 }

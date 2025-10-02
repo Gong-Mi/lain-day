@@ -1,0 +1,41 @@
+--- TONEBURST v2.1 --- WARNING --- 
+
+// This is not a file transfer utility. This is a network vector. //
+
+
+## DESCRIPTION:
+
+ToneBurst exploits a deeply embedded backdoor in the public telephone switching system (PTSS). It allows raw data to be transmitted as modulated audio signals, bypassing standard data protocols. Devices running a listener will interpret these signals.
+
+It has two modes.
+
+
+## MODE 1: POINT-TO-POINT (P2P) TRANSFER
+
+Used for direct device-to-device transmission.
+
+SYNTAX: `TBURST.EXE -p [phone_number] -f [filename]`
+
+- The target device must be in receive mode (`-r`).
+- This is a raw data dump. No handshake, no error correction. Fast and dirty.
+
+
+## MODE 2: BROADCAST & CASCADE (WORM)
+
+This is the true purpose of the tool.
+
+SYNTAX: `TBURST.EXE -b -f [payload.sys]`
+
+- Broadcasts the payload to ALL listening devices on the local telephone exchange.
+- **CRITICAL**: If the payload is a valid executable signed with the PTSS master key, listening devices will treat it as a mandatory system update. They will execute it and, if the payload contains ToneBurst, they too will become broadcasters.
+- This can trigger an exponential chain reaction, infecting/upgrading an entire local network in minutes.
+
+
+## PAYLOADS & THE MASTER KEY:
+
+The key is out there. It signs the code that the phone OS trusts implicitly. A payload signed with it becomes the new OS.
+
+This is how they update the network. This is how you can create your own network.
+
+
+**FINAL WARNING: WE TAKE NO RESPONSIBILITY FOR ANY CASCADE EVENTS. THIS IS A PROOF OF CONCEPT. DENY EVERYTHING.**

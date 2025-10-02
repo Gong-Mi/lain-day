@@ -108,33 +108,37 @@ def main():
             if 'location' in metadata:
                 character_data['location'] = metadata['location']
 
-            render_scene(story_content, available_choices)
+            render_scene(story_content, available_choices, character_data)
 
             if not available_choices:
                 input("(此故事分支尚未完成，按回车键退出重试)")
                 break
         
         redraw_scene = False
+        # IMPORTANT: Save the current story file path to character_data BEFORE processing input.
+        # This ensures that 'enter_story' actions have the correct return point.
+        character_data['current_story_file'] = os.path.relpath(current_story_file, abs_path)
+
         prompt = f"[{character_data.get('name', 'user').lower()}@{character_data.get('pseudo_terminal_cwd', '/')}]> "
         player_input = input(prompt)
+        new_story = None
 
         try:
             choice_index = int(player_input) - 1
             character_data, new_story, redraw_scene = process_choice(
                 choice_index, available_choices, character_data, actions, abs_path, items_db
             )
-            if new_story:
-                current_story_file = new_story
-            
         except ValueError:
-            character_data, redraw_scene = process_command(
-                player_input, character_data, world_root, items_db, world_map
+            character_data, new_story, redraw_scene = process_command(
+                player_input, character_data, world_root, items_db, world_map, actions, abs_path
             )
             if not redraw_scene:
                  print()
 
+        if new_story:
+            current_story_file = new_story
+
         # Save state after every action
-        character_data['current_story_file'] = os.path.relpath(current_story_file, abs_path)
         save_json(character_file_path, character_data)
 
 if __name__ == "__main__":

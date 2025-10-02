@@ -1,13 +1,23 @@
 import json
 import re
 
+def get_nested_value(data, path):
+    keys = path.split('.')
+    d = data
+    for key in keys:
+        if isinstance(d, dict):
+            d = d.get(key)
+        else:
+            return None
+    return d
+
 # Helper function for the new rich format
 def _parse_rich_block(rules, character_data):
     flag_to_check = rules.get("flag_to_check")
     if not flag_to_check:
         return None, None
 
-    player_value = str(character_data.get(flag_to_check, ""))
+    player_value = str(get_nested_value(character_data, flag_to_check) or "")
     
     branches = rules.get("branches", {})
     # Use player_value to find the branch, fallback to "default"

@@ -1,0 +1,22 @@
+SUBJECT: MLC Density Doubler Procedure (EXPERIMENTAL)
+
+** FOR STATIC/ARCHIVAL DATA ONLY. EXTREME RISK OF DATA LOSS. **
+** DO NOT USE ON BOOT PARTITION. **
+
+REQ: Direct controller access (SoC-level hooks or equivalent). Standard hardware controllers will fail.
+
+PROCEDURE:
+
+1.  Isolate target partition. Ensure it is unmounted and locked from OS-level access.
+
+2.  Load custom voltage map `vmap.q_experimental` into memory. This map must define 16 discrete voltage levels, not the standard 4. Calibration is key—improper values will brick the cells.
+
+3.  Execute low-level format command with forced density flag:
+    `flash_util --partition /dev/mem/part_X --force_remap --vmap_addr [addr_of_vmap.q_experimental]`
+
+4.  The re-mapping process is slow and will throw non-standard ECC errors. This is expected. The controller is fighting the procedure.
+
+5.  On completion, the partition will report ~2x its physical capacity. 
+
+
+NOTES: Write speeds will be abysmal. Read stability is not guaranteed; may require multiple attempts to access data. Consider this a one-way trip for cold storage. You have been warned.
