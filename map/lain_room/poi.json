@@ -1,19 +1,30 @@
 [
   { 
-    "id": "navi", 
+    "id": "navi",
+    "name": "NAVI电脑",
     "description": "一台大型的NAVI，上面布满了各种线缆和接口。", 
     "status": "off",
     "action": "examine_navi"
   },
-  { "id": "bed", "description": "一张凌乱的床，被子揉成一团。" },
-  { "id": "window", "description": "窗外是普通的住宅区景色，电线杆像五线谱一样划过天空。" },
+  { 
+    "id": "bed",
+    "name": "床",
+    "description": "一张凌乱的床，被子揉成一团。" 
+  },
+  { 
+    "id": "window",
+    "name": "窗户",
+    "description": "窗外是普通的住宅区景色，电线杆像五线谱一样划过天空。" 
+  },
   {
     "id": "puppy",
+    "name": "玩具狗",
     "description": "一个放在飘窗的玩具布偶狗",
     "details": "因为我坏掉的puppy"
   },
   {
     "id": "bookshelf",
+    "name": "书架",
     "description": "一个杂乱的书架，上面堆满了各种书籍。",
     "sub_items": [
       {

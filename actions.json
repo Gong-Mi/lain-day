@@ -9,7 +9,7 @@
   "go_downstairs": {
     "type": "location_change_and_set_flags",
     "payload": {
-      "new_location": "downstairs",
+      "new_location": "kurani_residence/living_room",
       "story_file": "story/02_downstairs.md",
       "flags": [
         {
@@ -298,7 +298,7 @@
   "return_to_living_room": {
     "type": "location_change",
     "payload": {
-      "new_location": "downstairs",
+      "new_location": "kurani_residence/living_room",
       "story_file": "story/02_downstairs.md"
     }
   },
@@ -747,7 +747,7 @@
   "gunshot_stare": {
     "type": "story_change",
     "payload": {
-      "story_file": "story/todo_default.md"
+      "story_file": "story/gunshot_advance.md"
     }
   },
   "sing_plastic_love": {
@@ -784,6 +784,12 @@
     "type": "story_change",
     "payload": {
       "story_file": "story/gunshot_advance.md"
+    }
+  },
+  "gunshot_exit": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/singing_result_gunshot.md"
     }
   },
   "end_chapter_two": {

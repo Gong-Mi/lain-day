@@ -27,17 +27,29 @@ def load_world_map_from_folders(abs_path):
     if not os.path.exists(map_root):
         return {}
 
-    for location_id in os.listdir(map_root):
-        location_path = os.path.join(map_root, location_id)
-        if os.path.isdir(location_path):
+    for dirpath, _, filenames in os.walk(map_root):
+        if 'name.txt' in filenames:
             try:
-                with open(os.path.join(location_path, 'name.txt'), 'r', encoding='utf-8') as f:
+                with open(os.path.join(dirpath, 'name.txt'), 'r', encoding='utf-8') as f:
                     name = f.read().strip()
-                with open(os.path.join(location_path, 'description.txt'), 'r', encoding='utf-8') as f:
-                    description = f.read().strip()
                 
-                connections = load_json(os.path.join(location_path, 'connections.json')) or {}
-                poi = load_json(os.path.join(location_path, 'poi.json')) or []
+                description = ""
+                if 'description.txt' in filenames:
+                    with open(os.path.join(dirpath, 'description.txt'), 'r', encoding='utf-8') as f:
+                        description = f.read().strip()
+
+                connections = {}
+                if 'connections.json' in filenames:
+                    with open(os.path.join(dirpath, 'connections.json'), 'r', encoding='utf-8') as f:
+                        connections = json.load(f)
+
+                poi = []
+                if 'poi.json' in filenames:
+                    with open(os.path.join(dirpath, 'poi.json'), 'r', encoding='utf-8') as f:
+                        poi = json.load(f)
+                
+                location_id = os.path.relpath(dirpath, map_root).replace('\\', '/')
+                if location_id == ".": continue
 
                 world_map[location_id] = {
                     'name': name,
@@ -45,9 +57,11 @@ def load_world_map_from_folders(abs_path):
                     'connections': connections,
                     'points_of_interest': poi
                 }
-            except FileNotFoundError as e:
-                print(f"警告: 跳过地点 '{location_id}'，因为缺少必要的文件: {e}")
+            except (FileNotFoundError, json.JSONDecodeError) as e:
+                location_id_for_error = os.path.relpath(dirpath, map_root).replace('\\', '/')
+                print(f"警告: 跳过地点 '{location_id_for_error}'，因为加载文件时出错: {e}")
                 continue
+                
     return world_map
 
 # --- Constants ---
@@ -102,7 +116,7 @@ def main():
     current_story_file = os.path.join(abs_path, character_data.get('current_story_file', STARTING_STORY_FILE))
 
     redraw_scene = True
-        last_action_name = None
+    last_action_name = None
     while True:
         if redraw_scene:
             story_content, available_choices, metadata = parse_story_file(current_story_file, character_data, last_action_name)
@@ -135,7 +149,7 @@ def main():
                 choice_index, available_choices, character_data, actions, abs_path, items_db
             )
         except ValueError:
-            character_data, new_story, redraw_scene = process_command(
+            character_data, new_story, redraw_scene, last_action_name = process_command(
                 player_input, character_data, world_root, items_db, world_map, actions, abs_path, fs_access_data
             )
             if not redraw_scene:

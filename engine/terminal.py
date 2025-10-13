@@ -315,7 +315,7 @@ def handle_arls(character_data, world_map):
             else:
                 display_description = f"{poi.get('description', '')} 看起来没什么特别的了。"
 
-        print(f"  [ {poi.get('name', '未知')} ] - {display_description}")
+        print("  [ {} ${} ] - {}".format(poi.get('name', '未知'), poi.get('id', ''), display_description))
         time.sleep(0.2)
     return None
 
@@ -370,11 +370,10 @@ def process_command(command_line, character_data, world_root, items_db, world_ma
     try:
         parts = shlex.split(command_line)
     except ValueError:
-        print("错误: 输入的指令包含未闭合的引号。 ")
-        return character_data, None, False
+        return character_data, None, False, None
         
     if not parts:
-        return character_data, None, False
+        return character_data, None, False, None
 
     command = parts[0].lower()
     args = parts[1:]
@@ -382,7 +381,7 @@ def process_command(command_line, character_data, world_root, items_db, world_ma
     unlocked_commands = character_data.get('unlocked_commands', [])
     if command not in unlocked_commands:
         print(f"command not found: {command}")
-        return character_data, None, False
+        return character_data, None, False, None
 
     sim_cwd = character_data.get('pseudo_terminal_cwd', '/')
     action_to_execute = None
@@ -420,10 +419,10 @@ def process_command(command_line, character_data, world_root, items_db, world_ma
     if action_to_execute:
         if action_to_execute in actions:
             action_details = actions[action_to_execute]
-            character_data, new_story_file, needs_redraw = execute_action(
-                action_details, character_data, abs_path, items_db
+            character_data, new_story_file, needs_redraw, _ = execute_action(
+                action_details, character_data, abs_path, items_db, action_name=action_to_execute
             )
         else:
             print(f"错误: 动作 '{action_to_execute}' 未在 actions.json 中定义。")
 
-    return character_data, new_story_file, needs_redraw
+    return character_data, new_story_file, needs_redraw, action_to_execute

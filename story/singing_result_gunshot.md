@@ -20,6 +20,12 @@ location: cyberia_club
         { "text": "鄙夷的看着他", "action": "gunshot_stare" }
       ]
     },
+    "gunshot_exit": {
+      "choices": [
+        { "text": "望向他，向前几步", "action": "gunshot_advance" },
+        { "text": "盯紧他", "action": "gunshot_stare" }
+      ]
+    },
     "default": {
       "choices": [
         { "text": "嫌弃的看着他", "action": "gunshot_stare" },

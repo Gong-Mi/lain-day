@@ -17,7 +17,7 @@ location: cyberia_club
         {"text": "唱一首《Plastic Love》", "action": "gunshot"},
         {"text": "唱动画的OP (Duvet)", "action": "gunshot"},
         {"text": "唱动画的ED (远い叫び)", "action": "gunshot"},
-        {"text": "还是算了", "action": "exit_to_main_story"}
+        {"text": "还是算了", "action": "gunshot_exit"}
       ]
     },
     "default": {
