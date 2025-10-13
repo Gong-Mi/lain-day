@@ -6,6 +6,18 @@ import re
 
 from .game_logic import execute_action
 
+def check_condition(character_data, condition):
+    if not condition or not isinstance(condition, dict):
+        return True # No condition means always show
+    
+    flag_name = condition.get('flag')
+    required_value = condition.get('value')
+    
+    # Special check for False, as get() with a default can be tricky
+    actual_value = character_data.get('flags', {}).get(flag_name, not required_value)
+
+    return actual_value == required_value
+
 # --- Terminal Command Handlers ---
 def get_jailed_path(world_root, sim_cwd, target_path):
     if not target_path:
@@ -90,12 +102,22 @@ def handle_examine(args, character_data, world_map):
             if 'action' in poi:
                 return poi['action']
 
-            sub_items = poi.get('sub_items')
-            if sub_items:
-                print(f"在 {poi.get('description', target_id)} 中，你发现了以下物品:")
-                for sub_item in sub_items:
-                    print(f"  - {sub_item.get('id')}: {sub_item.get('description')}")
+            sub_items = poi.get('sub_items', [])
+            visible_sub_items = [s for s in sub_items if check_condition(character_data, s.get('condition'))]
+
+            if visible_sub_items:
+                print(f"在 {poi.get('name', target_id)} 中，你发现了以下物品:")
+                for sub_item in visible_sub_items:
+                    print(f"  - {sub_item.get('name', sub_item.get('id', '未知'))}")
                 print(f"\n你可以使用 'examine {target_id} <子物品ID>' 来查看详情。")
+                return None
+            else:
+                # If there are no visible sub-items, just give the standard description.
+                details = poi.get('details')
+                if details:
+                    print(details)
+                else:
+                    print(f"你仔细看了看 {poi.get('name', target_id)}，但没有发现更多信息。")
                 return None
 
             details = poi.get('details')
@@ -233,9 +255,21 @@ def handle_mail(args, character_data, world_root):
 
     return None
 
-def handle_ls(args, world_root, sim_cwd):
+def handle_ls(args, world_root, sim_cwd, character_data, fs_access):
     target_sim_path = args[0] if args else sim_cwd
-    real_path, _ = get_jailed_path(world_root, sim_cwd, target_sim_path)
+    real_path, norm_sim_path = get_jailed_path(world_root, sim_cwd, target_sim_path)
+
+    # Permission Check
+    # We iterate through all protected paths to see if the target is within one of them.
+    for path, perms in fs_access.items():
+        # os.path.normpath is used to handle path separators consistently
+        if os.path.normpath(norm_sim_path).startswith(os.path.normpath(path)):
+            required_level = perms.get("list_level", 99) # Default to a high level if not specified
+            current_level = character_data.get("credit_level", 0)
+            if current_level < required_level:
+                print(f"ls: cannot access '{target_sim_path}': Permission denied")
+                return None
+
     if not real_path or not os.path.isdir(real_path):
         print(f"ls: cannot access '{target_sim_path}': No such file or directory")
         return None
@@ -252,18 +286,36 @@ def handle_arls(character_data, world_map):
     if not location_data:
         print(f"错误: 在世界地图中找不到当前位置 '{current_location_id}'。")
         return None
+    
     points_of_interest = location_data.get('points_of_interest', [])
-    if not points_of_interest:
+    
+    # Filter POIs based on conditions
+    visible_pois = [p for p in points_of_interest if check_condition(character_data, p.get('condition'))]
+
+    if not visible_pois:
         print("AR扫描未发现任何兴趣点。")
         return None
+    
     print("正在启动环境扫描...")
     time.sleep(0.5)
     print("AR视觉增强已激活。")
     time.sleep(0.3)
     print("发现以下兴趣点:\n")
     time.sleep(0.5)
-    for poi in points_of_interest:
-        print(f"  [ {poi.get('id', '未知')} ] - {poi.get('description', '无描述')}")
+    for poi in visible_pois:
+        # When displaying, we need to check sub-item conditions as well
+        display_description = poi.get('description', '无描述')
+        sub_items = poi.get('sub_items', [])
+        visible_sub_items = [s for s in sub_items if check_condition(character_data, s.get('condition'))]
+        
+        # Modify description for bookshelf to hint at content
+        if poi.get('id') == 'bookshelf':
+            if visible_sub_items:
+                display_description = f"{poi.get('description', '')} 里面似乎有些东西。"
+            else:
+                display_description = f"{poi.get('description', '')} 看起来没什么特别的了。"
+
+        print(f"  [ {poi.get('name', '未知')} ] - {display_description}")
         time.sleep(0.2)
     return None
 
@@ -278,11 +330,22 @@ def handle_cd(args, world_root, sim_cwd):
         sim_cwd = new_sim_path
     return sim_cwd
 
-def handle_cat(args, world_root, sim_cwd):
+def handle_cat(args, world_root, sim_cwd, character_data, fs_access):
     if not args:
         print("cat: missing operand")
         return None
-    real_path, _ = get_jailed_path(world_root, sim_cwd, args[0])
+    
+    real_path, norm_sim_path = get_jailed_path(world_root, sim_cwd, args[0])
+
+    # Permission Check
+    for path, perms in fs_access.items():
+        if os.path.normpath(norm_sim_path).startswith(os.path.normpath(path)):
+            required_level = perms.get("read_level", 99)
+            current_level = character_data.get("credit_level", 0)
+            if current_level < required_level:
+                print(f"cat: {args[0]}: Permission denied")
+                return None
+
     if not real_path or not os.path.isfile(real_path):
         print(f"cat: {args[0]}: No such file or directory")
         return None
@@ -303,7 +366,7 @@ def handle_cmake(args, world_root, sim_cwd):
     return None
 
 # --- Command Processor ---
-def process_command(command_line, character_data, world_root, items_db, world_map, actions, abs_path):
+def process_command(command_line, character_data, world_root, items_db, world_map, actions, abs_path, fs_access):
     try:
         parts = shlex.split(command_line)
     except ValueError:
@@ -331,7 +394,7 @@ def process_command(command_line, character_data, world_root, items_db, world_ma
     elif command in ['inventory', 'inv']:
         action_to_execute = handle_inventory(character_data, items_db)
     elif command == 'ls':
-        action_to_execute = handle_ls(args, world_root, sim_cwd)
+        action_to_execute = handle_ls(args, world_root, sim_cwd, character_data, fs_access)
     elif command == 'arls':
         action_to_execute = handle_arls(character_data, world_map)
     elif command == 'examine':
@@ -345,7 +408,7 @@ def process_command(command_line, character_data, world_root, items_db, world_ma
     elif command == 'cd':
         character_data['pseudo_terminal_cwd'] = handle_cd(args, world_root, sim_cwd)
     elif command == 'cat':
-        action_to_execute = handle_cat(args, world_root, sim_cwd)
+        action_to_execute = handle_cat(args, world_root, sim_cwd, character_data, fs_access)
     elif command == 'whoami':
         print(character_data.get('name', 'user').lower())
     elif command in ['clear', 'cls']:

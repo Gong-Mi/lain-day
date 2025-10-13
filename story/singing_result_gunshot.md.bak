@@ -1,0 +1,46 @@
+---
+location: cyberia_club
+---
+### 枪声
+
+那个坐在角落里的青年猛地站了起来。他眼中闪烁着惊恐和愤怒。
+
+“不……不。不不不不，你为什么还缠着我，因为我带朋友去玩游戏吗？ 不要靠过来 ling”
+
+他从怀里掏出一把手枪，朝着天花板扣动了扳机。巨大的枪声和闪光瞬间吞没了周围的音乐。
+
+整个俱乐部陷入了死寂。
+
+{
+
+  "context_variable": "last_action_name",
+
+  "branches": {
+
+    "wander_dance_floor": {
+
+      "choices": [
+
+        { "text": "望向他，向前几步", "action": "gunshot_advance" },
+
+        { "text": "鄙夷的看着他", "action": "gunshot_stare" }
+
+      ]
+
+    },
+
+    "default": {
+
+      "choices": [
+
+        { "text": "嫌弃的看着他", "action": "gunshot_stare" },
+
+        { "text": "立刻停止歌唱并前走几步", "action": "gunshot_advance" }
+
+      ]
+
+    }
+
+  }
+
+}

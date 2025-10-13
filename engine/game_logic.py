@@ -13,11 +13,11 @@ def set_nested_value(data, path, value):
                 d[key] = {}
             d = d[key]
 
-def execute_action(action_details, character_data, abs_path, items_db):
+def execute_action(action_details, character_data, abs_path, items_db, action_name=None):
     """
     Executes a given action and updates character_data.
 
-    Returns a tuple: (new_character_data, new_story_file, needs_redraw)
+    Returns a tuple: (new_character_data, new_story_file, needs_redraw, action_name)
     """
     payload = action_details.get('payload', {})
     action_type = action_details.get('type')
@@ -90,7 +90,7 @@ def execute_action(action_details, character_data, abs_path, items_db):
         if not item_data:
             typewriter_print(f"\n[错误: 物品 '{item_id}' 未在 items.json 中定义。]\n")
             time.sleep(1.5)
-            return character_data, None, True
+            return character_data, None, True, action_name
         player_credit = character_data.get('credit_level', 0)
         required_credit = item_data.get('required_credit', 1)
         if player_credit >= required_credit:
@@ -104,7 +104,41 @@ def execute_action(action_details, character_data, abs_path, items_db):
             time.sleep(1.5)
         if payload.get('story_file'):
             new_story_file = os.path.join(abs_path, payload.get('story_file'))
-        return character_data, new_story_file, True
+        return character_data, new_story_file, True, action_name
+
+    elif action_type == 'acquire_item_and_set_flag':
+        # 1. Acquire Item
+        item_id = payload.get('item_id')
+        item_data = items_db.get(item_id)
+        if not item_data:
+            typewriter_print(f"\n[错误: 物品 '{item_id}' 未在 items.json 中定义。]\n")
+            time.sleep(1.5)
+            return character_data, None, True, action_name
+        
+        player_credit = character_data.get('credit_level', 0)
+        required_credit = item_data.get('required_credit', 0)
+
+        if player_credit >= required_credit:
+            inventory = character_data.get('inventory', {})
+            if item_id not in inventory:
+                inventory[item_id] = 0
+            inventory[item_id] += 1
+            character_data['inventory'] = inventory
+            typewriter_print(f"\n[获得物品: {item_data.get('name', item_id)}]\n")
+            time.sleep(1.5)
+
+            # 2. Set Flag
+            if 'flag' in payload:
+                flag = payload['flag']
+                set_nested_value(character_data, flag['name'], flag['value'])
+        else:
+            typewriter_print(f"\n[权限不足: 需要信用等级 {required_credit}]\n")
+            time.sleep(1.5)
+
+        # 3. Redraw scene
+        if payload.get('story_file'):
+            new_story_file = os.path.join(abs_path, payload.get('story_file'))
+        return character_data, new_story_file, True, action_name
 
     elif action_type == 'toggle_protocol':
         protocol_name = payload.get('protocol_name')
@@ -131,7 +165,7 @@ def execute_action(action_details, character_data, abs_path, items_db):
         time.sleep(1.5)
         needs_redraw = False
 
-    return character_data, new_story_file, needs_redraw
+    return character_data, new_story_file, needs_redraw, action_name
 
 def process_choice(choice_index, available_choices, character_data, actions, abs_path, items_db):
     """
@@ -142,19 +176,19 @@ def process_choice(choice_index, available_choices, character_data, actions, abs
     """
     if not (0 <= choice_index < len(available_choices)):
         input("无效的选择。按回车键重试。")
-        return character_data, None, True
+        return character_data, None, True, None
 
     chosen_choice = available_choices[choice_index]
     if "(无法选择)" in chosen_choice['text']:
         input("这个选项当前无法选择。按回车键重试。")
-        return character_data, None, True
+        return character_data, None, True, None
 
     chosen_action_name = chosen_choice['action']
     if chosen_action_name not in actions:
         input(f"错误: 动作 '{chosen_action_name}' 未定义。按回车键。")
-        return character_data, None, True
+        return character_data, None, True, None
 
     action_details = actions[chosen_action_name]
 
     # Call the new centralized function
-    return execute_action(action_details, character_data, abs_path, items_db)
+    return execute_action(action_details, character_data, abs_path, items_db, action_name=chosen_action_name)

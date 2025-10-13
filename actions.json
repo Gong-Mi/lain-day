@@ -490,6 +490,54 @@
       "story_file": "story/08e_ask_alice_scared.md"
     }
   },
+  "ask_about_adults": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/ch2_lain_asks_about_adults.md"
+    }
+  },
+  "ask_about_computer": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/ch2_lain_asks_about_computer.md"
+    }
+  },
+  "ask_if_alice_hates_boss": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/ch2_lain_asks_if_alice_hates_boss.md"
+    }
+  },
+  "boss_answers_alice_morning": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/ch2_boss_answers_alice.md"
+    }
+  },
+  "alice_accepts_juice": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/ch2_boss_dismisses_lain.md"
+    }
+  },
+  "alice_presses_boss": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/ch2_boss_dismisses_lain.md"
+    }
+  },
+  "lain_asks_about_war": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/ch2_boss_dismisses_lain.md"
+    }
+  },
+  "wander_dance_floor": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/singing_result_gunshot.md"
+    }
+  },
   "active_overload": {
     "type": "story_change_and_set_flags",
     "payload": {
@@ -583,7 +631,7 @@
   "ch2_hug_alice_continue": {
     "type": "story_change",
     "payload": {
-      "story_file": "story/todo_ch2_hug_alice_continue.md"
+      "story_file": "story/21c_alice_comforts_lain.md"
     }
   },
   "ch2_bar_music_interrupt": {
@@ -613,13 +661,13 @@
   "ask_about_mika": {
     "type": "story_change",
     "payload": {
-      "story_file": "story/todo_ask_about_mika.md"
+      "story_file": "story/cyberia_boss_mika_response.md"
     }
   },
   "reply_is_me": {
     "type": "story_change",
     "payload": {
-      "story_file": "story/todo_reply_is_me.md"
+      "story_file": "story/22d_reply_is_me.md"
     }
   },
   "acquire_alice_hat": {
@@ -650,7 +698,19 @@
   "boss_invites_lain_to_sing": {
     "type": "story_change",
     "payload": {
-      "story_file": "story/todo_boss_invites_lain_to_to_sing.md"
+      "story_file": "story/22b_boss_invites_lain_to_sing.md"
+    }
+  },
+  "step_on_stage": {
+    "type": "enter_story",
+    "payload": {
+      "story_file": "story/side_stories/old_mic.md"
+    }
+  },
+  "refuse_to_sing": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_lain_refuses.md"
     }
   },
   "alice_asks_about_forum": {
@@ -663,6 +723,73 @@
     "type": "story_change",
     "payload": {
       "story_file": "story/todo_lain_asks_about_server_location.md"
+    }
+  },
+  "take_sand_bottle": {
+    "type": "acquire_item_and_set_flag",
+    "payload": {
+      "item_id": "sand_bottle",
+      "flag": { "name": "sand_bottle_taken", "value": true }
+    }
+  },
+  "trigger_gunshot": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/singing_result_gunshot.md"
+    }
+  },
+  "trigger_echo": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/singing_result_echo.md"
+    }
+  },
+  "gunshot_stare": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/todo_default.md"
+    }
+  },
+  "sing_plastic_love": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/singing_result_echo.md"
+    }
+  },
+  "sing_op": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/singing_result_echo.md"
+    }
+  },
+  "sing_ed": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/side_stories/singing_result_echo.md"
+    }
+  },
+  "gunshot": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/singing_result_gunshot.md"
+    }
+  },
+  "examine_old_mic": {
+    "type": "enter_story",
+    "payload": {
+      "story_file": "story/side_stories/old_mic.md"
+    }
+  },
+  "gunshot_advance": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/gunshot_advance.md"
+    }
+  },
+  "end_chapter_two": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/chapter_three_intro.md"
     }
   }
 }

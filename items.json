@@ -51,5 +51,10 @@
     "name": "绒毛帽子（爱丽丝版）",
     "description": "一顶柔软的绒毛帽子，像小熊一样温暖。",
     "required_credit": 0
+  },
+  "sand_bottle": {
+    "name": "装着沙子的试剂瓶",
+    "description": "一个装着干净海沙和贝壳碎的瓶子。瓶子本身很普通，但里面的沙子似乎对千砂有特殊的意义。",
+    "required_credit": 0
   }
 }

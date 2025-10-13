@@ -12,27 +12,44 @@ def get_nested_value(data, path):
     return d
 
 # Helper function for the new rich format
-def _parse_rich_block(rules, character_data):
-    flag_to_check = rules.get("flag_to_check")
-    if not flag_to_check:
-        return None, None
+def _parse_rich_block(rules, character_data, last_action_name=None):
+    player_value = ""
+    # Determine the value to check against based on the rule's instruction
+    if rules.get("context_variable") == "last_action_name":
+        player_value = last_action_name or ""
+    else:
+        flag_to_check = rules.get("flag_to_check")
+        if flag_to_check:
+            player_value = str(get_nested_value(character_data, flag_to_check) or "")
 
-    player_value = str(get_nested_value(character_data, flag_to_check) or "")
-    
     branches = rules.get("branches", {})
     # Use player_value to find the branch, fallback to "default"
     branch = branches.get(player_value) or branches.get("default")
 
     if not branch:
-        return None, None
+        # If no branch matches, and no default, display a debug symbol
+        return "#", None
 
     text = branch.get("text", "")
     choices = branch.get("choices", [])
     return text, choices
 
 # Helper function for the old simple format
-def _parse_simple_block(rules, character_data):
+def _parse_simple_block(rules, character_data, last_action_name=None):
     generated_fragments = []
+
+    # First, check if the last action name is a key in our rules.
+    # This gives priority to immediate context over persistent character state.
+    if last_action_name and last_action_name in rules:
+        # The rule is the entire dictionary for this action name
+        options = rules[last_action_name]
+        # In this specific case, the value is just the text.
+        # This could be expanded later if needed.
+        generated_fragments.append(options)
+        text = " ".join(filter(None, generated_fragments))
+        return text, None
+
+    # Fallback to the original logic for persistent state variables
     for state_variable, options in rules.items():
         player_value = str(character_data.get(state_variable, "0"))
         if player_value in options:
@@ -43,7 +60,7 @@ def _parse_simple_block(rules, character_data):
     text = " ".join(filter(None, generated_fragments))
     return text, None # Simple format doesn't have choices
 
-def parse_story_file(file_path, character_data):
+def parse_story_file(file_path, character_data, last_action_name=None):
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
@@ -102,9 +119,9 @@ def parse_story_file(file_path, character_data):
                         
                         # DECIDE WHICH PARSER TO USE
                         if "branches" in rules:
-                            text, new_choices = _parse_rich_block(rules, character_data)
+                            text, new_choices = _parse_rich_block(rules, character_data, last_action_name)
                         else:
-                            text, new_choices = _parse_simple_block(rules, character_data)
+                            text, new_choices = _parse_simple_block(rules, character_data, last_action_name)
 
                         if text:
                             story_content.append(text)

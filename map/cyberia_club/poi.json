@@ -2,7 +2,11 @@
       { "id": "dance_floor", "description": "舞池里挤满了人，随着音乐疯狂舞动。" },
       { "id": "bar", "description": "吧台后面，调酒师正忙着调制各种颜色的液体。" },
       { "id": "jj", "description": "一个戴着奇怪帽子的DJ，正在操作台前打碟。" },
-      { "id": "old_mic", "description": "一个老式的麦克风，看起来有些年头了。" },
+      { 
+        "id": "old_mic", 
+        "description": "一个老式的麦克风，看起来有些年头了。",
+        "action": "examine_old_mic"
+      },
       { "id": "detective_kids", "description": "三个小学生组成的侦探团，正在角落里窃窃私语。" },
       { "id": "restroom", "description": "洗手间，门上贴着奇怪的涂鸦。" },
       { 

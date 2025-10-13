@@ -93,6 +93,8 @@ def main():
         actions = load_json(actions_file_path)
         items_db = load_json(items_file_path)
         world_map = load_world_map_from_folders(abs_path)
+        fs_access_path = os.path.join(abs_path, 'world/etc/fs_access.json')
+        fs_access_data = load_json(fs_access_path) or {}
     except FileNotFoundError as e:
         print(f"错误: 无法加载游戏数据文件: {e}")
         sys.exit(1)
@@ -100,10 +102,14 @@ def main():
     current_story_file = os.path.join(abs_path, character_data.get('current_story_file', STARTING_STORY_FILE))
 
     redraw_scene = True
+        last_action_name = None
     while True:
         if redraw_scene:
-            story_content, available_choices, metadata = parse_story_file(current_story_file, character_data)
+            story_content, available_choices, metadata = parse_story_file(current_story_file, character_data, last_action_name)
             
+            # Reset last_action_name after it's used
+            last_action_name = None
+
             # Update location based on story file metadata
             if 'location' in metadata:
                 character_data['location'] = metadata['location']
@@ -125,12 +131,12 @@ def main():
 
         try:
             choice_index = int(player_input) - 1
-            character_data, new_story, redraw_scene = process_choice(
+            character_data, new_story, redraw_scene, last_action_name = process_choice(
                 choice_index, available_choices, character_data, actions, abs_path, items_db
             )
         except ValueError:
             character_data, new_story, redraw_scene = process_command(
-                player_input, character_data, world_root, items_db, world_map, actions, abs_path
+                player_input, character_data, world_root, items_db, world_map, actions, abs_path, fs_access_data
             )
             if not redraw_scene:
                  print()
