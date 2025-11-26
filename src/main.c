@@ -4,6 +4,7 @@
 #include <ctype.h>  // For isdigit
 #include <unistd.h> // For getcwd
 
+#include "build_info.h"   // For BUILD_OS, BUILD_ARCH
 #include "game_types.h"
 #include "data_loader.h"
 #include "map_loader.h"
@@ -61,8 +62,9 @@ int is_numeric(const char* str) {
 
 int main() {
     printf("Lain-day C version starting...\n");
+    printf("Build Info - OS: %s, Arch: %s\n", BUILD_OS, BUILD_ARCH);
 
-    // --- GameState Initialization ---
+    char cwd[1024];
     // The master GameState struct is created and zeroed out.
     GameState game_state;
     memset(&game_state, 0, sizeof(GameState));

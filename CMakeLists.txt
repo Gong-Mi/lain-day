@@ -2,6 +2,17 @@ cmake_minimum_required(VERSION 3.10)
 
 project(lain_day_c VERSION 1.0)
 
+# --- Platform/Architecture Information ---
+# Print detected info to the console during configuration
+message(STATUS "Detected OS: ${CMAKE_SYSTEM_NAME} (${CMAKE_SYSTEM_VERSION})")
+message(STATUS "Detected Arch: ${CMAKE_SYSTEM_PROCESSOR}")
+
+# Generate a header file with the detected platform info
+configure_file(
+    "${PROJECT_SOURCE_DIR}/include/build_info.h.in"
+    "${PROJECT_BINARY_DIR}/include/build_info.h"
+)
+
 # Set C standard
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -9,6 +20,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Include directories
 include_directories(include)
 include_directories(scenes) # Add scenes directory to include path
+include_directories("${PROJECT_BINARY_DIR}/include") # For generated headers
 
 # Find all scene source files automatically.
 # This allows new scenes to be added simply by creating a new directory

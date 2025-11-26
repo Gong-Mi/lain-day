@@ -1,0 +1,4 @@
+#pragma once
+
+#define BUILD_OS "@CMAKE_SYSTEM_NAME@"
+#define BUILD_ARCH "@CMAKE_SYSTEM_PROCESSOR@"
