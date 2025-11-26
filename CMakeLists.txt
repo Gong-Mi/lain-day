@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 3.10)
 
 project(lain_day_c VERSION 1.0)
 
+# --- Character Life/Death Options (Compile-time) ---
+# Use these options to exclude specific characters and their associated content
+# from the build. Defaults to ON (character is included).
+option(CHARACTER_ALICE_ALIVE "Include Alice in the game build" ON)
+option(CHARACTER_CHISA_ALIVE "Include Chisa in the game build" ON)
+option(CHARACTER_FATHER_ALIVE "Include Father in the game build" ON)
+option(CHARACTER_FUYUKO_MIRA_ALIVE "Include Fuyuko Mira (Doctor) in the game build" ON)
+option(CHARACTER_LAINS_SISTER_MIRA_ALIVE "Include Mira (Lain's Sister) in the game build" ON)
+
 # --- Platform/Architecture Information ---
 # Note: Specific detection for Termux is deferred.
 # If generic Android detection causes issues in Termux,
@@ -49,3 +58,13 @@ add_executable(lain_day_c
     src/scenes.c
     ${SCENE_SOURCES}
 )
+
+# Add compile definitions for character life/death options
+target_compile_definitions(lain_day_c PUBLIC
+    $<$<BOOL:${CHARACTER_ALICE_ALIVE}>:CHARACTER_ALICE_ALIVE>
+    $<$<BOOL:${CHARACTER_CHISA_ALIVE}>:CHARACTER_CHISA_ALIVE>
+    $<$<BOOL:${CHARACTER_FATHER_ALIVE}>:CHARACTER_FATHER_ALIVE>
+    $<$<BOOL:${CHARACTER_FUYUKO_MIRA_ALIVE}>:CHARACTER_FUYUKO_MIRA_ALIVE>
+    $<$<BOOL:${CHARACTER_LAINS_SISTER_MIRA_ALIVE}>:CHARACTER_LAINS_SISTER_MIRA_ALIVE>
+)
+

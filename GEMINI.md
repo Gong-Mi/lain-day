@@ -4,7 +4,7 @@
 
 This project is a sophisticated, text-based interactive fiction game inspired by the themes of the anime *Serial Experiments Lain*. The game is developed and played within a terminal environment.
 
-The architecture follows a **data-driven design**, cleanly separating the game engine from the game content:
+The architecture blends **data-driven elements** for world structure (like map definitions and item properties) with **code-driven logic** for narrative flow and character interactions. This approach aims to provide a stronger, more controlled narrative experience while maintaining flexibility for certain game content.
 
 -   **`game.py`**: A single Python script that acts as the game engine. It parses story files, manages game state, and handles a hybrid user input system.
 -   **`story/*.md`**: A directory of Markdown files, each representing a single scene or story beat. The narrative flow is defined by choices embedded in these files, and each file can define its own location via front matter.
@@ -26,14 +26,14 @@ The project is written in pure Python using only standard libraries. No external
 
 ## Development Conventions
 
-### 1. Data-Driven Design
+### 1. Blended Data/Code-Driven Design
 
-The core philosophy is to keep logic and data separate.
+The core philosophy has evolved from a strict data-driven separation to a **blended data-driven and code-driven design**.
 
--   **`game.py`** and the **`engine/`** modules contain all the logic.
--   The **`story/`** and **`map/`** directories, along with **`.json`** files, contain all the content and state.
+-   **Data-Driven Aspects**: Elements such as the `map/` directory (for location definitions), `actions.json` (for general game events), and `items.json` (for item properties) remain primarily data-driven. This allows for easy modification of these content types without altering core engine code.
+-   **Code-Driven Aspects**: Core narrative sequences, character interactions, and complex state changes are increasingly managed directly within the C engine code (e.g., `game.py` for Python version, `src/` modules for C version). This approach is adopted to enable stronger narrative control, more intricate structural integrity, and to avoid the "weak narrative" and "weak structure" that can sometimes arise from overly generic data-driven narrative systems.
 
-This allows for easy modification of the story, items, and world map without altering the engine code.
+This means that while some game content is still externalized, the logic that weaves the story and defines character-specific behaviors will be more tightly integrated into the codebase.
 
 ### 2. Story and Location System
 
@@ -105,3 +105,20 @@ These technologies are introduced to the player via in-game documents and form t
 -   **MLC Density Doubler (High-Risk Tech):**
     -   **Lore:** An experimental hack to force storage hardware to hold double its rated capacity, at extreme risk of data corruption.
     -   **Mechanic:** Represents the high-risk, high-reward nature of the game's technology, where players can use dangerous, unsanctioned methods to achieve their goals.
+
+### 4. Time and Narrative Constructs
+
+The game employs specific temporal and narrative constructs to enhance its unique gameplay and thematic depth:
+
+-   **"Groundhog Day" Time Loop (Repetitive Cycle):**
+    -   **Lore/Concept:** The game operates on a "Groundhog Day" principle, where a fixed period of time (e.g., a day or a specific sequence of events) repeats itself.
+    -   **Mechanic:** The player (as Lain) retains memories, knowledge, and skills from previous iterations, while the game world and its NPCs generally reset. This allows for extensive experimentation, learning character routines, uncovering hidden information, and manipulating events with foreknowledge. The primary goal often involves "breaking the loop" or achieving a specific outcome that ends the repetition.
+
+-   **Blended Narrative Methods:** The game utilizes a combination of narrative approaches:
+    -   **Interactive Fiction / Text Adventure:** Core text-based interaction, choices, and terminal commands drive the primary narrative.
+    -   **Branching Narrative:** Player choices lead to diverse scenes, character interactions, and potentially multiple endings, which the time loop encourages exploring.
+    -   **Environmental Narrative:** Story elements are conveyed through the game world's structure (`map/`, `world/`), discarded documents, and subtle cues, inviting player exploration and interpretation.
+    -   **Code-Driven Narrative:** Key plot points, character arcs, and complex event sequences are primarily managed within the C engine code to ensure a strong, controlled, and structurally sound story, diverging from a purely data-driven narrative approach. This allows for intricate pacing and thematic resonance.
+
+The goal is to create a deep, immersive, and mysterious experience by allowing players to act as "digital archaeologists," piecing together the story from fragmented documents and observing the emergent consequences of their actions within a structured, repeating framework.
+
