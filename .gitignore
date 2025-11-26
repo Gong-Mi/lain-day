@@ -1,3 +1,6 @@
+# Game build directory
+build/
+
 # Python cache
 __pycache__/
 
