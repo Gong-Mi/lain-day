@@ -3,6 +3,17 @@ cmake_minimum_required(VERSION 3.10)
 project(lain_day_c VERSION 1.0)
 
 # --- Platform/Architecture Information ---
+# Note: Specific detection for Termux is deferred.
+# If generic Android detection causes issues in Termux,
+# check for TERMUX_VERSION environment variable here.
+# For example:
+# if(DEFINED ENV{TERMUX_VERSION})
+#     set(PLATFORM_NAME "Termux")
+# else()
+#     set(PLATFORM_NAME ${CMAKE_SYSTEM_NAME})
+# endif()
+# message(STATUS "Detected Platform: ${PLATFORM_NAME}")
+
 # Print detected info to the console during configuration
 message(STATUS "Detected OS: ${CMAKE_SYSTEM_NAME} (${CMAKE_SYSTEM_VERSION})")
 message(STATUS "Detected Arch: ${CMAKE_SYSTEM_PROCESSOR}")
