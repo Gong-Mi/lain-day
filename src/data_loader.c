@@ -126,8 +126,9 @@ int load_actions_data(const char* path, GameState* game_state) {
     if (root == NULL) return 0;
 
     game_state->action_count = 0;
-    cJSON *action_json;
-    cJSON_ArrayForEach(action_json, root) {
+    cJSON *action_json = NULL;
+    for (int i = 0; i < cJSON_GetArraySize(root); i++) {
+        action_json = cJSON_GetArrayItem(root, i);
         if (game_state->action_count >= MAX_ACTIONS) break;
 
         Action *action = &game_state->all_actions[game_state->action_count];
@@ -137,7 +138,11 @@ int load_actions_data(const char* path, GameState* game_state) {
         if (cJSON_IsString(type)) strncpy(action->type_str, type->valuestring, MAX_NAME_LENGTH - 1);
 
         cJSON *payload = cJSON_GetObjectItemCaseSensitive(action_json, "payload");
-        if (payload) action->payload_json = cJSON_DetachItemViaPointer(action_json, payload);
+        if (payload) {
+            action->payload_json = cJSON_Duplicate(payload, 1);
+        } else {
+            action->payload_json = NULL;
+        }
 
         game_state->action_count++;
     }

@@ -44,9 +44,9 @@
     }
   },
   "examine_navi": {
-    "type": "enter_story",
+    "type": "story_change",
     "payload": {
-      "story_file": "story/side_stories/navi.md"
+      "story_file": "story/01a_examine_navi.md"
     }
   },
   "exit_to_main_story": {

@@ -10,7 +10,7 @@
 #include "story_parser.h" // Still needed for compilation, but not for the hardcoded scene logic here
 #include "executor.h"
 #include "string_table.h" // For get_string_by_id
-#include "scenes.h"       // For init_scene_examine_navi
+#include "scenes.h"       // For transition_to_scene
 
 // --- Helper Functions for Game Loop ---
 void render_current_scene(const StoryScene* scene) {
@@ -62,88 +62,60 @@ int is_numeric(const char* str) {
 int main() {
     printf("Lain-day C version starting...\n");
 
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) != NULL) {
-        printf("Current working directory: %s\n", cwd);
-    } else {
-        perror("getcwd() error");
-    }
-
+    // --- GameState Initialization ---
+    // The master GameState struct is created and zeroed out.
     GameState game_state;
     memset(&game_state, 0, sizeof(GameState));
 
-    // --- Initialize game_state directly for demo ---
-    // Hardcode PlayerState
-    strncpy(game_state.player_state.location, "lain_room", MAX_NAME_LENGTH - 1);
-    game_state.player_state.credit_level = 1;
-    game_state.player_state.inventory_count = 0;
-    strncpy(game_state.player_state.unlocked_commands[0], "help", MAX_NAME_LENGTH - 1);
-    game_state.player_state.unlocked_commands_count = 1;
-
-    // Hardcode mock Action entries for NAVI choices
-    // Action: navi_shutdown
-    strncpy(game_state.all_actions[0].id, "navi_shutdown", MAX_NAME_LENGTH - 1);
-    strncpy(game_state.all_actions[0].type_str, "story_change", MAX_NAME_LENGTH - 1); // Mock type
-    game_state.all_actions[0].payload_json = NULL; // No actual payload for mock
-    game_state.action_count = 1;
-
-    // Action: navi_reboot
-    strncpy(game_state.all_actions[1].id, "navi_reboot", MAX_NAME_LENGTH - 1);
-    strncpy(game_state.all_actions[1].type_str, "story_change", MAX_NAME_LENGTH - 1); // Mock type
-    game_state.all_actions[1].payload_json = NULL; // No actual payload for mock
-    game_state.action_count++;
-
-    // Action: navi_connect
-    strncpy(game_state.all_actions[2].id, "navi_connect", MAX_NAME_LENGTH - 1);
-    strncpy(game_state.all_actions[2].type_str, "story_change", MAX_NAME_LENGTH - 1); // Mock type
-    game_state.all_actions[2].payload_json = NULL; // No actual payload for mock
-    game_state.action_count++;
-
-    printf("PlayerState and Actions hardcoded for demo.\n");
-
-    // Comment out file-based data loading as it's bypassed
-    /*
+    // --- Load all game data ---
+    // The engine now loads all data from the JSON and map files at startup.
     if (!load_player_state("./character.json", &game_state)) {
         fprintf(stderr, "Failed to load player data. Exiting.\n");
         return 1;
     }
-    
+    printf("Player data loaded successfully.\n");
+
     if (!load_map_data("./map", &game_state)) {
         fprintf(stderr, "Failed to load map data. Exiting.\n");
         cleanup_game_state(&game_state);
         return 1;
     }
+    printf("Map data loaded successfully.\n");
 
     if (!load_items_data("./items.json", &game_state)) {
         fprintf(stderr, "Failed to load items data. Exiting.\n");
         cleanup_game_state(&game_state);
         return 1;
     }
+    printf("Items data loaded successfully.\n");
 
     if (!load_actions_data("./actions.json", &game_state)) {
         fprintf(stderr, "Failed to load actions data. Exiting.\n");
         cleanup_game_state(&game_state);
         return 1;
     }
-    printf("All data loaded successfully.\n");
-    */
+    printf("Actions data loaded successfully.\n");
+
 
     // --- Game Loop ---
     int running = 1;
     char input_buffer[MAX_LINE_LENGTH];
     StoryScene current_scene;
 
-    // Initialize the Navi scene directly for demonstration
-    init_scene_examine_navi(&current_scene);
-    strncpy(game_state.player_state.location, current_scene.location_id, MAX_NAME_LENGTH - 1); // Set initial location
+    // Initialize the first scene based on the state loaded from character.json
+    if (!transition_to_scene(game_state.current_story_file, &current_scene, &game_state)) {
+        fprintf(stderr, "Failed to initialize starting scene from story file: %s\n", game_state.current_story_file);
+        return 1;
+    }
     
-    // Initial render of the hardcoded scene
+    // Initial render of the scene
     render_current_scene(&current_scene);
 
 
+    // The main loop handles player input, routing it to either the choice handler
+    // or the text command executor.
     while (running) {
         get_player_input(input_buffer, sizeof(input_buffer));
-        // scene_changed = 0; // Reset for next loop
 
         if (strcmp(input_buffer, "quit") == 0) {
             running = 0;
@@ -151,29 +123,37 @@ int main() {
             int choice_index = atoi(input_buffer) - 1;
             if (choice_index >= 0 && choice_index < current_scene.choice_count) {
                 const char* action_id = current_scene.choices[choice_index].action_id;
-                // For this demo, execute_action will simply print the action ID
-                printf("Executing action: %s\n", action_id);
-                // In a real game, execute_action would update game_state and potentially change scene_changed
-                // For now, we'll keep the scene static after choice, unless action changes it
                 
-                // For demo, if action changes scene, we would call a new init_scene_X
-                // For now, let's just re-render to simulate a response if we don't change scene
-                render_current_scene(&current_scene); 
+                // execute_action handles the game logic for the choice.
+                // If it returns true, the story file has changed.
+                if (execute_action(action_id, &game_state)) { 
+                    // transition_to_scene loads the new C-based scene.
+                    if (!transition_to_scene(game_state.current_story_file, &current_scene, &game_state)) {
+                        fprintf(stderr, "Failed to transition to scene %s.\n", game_state.current_story_file);
+                    }
+                }
+                render_current_scene(&current_scene);
 
             } else {
                 printf("Invalid choice number.\n");
             }
         } else {
-            // Placeholder for command execution, will always print invalid for now
-            printf("Invalid command or input for this scene. Please choose a number.\n");
+            // For non-numeric input, execute as a text command.
+            execute_command(input_buffer, &game_state);
+            render_current_scene(&current_scene); 
         }
     }
 
     // --- Save and Cleanup ---
+    // The final game state is saved back to character.json before exiting.
     printf("\nSaving game state...\n");
-    // For this hardcoded demo, we don't save game state or cleanup dynamically allocated cJSON objects.
-    // The previous debug code to print CWD should also be removed.
-    // cleanup_game_state(&game_state);
+    if (!save_game_state("./character.json", &game_state)) {
+        fprintf(stderr, "Error: Failed to save game state.\n");
+    } else {
+        printf("Game state saved successfully.\n");
+    }
+    
+    cleanup_game_state(&game_state);
 
     printf("\nLain-day C version exiting.\n");
     return 0;

@@ -17,6 +17,90 @@ const char* g_string_table[TEXT_COUNT] = {
     [TEXT_CHOICE_NAVI_SHUTDOWN] = "强制关闭Navi",
     [TEXT_CHOICE_NAVI_REBOOT] = "重启Navi",
     [TEXT_CHOICE_NAVI_CONNECT] = "尝试打开网络链接",
+
+    // Entry Scene (00_entry) Text
+    [TEXT_ENTRY_DESC1] = "你站在一个空旷、安静的房间里。",
+    [TEXT_ENTRY_DESC2] = "房间里几乎没有东西，只有一扇朴素的门，以及通往楼下的楼梯。",
+    [TEXT_ENTRY_DESC3] = "门上用手写体刻着一个词：",
+    [TEXT_ENTRY_DESC4] = "lain",
+    [TEXT_ENTRY_DESC5] = "但底下的汉字被抹去了",
+
+    // Entry Scene (00_entry) Choices
+    [TEXT_CHOICE_OPEN_DOOR] = "打开门",
+    [TEXT_CHOICE_GO_DOWNSTAIRS] = "走下楼梯",
+    [TEXT_CHOICE_WAIT_ONE_MINUTE] = "保持沉默，等待一分钟",
+
+    // 00a_wait_one_minute_endprologue Text
+    [TEXT_WAIT_DESC1] = "你选择什么都不做，只是静静地站在那里。",
+    [TEXT_WAIT_DESC2] = "时间一分一秒地过去，房间里只有你自己的呼吸声。就在你开始怀疑这是否是徒劳之时……",
+    [TEXT_WAIT_DESC3] = "那扇写着`lain`的门，伴随着一声轻响，自己打开了。",
+    [TEXT_WAIT_DESC4] = "一个穿着小熊睡衣的少女从门里走了出来。",
+    [TEXT_WAIT_DESC5] = "她平静地看着你，开口问道：",
+    [TEXT_WAIT_QUOTE] = "……找我有事吗？",
+
+    // 00a_wait_one_minute_endprologue Choices
+    [TEXT_CHOICE_START_CHAPTER_ONE] = "第一章 开始",
+
+    // 01_lain_room Text
+    [TEXT_LAIN_ROOM_TITLE] = "lain的房间",
+    [TEXT_LAIN_ROOM_DESC1] = "你推开门，向前走了一步，房间内的布局清晰地展现在眼前。",
+    [TEXT_LAIN_ROOM_DESC2] = "房间里很暗。一张巨大的书桌占据了角落，靠着两面墙，上面堆满了书籍和设备。在书堆之下，一台老旧的 `Navi` 屏幕亮着幽光。",
+    [TEXT_LAIN_ROOM_DESC3] = "房间的中央是一个飘窗。你的右边是一张靠墙的床，床和飘窗之间散落着几个布娃娃。",
+    [TEXT_LAIN_ROOM_DESC4] = "而在飘窗上，有一个人影正靠着窗户，静静地坐在窗沿上。",
+    [TEXT_LAIN_ROOM_DESC5] = "幽灵少女 盯着月亮 上新月 口里呢喃着 链接", // This is a comment in the original, but I'll add it as a descriptive text here for now
+
+    // 01_lain_room Choices
+    [TEXT_CHOICE_TALK_TO_FIGURE] = "和窗边的人说话",
+    [TEXT_CHOICE_EXAMINE_NAVI] = "检查那台Navi",
+    [TEXT_CHOICE_LEAVE_ROOM] = "默默地离开房间",
+
+    // 01b_navi_shutdown Text
+    [TEXT_NAVI_SHUTDOWN_TITLE] = "连接中断",
+    [TEXT_NAVI_SHUTDOWN_DESC1] = "你伸出手，按下了Navi的物理关机按钮。",
+    [TEXT_NAVI_SHUTDOWN_DESC2] = "屏幕上的进度条和光标瞬间消失，房间唯一的光源熄灭了。世界陷入了彻底的黑暗和寂静。",
+    [TEXT_NAVI_SHUTDOWN_DESC3] = "在你的视线余光中，那个坐在窗沿上的人影开始变得不稳定。TA的轮廓像是电视雪花一样闪烁、分解，然后无声无息地消散在了空气里，仿佛从未存在过。",
+    [TEXT_NAVI_SHUTDOWN_DESC4] = "黑暗中，你轻声说出了那句话：",
+    [TEXT_NAVI_SHUTDOWN_QUOTE] = "……你到现在，还不能原我吗，lain？",
+
+    // 01c_talk_to_figure_endprologue Text
+    [TEXT_TALK_FIGURE_TITLE] = "序章结束（结局G：停火）",
+    [TEXT_TALK_FIGURE_DESC1] = "你走上前，对着窗边的那个身影开口：",
+    [TEXT_TALK_FIGURE_YOU_QUOTE1] = "你： “你这个幽灵……是想占据我的全部吗？”",
+    [TEXT_TALK_FIGURE_DESC2] = "那个身影缓缓地转过头来。TA的脸和你一模一样，但眼神空洞，没有任何情绪。",
+    [TEXT_TALK_FIGURE_GHOST_QUOTE1] = "幽灵： “不知道。我只是被世界选中的载体，而你……是那个进行选择的人。”",
+    [TEXT_TALK_FIGURE_GHOST_QUOTE2] = "幽灵： “我对你的一切毫无兴趣。”",
+    [TEXT_TALK_FIGURE_YOU_QUOTE2] = "你： “但你还是开始入侵我的房间了。”",
+    [TEXT_TALK_FIGURE_GHOST_QUOTE3] = "幽灵： “不是入侵，这一切都是自动。我也没有选择……要不，我们暂时停火好吗？”",
+    [TEXT_TALK_FIGURE_YOU_QUOTE3] = "你： “……希望如此。”",
+    [TEXT_TALK_FIGURE_DESC3] = "说完，你转身按下了Navi的电源。屏幕熄灭，房间陷入黑暗。但这一次，你知道，那个“幽灵”并没有消失，只是暂时休眠了。",
+
+    // 01d_navi_reboot_endprologue Text
+    [TEXT_NAVI_REBOOT_TITLE] = "序章结束（结局H：重启）",
+    [TEXT_NAVI_REBOOT_DESC1] = "你选择了【重启Navi】。屏幕瞬间变黑，然后一行行启动代码飞速滚过。",
+    [TEXT_NAVI_REBOOT_DESC2] = "与此同时，窗边的幽灵闪烁了一下，消失了——不，不是消失。TA身上的衣服在一瞬间变了，从白色的连衣裙变成了一套你从未见过的、似乎是某个校服的样式。",
+    [TEXT_NAVI_REBOOT_YOU_QUOTE1] = "你： “所以……你现在是谁？”",
+    [TEXT_NAVI_REBOOT_DESC3] = "TA没有立刻回答，而是慢慢向你走来，靠近，然后……轻轻地抱住了你。一个冰冷的、没有实感的拥抱。",
+    [TEXT_NAVI_REBOOT_GHOST_QUOTE1] = "幽灵： “我就是你。或者说，是你的一个‘可能’。”",
+    [TEXT_NAVI_REBOOT_GHOST_QUOTE2] = "幽灵： “比如，你曾经想过去美国留学，然后回国当一名医生。”",
+    [TEXT_NAVI_REBOOT_YOU_QUOTE2] = "你： “我没有！”",
+    [TEXT_NAVI_REBOOT_GHOST_QUOTE3] = "幽灵： “所以我说，只是一个‘可能’。那么，你是谁？”",
+    [TEXT_NAVI_REBOOT_YOU_QUOTE3] = "你： “我就是我。”",
+    [TEXT_NAVI_REBOOT_DESC4] = "TA松开了拥抱，嘴角似乎有一丝微笑，说出了一句你无法理解的话：",
+    [TEXT_NAVI_REBOOT_GHOST_QUOTE4] = "幽灵： “是吗？我软链接我自己吗？……不，并没有。我们都只是空文件而已。”",
+
+    // 01e_navi_connect_endprologue Text
+    [TEXT_NAVI_CONNECT_TITLE] = "序章结束（结局I：403 Forbidden）",
+    [TEXT_NAVI_CONNECT_DESC1] = "你选择了【尝试打开网络链接】。屏幕上的进度条消失了，取而代之的是一行冷冰冰的错误代码：",
+    [TEXT_NAVI_CONNECT_STATUS_CODE] = "> Status: 403 Forbidden",
+    [TEXT_NAVI_CONNECT_DESC2] = "窗边的幽灵开口了，带着一丝嘲弄：",
+    [TEXT_NAVI_CONNECT_GHOST_QUOTE1] = "幽灵： “没用的。你现在只是独自一人。”",
+    [TEXT_NAVI_CONNECT_YOU_QUOTE1] = "你： “你甚至都不是‘人’。”",
+    [TEXT_NAVI_CONNECT_GHOST_QUOTE2] = "幽灵： “不是‘404 Not Found’，就还有希望。你只是被‘拒绝’了……只要你登录那个账号……”",
+    [TEXT_NAVI_CONNECT_YOU_QUOTE2] = "你： “不！你又要怂恿我！我就是不……”",
+    [TEXT_NAVI_CONNECT_GHOST_QUOTE3] = "幽灵： “你会想的。没有人会拒绝被人理解的感觉。”",
+    [TEXT_NAVI_CONNECT_YOU_QUOTE3] = "你： “哪怕是不情愿的吗？”",
+    [TEXT_NAVI_CONNECT_GHOST_QUOTE4] = "幽灵： “是的。”",
+    [TEXT_NAVI_CONNECT_DESC3] = "幽灵的话语在寂静的房间里回响。屏幕上的“403 Forbidden”像是一种最终的宣判。",
 };
 
 const char* get_string_by_id(StringID id) {
