@@ -11,6 +11,22 @@ option(CHARACTER_FATHER_ALIVE "Include Father in the game build" ON)
 option(CHARACTER_FUYUKO_MIRA_ALIVE "Include Fuyuko Mira (Doctor) in the game build" ON)
 option(CHARACTER_LAINS_SISTER_MIRA_ALIVE "Include Mira (Lain's Sister) in the game build" ON)
 
+# --- Feature Toggles ---
+option(ENABLE_TYPEWRITER_EFFECT "Enable typewriter text rendering effect" OFF)
+
+# --- Compiler Cache ---
+option(USE_CCACHE "Use ccache to speed up compilation, if available" ON)
+if(USE_CCACHE)
+    find_program(CCACHE_FOUND ccache)
+    if(CCACHE_FOUND)
+        message(STATUS "Using ccache to speed up compilation")
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_FOUND}")
+        set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CCACHE_FOUND}")
+    else()
+        message(STATUS "ccache not found, continuing without it")
+    endif()
+endif()
+
 # --- Platform/Architecture Information ---
 # Note: Specific detection for Termux is deferred.
 # If generic Android detection causes issues in Termux,
@@ -54,6 +70,7 @@ add_executable(lain_day_c
     src/data_loader.c 
     src/map_loader.c 
     src/executor.c
+    src/flag_system.c
     src/string_table.c
     src/scenes.c
     ${SCENE_SOURCES}
@@ -66,5 +83,10 @@ target_compile_definitions(lain_day_c PUBLIC
     $<$<BOOL:${CHARACTER_FATHER_ALIVE}>:CHARACTER_FATHER_ALIVE>
     $<$<BOOL:${CHARACTER_FUYUKO_MIRA_ALIVE}>:CHARACTER_FUYUKO_MIRA_ALIVE>
     $<$<BOOL:${CHARACTER_LAINS_SISTER_MIRA_ALIVE}>:CHARACTER_LAINS_SISTER_MIRA_ALIVE>
+)
+
+# Add feature toggle definitions
+target_compile_definitions(lain_day_c PUBLIC
+    $<$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>:USE_TYPEWRITER_EFFECT>
 )
 

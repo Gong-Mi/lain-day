@@ -109,20 +109,32 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
                 if (cJSON_IsArray(poi_root)) {
                     cJSON *poi_item;
                     cJSON_ArrayForEach(poi_item, poi_root) {
-                        if (current_location->poi_count < MAX_POIS) {
-                             if (cJSON_IsObject(poi_item)) {
-                                const cJSON *poi_identifier = cJSON_GetObjectItemCaseSensitive(poi_item, "id");
-                                if (!(cJSON_IsString(poi_identifier) && (poi_identifier->valuestring != NULL))) {
-                                    poi_identifier = cJSON_GetObjectItemCaseSensitive(poi_item, "name");
+                        if (current_location->pois_count < MAX_POIS) {
+                            POI *current_poi = &current_location->pois[current_location->pois_count];
+                            memset(current_poi, 0, sizeof(POI)); // Initialize POI struct
+
+                            if (cJSON_IsObject(poi_item)) {
+                                const cJSON *id_json = cJSON_GetObjectItemCaseSensitive(poi_item, "id");
+                                const cJSON *name_json = cJSON_GetObjectItemCaseSensitive(poi_item, "name");
+                                const cJSON *desc_json = cJSON_GetObjectItemCaseSensitive(poi_item, "description");
+
+                                if (cJSON_IsString(id_json) && id_json->valuestring != NULL) {
+                                    strncpy(current_poi->id, id_json->valuestring, MAX_NAME_LENGTH - 1);
                                 }
-                                if (cJSON_IsString(poi_identifier) && (poi_identifier->valuestring != NULL)) {
-                                    strncpy(current_location->points_of_interest[current_location->poi_count], poi_identifier->valuestring, MAX_DESC_LENGTH - 1);
-                                    current_location->poi_count++;
+                                if (cJSON_IsString(name_json) && name_json->valuestring != NULL) {
+                                    strncpy(current_poi->name, name_json->valuestring, MAX_NAME_LENGTH - 1);
+                                } else if (cJSON_IsString(id_json) && id_json->valuestring != NULL) { // Fallback name to id if name is missing
+                                    strncpy(current_poi->name, id_json->valuestring, MAX_NAME_LENGTH - 1);
                                 }
-                            } else if (cJSON_IsString(poi_item)) {
-                                strncpy(current_location->points_of_interest[current_location->poi_count], poi_item->valuestring, MAX_DESC_LENGTH - 1);
-                                current_location->poi_count++;
+                                if (cJSON_IsString(desc_json) && desc_json->valuestring != NULL) {
+                                    strncpy(current_poi->description, desc_json->valuestring, (MAX_DESC_LENGTH * 2) - 1);
+                                }
+                            } else if (cJSON_IsString(poi_item)) { // Handle old simple string POI format
+                                strncpy(current_poi->id, poi_item->valuestring, MAX_NAME_LENGTH - 1);
+                                strncpy(current_poi->name, poi_item->valuestring, MAX_NAME_LENGTH - 1);
+                                strncpy(current_poi->description, "No detailed description.", (MAX_DESC_LENGTH * 2) - 1);
                             }
+                            current_location->pois_count++;
                         }
                     }
                 }

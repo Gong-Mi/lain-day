@@ -1,4 +1,5 @@
 #include "executor.h"
+#include "flag_system.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -51,10 +52,61 @@ int execute_action(const char* action_id, GameState* game_state) {
     int scene_changed = 0;
     
     // --- STORY/LOCATION CHANGE ---
-    const cJSON *story_file_json = cJSON_GetObjectItemCaseSensitive(payload, "story_file");
-    if (cJSON_IsString(story_file_json) && story_file_json->valuestring != NULL) {
-        strncpy(game_state->current_story_file, story_file_json->valuestring, MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
+    // This block handles multiple action types that can result in a scene change.
+    if (strcmp(action->type_str, "conditional_story_change") == 0) {
+        const cJSON *flag_name_json = cJSON_GetObjectItemCaseSensitive(payload, "flag_name");
+        if (cJSON_IsString(flag_name_json) && flag_name_json->valuestring != NULL) {
+            const char* flag_value = hash_table_get(game_state->flags, flag_name_json->valuestring);
+            
+            // Consider the condition true if the flag exists and its value is not "false", "0", or empty.
+            int condition_is_true = (flag_value != NULL && strcmp(flag_value, "false") != 0 && strcmp(flag_value, "0") != 0 && strlen(flag_value) > 0);
+
+            if (condition_is_true) {
+                const cJSON *story_if_true_json = cJSON_GetObjectItemCaseSensitive(payload, "story_if_true");
+                if (cJSON_IsString(story_if_true_json) && story_if_true_json->valuestring != NULL) {
+                    strncpy(game_state->current_story_file, story_if_true_json->valuestring, MAX_PATH_LENGTH - 1);
+                    scene_changed = 1;
+                }
+            } else {
+                const cJSON *story_if_false_json = cJSON_GetObjectItemCaseSensitive(payload, "story_if_false");
+                if (cJSON_IsString(story_if_false_json) && story_if_false_json->valuestring != NULL) {
+                    strncpy(game_state->current_story_file, story_if_false_json->valuestring, MAX_PATH_LENGTH - 1);
+                    scene_changed = 1;
+                }
+            }
+        }
+    } else if (strcmp(action->type_str, "conditional_action_by_flag") == 0) {
+        const cJSON *flag_name_json = cJSON_GetObjectItemCaseSensitive(payload, "flag_name");
+        if (cJSON_IsString(flag_name_json) && flag_name_json->valuestring != NULL) {
+            const char* flag_value = hash_table_get(game_state->flags, flag_name_json->valuestring);
+            
+            const char* next_action_id = NULL;
+            if (flag_value != NULL) {
+                if (strcmp(flag_value, "cold") == 0) {
+                    const cJSON *cold_action_json = cJSON_GetObjectItemCaseSensitive(payload, "value_cold_action");
+                    if (cJSON_IsString(cold_action_json)) next_action_id = cold_action_json->valuestring;
+                } else if (strcmp(flag_value, "curious") == 0) {
+                    const cJSON *curious_action_json = cJSON_GetObjectItemCaseSensitive(payload, "value_curious_action");
+                    if (cJSON_IsString(curious_action_json)) next_action_id = curious_action_json->valuestring;
+                }
+            }
+
+            if (next_action_id == NULL) { // Fallback to default if flag not found or no specific match
+                const cJSON *default_action_json = cJSON_GetObjectItemCaseSensitive(payload, "default_action");
+                if (cJSON_IsString(default_action_json)) next_action_id = default_action_json->valuestring;
+            }
+
+            if (next_action_id != NULL) {
+                scene_changed = execute_action(next_action_id, game_state); // Recursively execute the chosen action
+            }
+        }
+    } else {
+        // Handle simple story_change, location_change, etc.
+        const cJSON *story_file_json = cJSON_GetObjectItemCaseSensitive(payload, "story_file");
+        if (cJSON_IsString(story_file_json) && story_file_json->valuestring != NULL) {
+            strncpy(game_state->current_story_file, story_file_json->valuestring, MAX_PATH_LENGTH - 1);
+            scene_changed = 1;
+        }
     }
 
     const cJSON *new_location_json = cJSON_GetObjectItemCaseSensitive(payload, "new_location");
@@ -116,12 +168,38 @@ int execute_action(const char* action_id, GameState* game_state) {
         cJSON *flag_item;
         cJSON_ArrayForEach(flag_item, flags_json) {
             if (cJSON_IsObject(flag_item)) {
-                const cJSON *name = cJSON_GetObjectItemCaseSensitive(flag_item, "name");
-                const cJSON *value = cJSON_GetObjectItemCaseSensitive(flag_item, "value");
-                if (cJSON_IsString(name) && name->valuestring != NULL) {
-                    if (strcmp(name->valuestring, "credit_level") == 0 && cJSON_IsNumber(value)) {
-                        game_state->player_state.credit_level = value->valueint;
+                const cJSON *name_json = cJSON_GetObjectItemCaseSensitive(flag_item, "name");
+                const cJSON *value_json = cJSON_GetObjectItemCaseSensitive(flag_item, "value");
+
+                if (cJSON_IsString(name_json) && name_json->valuestring != NULL && value_json != NULL) {
+                    char value_str[256]; // Buffer to hold the string representation of the value
+
+                    if (cJSON_IsString(value_json)) {
+                        strncpy(value_str, value_json->valuestring, sizeof(value_str) - 1);
+                    } else if (cJSON_IsNumber(value_json)) {
+                        snprintf(value_str, sizeof(value_str), "%f", value_json->valuedouble);
+                        // Trim trailing zeros and decimal point if it's an integer
+                        char *p = strchr(value_str, '.');
+                        if (p != NULL) {
+                            char *end = p + strlen(p) - 1;
+                            while (end > p && *end == '0') {
+                                *end-- = '\0';
+                            }
+                            if (end == p) { // If only the decimal point is left
+                                *end = '\0';
+                            }
+                        }
+                    } else if (cJSON_IsTrue(value_json)) {
+                        strncpy(value_str, "true", sizeof(value_str) - 1);
+                    } else if (cJSON_IsFalse(value_json)) {
+                        strncpy(value_str, "false", sizeof(value_str) - 1);
+                    } else {
+                        // Skip if value is not a supported type
+                        continue;
                     }
+                    
+                    value_str[sizeof(value_str) - 1] = '\0'; // Ensure null-termination
+                    hash_table_set(game_state->flags, name_json->valuestring, value_str);
                 }
             }
         }
@@ -152,11 +230,11 @@ void execute_command(const char* input, GameState* game_state) {
             printf("Location: %s\n", current_loc->name);
             printf("Description: %s\n", current_loc->description);
             printf("\nPoints of Interest:\n");
-            if (current_loc->poi_count == 0) {
+            if (current_loc->pois_count == 0) {
                 printf("  (none)\n");
             }
-            for (int i = 0; i < current_loc->poi_count; i++) {
-                printf("  - %s\n", current_loc->points_of_interest[i]);
+            for (int i = 0; i < current_loc->pois_count; i++) {
+                printf("  - %s\n", current_loc->pois[i].name);
             }
             printf("\nConnections:\n");
             if (current_loc->connection_count == 0) {

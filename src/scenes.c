@@ -23,6 +23,16 @@
 #include "01c_talk_to_figure_endprologue/scene.h"
 #include "01d_navi_reboot_endprologue/scene.h"
 #include "01e_navi_connect_endprologue/scene.h"
+#include "02_downstairs/scene.h"
+#include "03_chapter_one_intro/scene.h"
+#include "02d_talk_to_mom_normal/scene.h"
+#include "02a_talk_to_dad/scene.h"
+#include "02b_dad_reply_no/scene.h"
+#include "02c_dad_ask_help/scene.h"
+#include "02j_get_milk_endprologue/scene.h"
+#include "04a_talk_to_sister_cold/scene.h"
+#include "04b_talk_to_sister_curious/scene.h"
+#include "04c_talk_to_sister_default/scene.h"
 // TODO: Add more scene headers as they are converted
 
 int transition_to_scene(const char* target_story_file, StoryScene* scene, GameState* game_state) {
@@ -45,6 +55,26 @@ int transition_to_scene(const char* target_story_file, StoryScene* scene, GameSt
         init_scene_01d_navi_reboot_endprologue(scene);
     } else if (strcmp(target_story_file, "story/01e_navi_connect_endprologue.md") == 0) {
         init_scene_01e_navi_connect_endprologue(scene);
+    } else if (strcmp(target_story_file, "story/02_downstairs.md") == 0) {
+        init_scene_02_downstairs(scene);
+    } else if (strcmp(target_story_file, "story/03_chapter_one_intro.md") == 0) {
+        init_scene_03_chapter_one_intro(scene);
+    } else if (strcmp(target_story_file, "story/02d_talk_to_mom_normal.md") == 0) {
+        init_scene_02d_talk_to_mom_normal(scene);
+    } else if (strcmp(target_story_file, "story/02a_talk_to_dad.md") == 0) {
+        init_scene_02a_talk_to_dad(scene);
+    } else if (strcmp(target_story_file, "story/02b_dad_reply_no.md") == 0) {
+        init_scene_02b_dad_reply_no(scene);
+    } else if (strcmp(target_story_file, "story/02c_dad_ask_help.md") == 0) {
+        init_scene_02c_dad_ask_help(scene);
+    } else if (strcmp(target_story_file, "story/02j_get_milk_endprologue.md") == 0) {
+        init_scene_02j_get_milk_endprologue(scene);
+    } else if (strcmp(target_story_file, "story/04a_talk_to_sister_cold.md") == 0) {
+        init_scene_04a_talk_to_sister_cold(scene);
+    } else if (strcmp(target_story_file, "story/04b_talk_to_sister_curious.md") == 0) {
+        init_scene_04b_talk_to_sister_curious(scene);
+    } else if (strcmp(target_story_file, "story/04c_talk_to_sister_default.md") == 0) {
+        init_scene_04c_talk_to_sister_default(scene);
     }
     // TODO: Add more scenes here as they are converted
     else {

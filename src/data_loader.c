@@ -1,5 +1,6 @@
 #include "data_loader.h"
 #include "cJSON.h"
+#include "flag_system.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +25,14 @@ static char* read_file_to_buffer(const char* path) {
 
 int load_player_state(const char* path, GameState* game_state) {
     if (game_state == NULL) return 0;
+    
+    // Initialize the flag system
+    game_state->flags = create_hash_table(128);
+    if (game_state->flags == NULL) {
+        fprintf(stderr, "DEBUG: Failed to create hash table for flags.\n");
+        return 0;
+    }
+
     PlayerState* player_state = &game_state->player_state;
     char *json_string = read_file_to_buffer(path);
     if (json_string == NULL) {
@@ -48,6 +57,14 @@ int load_player_state(const char* path, GameState* game_state) {
 
     const cJSON *credit_level = cJSON_GetObjectItemCaseSensitive(root, "credit_level");
     if (cJSON_IsNumber(credit_level)) player_state->credit_level = credit_level->valueint;
+
+    // Load typewriter delay, with a default value
+    const cJSON *typewriter_delay_json = cJSON_GetObjectItemCaseSensitive(root, "typewriter_delay");
+    if (cJSON_IsNumber(typewriter_delay_json)) {
+        game_state->typewriter_delay = (float)typewriter_delay_json->valuedouble;
+    } else {
+        game_state->typewriter_delay = 0.04f; // Default value
+    }
 
     const cJSON *inventory = cJSON_GetObjectItemCaseSensitive(root, "inventory");
     player_state->inventory_count = 0;
@@ -153,6 +170,13 @@ int load_actions_data(const char* path, GameState* game_state) {
 
 void cleanup_game_state(GameState* game_state) {
     if (game_state == NULL) return;
+
+    // Free the flag system hash table
+    if (game_state->flags != NULL) {
+        free_hash_table(game_state->flags);
+    }
+
+    // Free action payloads
     for (int i = 0; i < game_state->action_count; i++) {
         if (game_state->all_actions[i].payload_json != NULL) {
             cJSON_Delete(game_state->all_actions[i].payload_json);

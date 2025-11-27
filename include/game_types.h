@@ -3,6 +3,7 @@
 
 #include "cJSON.h" // Include cJSON.h for cJSON* type
 #include "string_ids.h" // Include StringID enum
+#include "flag_system.h"
 
 #define MAX_NAME_LENGTH 64
 #define MAX_DESC_LENGTH 256
@@ -50,13 +51,23 @@ typedef struct {
     cJSON *payload_json; // Store the raw payload as a cJSON object, to be parsed at execution
 } Action;
 
+// Represents a Point of Interest within a Location (from poi.json)
+typedef struct {
+    char id[MAX_NAME_LENGTH];
+    char name[MAX_NAME_LENGTH];
+    char description[MAX_DESC_LENGTH * 2]; // Can be longer for full descriptions
+    // Add other fields from poi.json as needed (status, action, details, sub_items)
+    // For now, let's keep it simple with main ID, name, description.
+    // We can add more complex fields later if needed, potentially using cJSON* again for sub_items
+} POI;
+
 // Represents a single location in the game world
 typedef struct {
     char id[MAX_NAME_LENGTH];
     char name[MAX_NAME_LENGTH];
     char description[MAX_DESC_LENGTH * 4]; // Longer for full descriptions
-    char points_of_interest[MAX_POIS][MAX_DESC_LENGTH];
-    int poi_count;
+    POI pois[MAX_POIS]; // Array of POI structs
+    int pois_count;
     char connections[MAX_CONNECTIONS][MAX_NAME_LENGTH]; // List of location IDs
     int connection_count;
 } Location;
@@ -112,8 +123,11 @@ typedef struct {
     Action all_actions[MAX_ACTIONS];
     int action_count;
 
-    // Any global flags or state not tied to player
-    // For now, keep it simple.
+    // Generic game flags, managed by the flag system
+    HashTable* flags;
+
+    // UI/Rendering state
+    float typewriter_delay;
 } GameState;
 
 #endif // GAME_TYPES_H

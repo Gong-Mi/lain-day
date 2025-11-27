@@ -1,0 +1,34 @@
+#include "scene.h"
+#include "string_ids.h"
+#include <string.h>
+
+void init_scene_04a_talk_to_sister_cold(StoryScene* scene) {
+    // Scene ID
+    strncpy(scene->scene_id, "04a_talk_to_sister_cold", MAX_NAME_LENGTH - 1);
+
+    // Location ID
+    strncpy(scene->location_id, "kurani_residence/living_room", MAX_NAME_LENGTH - 1);
+
+    // Scene Text - Fixed parts
+    scene->text_line_count = 6;
+    scene->text_content_ids[0] = TEXT_SISTER_FIXED_DESC1;
+    scene->text_content_ids[1] = TEXT_SISTER_COLD_QUOTE1; // Conditional part
+    scene->text_content_ids[2] = TEXT_SISTER_COLD_QUOTE2; // Conditional part
+    scene->text_content_ids[3] = TEXT_SISTER_FIXED_DESC2;
+    scene->text_content_ids[4] = TEXT_SISTER_FIXED_DESC3;
+    scene->text_content_ids[5] = TEXT_SISTER_FIXED_DESC4;
+
+    // Scene Choices
+    scene->choice_count = 3;
+    scene->choices[0].text_id = TEXT_CHOICE_READ_EMAIL_FROM_CHISA;
+    strncpy(scene->choices[0].action_id, "read_email_from_chisa", MAX_NAME_LENGTH - 1);
+    scene->choices[0].condition.flag_name[0] = '\0';
+
+    scene->choices[1].text_id = TEXT_CHOICE_GO_TO_SCHOOL;
+    strncpy(scene->choices[1].action_id, "go_to_school", MAX_NAME_LENGTH - 1);
+    scene->choices[1].condition.flag_name[0] = '\0';
+
+    scene->choices[2].text_id = TEXT_CHOICE_DELETE_EMAIL_UNREAD;
+    strncpy(scene->choices[2].action_id, "delete_email_unread", MAX_NAME_LENGTH - 1);
+    scene->choices[2].condition.flag_name[0] = '\0';
+}

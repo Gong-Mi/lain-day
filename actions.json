@@ -363,10 +363,30 @@
     }
   },
   "talk_to_sister": {
-    "type": "story_change_and_set_flags",
+    "type": "conditional_action_by_flag",
     "payload": {
-      "story_file": "story/04_talk_to_sister.md",
-      "flags": [{"name": "has_talked_to_sister", "value": true}]
+      "flag_name": "sister_mood",
+      "value_cold_action": "talk_to_sister_cold",
+      "value_curious_action": "talk_to_sister_curious",
+      "default_action": "talk_to_sister_default"
+    }
+  },
+  "talk_to_sister_cold": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/04a_talk_to_sister_cold.md"
+    }
+  },
+  "talk_to_sister_curious": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/04b_talk_to_sister_curious.md"
+    }
+  },
+  "talk_to_sister_default": {
+    "type": "story_change",
+    "payload": {
+      "story_file": "story/04c_talk_to_sister_default.md"
     }
   },
   "trigger_shutdown_story": {
