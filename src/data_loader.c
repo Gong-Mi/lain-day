@@ -8,7 +8,9 @@
 static char* read_file_to_buffer(const char* path) {
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
+        #ifdef USE_DEBUG_LOGGING
         fprintf(stderr, "DEBUG: Failed to open file: %s\n", path);
+#endif
         return NULL;
     }
     fseek(file, 0, SEEK_END);
@@ -29,28 +31,40 @@ int load_player_state(const char* path, GameState* game_state) {
     // Initialize the flag system
     game_state->flags = create_hash_table(128);
     if (game_state->flags == NULL) {
+#ifdef USE_DEBUG_LOGGING
         fprintf(stderr, "DEBUG: Failed to create hash table for flags.\n");
+#endif
         return 0;
     }
 
     PlayerState* player_state = &game_state->player_state;
     char *json_string = read_file_to_buffer(path);
     if (json_string == NULL) {
+#ifdef USE_DEBUG_LOGGING
         fprintf(stderr, "DEBUG: Failed to read file to buffer: %s\n", path);
+#endif
         return 0;
     }
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Read JSON string:\n%s\n", json_string);
+#endif
     cJSON *root = cJSON_Parse(json_string);
     free(json_string); 
     if (root == NULL) {
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL) {
+#ifdef USE_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: cJSON_Parse error before: %s\n", error_ptr);
+#endif
         }
+#ifdef USE_DEBUG_LOGGING
         fprintf(stderr, "DEBUG: Failed to parse JSON from %s\n", path);
+#endif
         return 0;
     }
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Successfully parsed JSON from %s\n", path);
+#endif
 
     const cJSON *location = cJSON_GetObjectItemCaseSensitive(root, "location");
     if (cJSON_IsString(location)) strncpy(player_state->location, location->valuestring, MAX_NAME_LENGTH - 1);

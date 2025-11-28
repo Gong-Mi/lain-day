@@ -13,7 +13,9 @@
 static char* read_file_to_buffer(const char* path) {
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
+#ifdef USE_DEBUG_LOGGING
         fprintf(stderr, "DEBUG: Failed to open file for reading: %s\n", path); // Debug added
+#endif
         return NULL;
     }
 
@@ -55,9 +57,9 @@ static char* read_file_to_buffer(const char* path) {
 
 int load_map_data(const char* map_dir_path, GameState* game_state) {
 
-
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Entering load_map_data for path: %s\n", map_dir_path);
-
+#endif
 
     if (game_state == NULL) {
 
@@ -91,9 +93,9 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 
     }
 
-
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: CMap created with size %d.\n", MAX_LOCATIONS);
-
+#endif
 
 
 
@@ -133,9 +135,9 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 
     }
 
-
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Successfully opened map directory: %s\n", map_dir_path);
-
+#endif
 
 
 
@@ -166,9 +168,9 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 
         if (stat(full_path, &st) == -1) {
 
-
+#ifdef USE_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: stat failed for %s. Skipping.\n", full_path);
-
+#endif
 
             continue;
 
@@ -181,9 +183,9 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 
         if (S_ISDIR(st.st_mode)) {
 
-
+#ifdef USE_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: Processing location directory: %s\n", dir->d_name);
-
+#endif
 
             if (game_state->location_count >= MAX_LOCATIONS) {
 
@@ -547,9 +549,9 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 
             cmap_insert(game_state->location_map, (struct Location*)current_location);
 
-
+#ifdef USE_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: Inserted location '%s' into CMap.\n", current_location->id);
-
+#endif
 
 
 
@@ -565,9 +567,9 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 
     closedir(d);
 
-
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Successfully loaded %d locations from map data.\n", game_state->location_count);
-
+#endif
 
     return 1;
 

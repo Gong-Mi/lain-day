@@ -13,6 +13,7 @@ option(CHARACTER_LAINS_SISTER_MIRA_ALIVE "Include Mira (Lain's Sister) in the ga
 
 # --- Feature Toggles ---
 option(ENABLE_TYPEWRITER_EFFECT "Enable typewriter text rendering effect" OFF)
+option(ENABLE_DEBUG_LOGGING "Enable debug logging to stderr" ON)
 
 # --- Compiler Cache ---
 option(USE_CCACHE "Use ccache to speed up compilation, if available" ON)
@@ -89,6 +90,7 @@ target_compile_definitions(lain_day_c PUBLIC
 # Add feature toggle definitions
 target_compile_definitions(lain_day_c PUBLIC
     $<$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>:USE_TYPEWRITER_EFFECT>
+    $<$<BOOL:${ENABLE_DEBUG_LOGGING}>:USE_DEBUG_LOGGING>
 )
 
 # --- Installation Rules ---

@@ -147,7 +147,9 @@ void print_colored_line(const char* line, const GameState* game_state) {
 
 // --- Helper Functions for Game Loop ---
 void render_current_scene(const StoryScene* scene, const GameState* game_state) {
+    #ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Entering render_current_scene.\n");
+#endif
     if (scene == NULL) {
         printf("Error: Scene is NULL.\n");
         return;
