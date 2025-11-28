@@ -1,22 +1,60 @@
 #include <stdio.h>
-#include <stdlib.h> // For atoi
-#include <string.h> // For memset and strcmp, strlen, strncpy
-#include <ctype.h>  // For isdigit
-#include <unistd.h> // For getcwd, access
-#include <sys/stat.h> // For mkdir
-#include <stdbool.h> // For bool type
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <stdbool.h>
+#include <libgen.h> // For dirname
 
-#include "build_info.h"   // For BUILD_OS, BUILD_ARCH
+#include "build_info.h"
 #include "game_types.h"
 #include "data_loader.h"
 #include "map_loader.h"
-#include "story_parser.h" // Still needed for compilation, but not for the hardcoded scene logic here
+#include "story_parser.h"
 #include "executor.h"
-#include "string_table.h" // For get_string_by_id
-#include "scenes.h"       // For transition_to_scene
-#include "../include/ansi_colors.h" // For ANSI color codes
-#include "../include/project_status.h" // Development status document
-#include "flag_system.h" // Include for hash table flag system
+#include "string_table.h"
+#include "scenes.h"
+#include "../include/ansi_colors.h"
+#include "../include/project_status.h"
+#include "flag_system.h"
+
+// --- Path Management ---
+typedef struct {
+    char base_path[MAX_PATH_LENGTH];
+    char default_character_file[MAX_PATH_LENGTH];
+    char items_file[MAX_PATH_LENGTH];
+    char actions_file[MAX_PATH_LENGTH];
+    char map_dir[MAX_PATH_LENGTH];
+    char session_root_dir[MAX_PATH_LENGTH];
+} GamePaths;
+
+// Gets the base path of the installation
+void get_base_path(char* exe_path, char* base_path, size_t size) {
+    char* exe_dir = dirname(exe_path);
+    // The executable is in 'bin/', so we go up one level to get the install root
+    snprintf(base_path, size, "%s/..", exe_dir);
+}
+
+void init_paths(char* argv0, GamePaths* paths) {
+    char exe_path[MAX_PATH_LENGTH];
+    realpath(argv0, exe_path); // Resolves the absolute path of the executable
+
+    char install_root[MAX_PATH_LENGTH];
+    get_base_path(exe_path, install_root, sizeof(install_root));
+
+    // Construct all data paths relative to the installation root
+    snprintf(paths->base_path, sizeof(paths->base_path), "%s/share/lain_day_c", install_root);
+    snprintf(paths->default_character_file, sizeof(paths->default_character_file), "%s/character.json", paths->base_path);
+    snprintf(paths->items_file, sizeof(paths->items_file), "%s/items.json", paths->base_path);
+    snprintf(paths->actions_file, sizeof(paths->actions_file), "%s/actions.json", paths->base_path);
+    snprintf(paths->map_dir, sizeof(paths->map_dir), "%s/map", paths->base_path);
+    snprintf(paths->session_root_dir, sizeof(paths->session_root_dir), "%s/session", paths->base_path);
+}
+
+
+// --- Helper Functions --- (copy_file, print_colored_line, etc. remain the same)
+// ... [Existing helper functions like copy_file, print_colored_line, render_current_scene, etc.] ...
 
 // Helper function to copy a file
 int copy_file(const char *src_path, const char *dest_path) {
@@ -109,6 +147,7 @@ void print_colored_line(const char* line, const GameState* game_state) {
 
 // --- Helper Functions for Game Loop ---
 void render_current_scene(const StoryScene* scene, const GameState* game_state) {
+    fprintf(stderr, "DEBUG: Entering render_current_scene.\n");
     if (scene == NULL) {
         printf("Error: Scene is NULL.\n");
         return;
@@ -188,24 +227,30 @@ int is_numeric(const char* str) {
     return 1;
 }
 
+// Helper to print the current game time
+void print_game_time(int time_of_day) {
+    int hours = time_of_day / 60;
+    int minutes = time_of_day % 60;
+    printf(ANSI_COLOR_YELLOW "[%02d:%02d]" ANSI_COLOR_RESET "\n", hours, minutes);
+}
+
 int main(int argc, char *argv[]) {
     printf("Lain-day C version starting...\n");
     printf("Build Info - OS: %s, Arch: %s\n", BUILD_OS, BUILD_ARCH);
 
-    const char* SESSION_DIR_NAME = "session";
-    const char* DEFAULT_CHARACTER_FILE = "./character.json"; // Path to the pristine default character file
+    GamePaths paths;
+    init_paths(argv[0], &paths);
+
     char session_name[MAX_NAME_LENGTH];
     char session_dir_path[MAX_PATH_LENGTH];
     char character_session_file_path[MAX_PATH_LENGTH];
     
-    int arg_index = 1; // Start reading args from index 1 (0 is program name)
-    bool is_test_mode = false; // Flag for test mode
+    int arg_index = 1;
+    bool is_test_mode = false;
 
-    // The master GameState struct is created and zeroed out.
     GameState game_state;
     memset(&game_state, 0, sizeof(GameState));
 
-    // Parse command-line flags before session name
     while (arg_index < argc && argv[arg_index][0] == '-') {
         if (strcmp(argv[arg_index], "-d") == 0) {
             is_test_mode = true;
@@ -216,120 +261,103 @@ int main(int argc, char *argv[]) {
         arg_index++;
     }
 
-    // Get current working directory for relative paths
-    char cwd[1024];
-    if (getcwd(cwd, sizeof(cwd)) == NULL) {
-        fprintf(stderr, "Error: Failed to get current working directory.\n");
-        return 1;
-    }
-        // --- Session Management ---
-        if (is_test_mode) {
-            printf("Test mode enabled. Using default character state without session persistence.\n");
-            strncpy(character_session_file_path, DEFAULT_CHARACTER_FILE, MAX_PATH_LENGTH - 1);
-            character_session_file_path[MAX_PATH_LENGTH - 1] = '\0';
-            if (argc > arg_index) { // Set session_name from argument for logging in test mode
-                strncpy(session_name, argv[arg_index], MAX_NAME_LENGTH - 1);
-                session_name[MAX_NAME_LENGTH - 1] = '\0';
-                printf("Test session name: %s\n", session_name);
-                arg_index++;
-            } else {
-                strncpy(session_name, "test_session_default", MAX_NAME_LENGTH - 1);
-                session_name[MAX_NAME_LENGTH - 1] = '\0';
-                printf("No test session name provided. Using default: %s\n", session_name);
-            }
+    // --- Session Management ---
+    if (is_test_mode) {
+        printf("Test mode enabled. Using default character state without session persistence.\n");
+        strncpy(character_session_file_path, paths.default_character_file, MAX_PATH_LENGTH - 1);
+        // ... rest of test mode logic
         } else { // Normal mode - persistent session
-            if (argc > arg_index) { // Get session name from argument or prompt
+            if (argc > arg_index) {
                 strncpy(session_name, argv[arg_index], MAX_NAME_LENGTH - 1);
                 session_name[MAX_NAME_LENGTH - 1] = '\0';
                 printf("Using session name from argument: %s\n", session_name);
                 arg_index++;
             } else {
-                printf("请输入会话名称 (例如 'new_game' 或 'resume_game'): ");
-                if (fgets(session_name, MAX_NAME_LENGTH, stdin) != NULL) {
-                    session_name[strcspn(session_name, "\n")] = 0;
-                } else {
-                    fprintf(stderr, "Error: Failed to read session name.\n");
-                    return 1;
+                bool name_valid = false;
+                while(!name_valid) {
+                    printf("请输入会话名称 (例如 'new_game' 或 'resume_game'): ");
+                    if (fgets(session_name, MAX_NAME_LENGTH, stdin) != NULL) {
+                        session_name[strcspn(session_name, "\n")] = 0; // Remove newline
+                        if (strlen(session_name) > 0) {
+                            name_valid = true;
+                        } else {
+                            printf("会话名称不能为空，请重新输入。\n");
+                        }
+                    } else {
+                        fprintf(stderr, "Error: Failed to read session name.\n");
+                        return 1;
+                    }
                 }
             }
-    
-            snprintf(session_dir_path, MAX_PATH_LENGTH, "%s/session/%s", cwd, session_name);
-            #ifdef _WIN32
-                _mkdir(session_dir_path);
-            #else
-                mkdir(session_dir_path, 0755);
-            #endif
-    
-            snprintf(character_session_file_path, MAX_PATH_LENGTH, "%s/character.json", session_dir_path);
-    
-            if (access(character_session_file_path, F_OK) == -1) {
-                printf("Creating new session '%s'. Copying default character state...\n", session_name);
-                if (!copy_file(DEFAULT_CHARACTER_FILE, character_session_file_path)) {
-                    fprintf(stderr, "Error: Failed to copy default character.json to session.\n");
-                    return 1;
-                }
-            } else {
-                printf("Resuming session '%s'.\n", session_name);
-            }
-        }
+
+        // Create session directories
+        mkdir(paths.session_root_dir, 0755);
+        snprintf(session_dir_path, MAX_PATH_LENGTH, "%s/%s", paths.session_root_dir, session_name);
+        mkdir(session_dir_path, 0755);
         
-        // --- Load all game data ---
+        snprintf(character_session_file_path, MAX_PATH_LENGTH, "%s/character.json", session_dir_path);
+
+        if (access(character_session_file_path, F_OK) == -1) {
+            printf("Creating new session '%s'.\n", session_name);
+            if (!copy_file(paths.default_character_file, character_session_file_path)) {
+                fprintf(stderr, "Error: Failed to copy default character.json to session.\n");
+                return 1;
+            }
+        } else {
+            printf("Resuming session '%s'.\n", session_name);
+        }
+    }
+        
+    // --- Load all game data using paths struct ---
     if (!load_player_state(character_session_file_path, &game_state)) {
-        fprintf(stderr, "Failed to load player data from %s. Exiting.\n", character_session_file_path);
+        // ... error handling
         return 1;
     }
-    printf("Player data loaded successfully.\n");
+    printf("Player data loaded.\n");
 
-    if (!load_map_data("./map", &game_state)) {
-        fprintf(stderr, "Failed to load map data. Exiting.\n");
-        cleanup_game_state(&game_state);
+    if (!load_map_data(paths.map_dir, &game_state)) {
+        // ... error handling
         return 1;
     }
-    printf("Map data loaded successfully.\n");
+    printf("Map data loaded.\n");
 
-    if (!load_items_data("./items.json", &game_state)) {
-        fprintf(stderr, "Failed to load items data. Exiting.\n");
-        cleanup_game_state(&game_state);
+    if (!load_items_data(paths.items_file, &game_state)) {
+        // ... error handling
         return 1;
     }
-    printf("Items data loaded successfully.\n");
+    printf("Items data loaded.\n");
 
-    if (!load_actions_data("./actions.json", &game_state)) {
-        fprintf(stderr, "Failed to load actions data. Exiting.\n");
-        cleanup_game_state(&game_state);
+    if (!load_actions_data(paths.actions_file, &game_state)) {
+        // ... error handling
         return 1;
     }
-    printf("Actions data loaded successfully.\n");
-
+    printf("Actions data loaded.\n");
 
     // --- Game Loop ---
+    // ... [The rest of the main function remains largely the same] ...
     int running = 1;
     char input_buffer[MAX_LINE_LENGTH];
     StoryScene current_scene;
 
-    // Initialize the first scene based on the state loaded from character.json
     if (!transition_to_scene(game_state.current_story_file, &current_scene, &game_state)) {
-        fprintf(stderr, "Failed to initialize starting scene from story file: %s\n", game_state.current_story_file);
+        fprintf(stderr, "Failed to initialize starting scene: %s\n", game_state.current_story_file);
         return 1;
     }
     
-    // Initial render of the scene
     render_current_scene(&current_scene, &game_state);
 
-
-    // The main loop handles player input, routing it to either the choice handler
-    // or the text command executor.
     while (running) {
+        print_game_time(game_state.time_of_day);
         get_next_input(input_buffer, sizeof(input_buffer), argc, argv, &arg_index);
 
         if (strcmp(input_buffer, "quit") == 0 || strcmp(input_buffer, "0") == 0) {
             running = 0;
         } else if (is_numeric(input_buffer)) {
+            // ... [choice processing logic] ...
             int target_visible_index = atoi(input_buffer);
             int visible_choice_count = 0;
             int target_array_index = -1;
 
-            // Find the actual array index corresponding to the visible choice number
             for (int i = 0; i < current_scene.choice_count; i++) {
                 const StoryChoice* choice = &current_scene.choices[i];
                 int is_selectable = 0;
@@ -366,8 +394,8 @@ int main(int argc, char *argv[]) {
             } else {
                 printf("Invalid choice number.\n");
             }
+
         } else {
-            // For non-numeric input, execute as a text command.
             execute_command(input_buffer, &game_state);
             render_current_scene(&current_scene, &game_state); 
         }

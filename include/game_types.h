@@ -114,7 +114,8 @@ typedef struct {
 
 typedef struct {
     PlayerState player_state;
-    char current_story_file[MAX_PATH_LENGTH]; // Still used for legacy MD, or can be SceneID for C
+    char current_story_file[MAX_PATH_LENGTH];
+    int time_of_day; // Minutes past midnight (0-1439)
     
     // Game data loaded at startup
     Location all_locations[MAX_LOCATIONS];

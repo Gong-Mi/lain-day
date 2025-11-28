@@ -1,0 +1,60 @@
+{
+  "screwdriver": {
+    "name": "螺丝刀",
+    "description": "一把普通的十字螺丝刀，看起来可以拧开某些电子设备的外壳。"
+  },
+  "access_card_lvl1": {
+    "name": "1级访问卡",
+    "description": "一张印有'Tachibana Labs'标志的白色卡片。"
+  },
+  "floppy_disk_ke": {
+    "name": "软盘 (K&E)",
+    "description": "一张3.5英寸软盘，标签上手写着'Knights & Eastern'。"
+  },
+  "mobile_phone": {
+    "name": "旧款手机",
+    "description": "一部有些过时的翻盖手机，但还能用。姐姐Mika刚刚还给了你。"
+  },
+  "bus_pass": {
+    "name": "公交月卡",
+    "description": "一张限定范围的公交月卡，足够你上下学使用。"
+  },
+  "cd_mystery": {
+    "name": "一张CD",
+    "description": "一张没有标签的CD-R，不知道里面是什么内容。"
+  },
+  "lain_diary": {
+    "name": "冬子的日记",
+    "description": "冬子老师给你的日记本，还是全新的。"
+  },
+  "milk": {
+    "name": "牛奶",
+    "description": "一瓶冰牛奶，是Cyberia的招牌饮品之一。",
+    "required_credit": 1
+  },
+  "coffee": {
+    "name": "咖啡",
+    "description": "一杯热咖啡，散发着浓郁的香气。",
+    "required_credit": 1
+  },
+  "juice": {
+    "name": "果汁",
+    "description": "一杯鲜榨果汁。",
+    "required_credit": 1
+  },
+  "business_card": {
+    "name": "一张名片",
+    "description": "一张看起来很可疑的名片，上面写着一个网址。",
+    "required_credit": 1
+  },
+  "alice_hat": {
+    "name": "绒毛帽子（爱丽丝版）",
+    "description": "一顶柔软的绒毛帽子，像小熊一样温暖。",
+    "required_credit": 0
+  },
+  "sand_bottle": {
+    "name": "装着沙子的试剂瓶",
+    "description": "一个装着干净海沙和贝壳碎的瓶子。瓶子本身很普通，但里面的沙子似乎对千砂有特殊的意义。",
+    "required_credit": 0
+  }
+}

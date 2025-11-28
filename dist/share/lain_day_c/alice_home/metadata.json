@@ -1,0 +1,11 @@
+{
+  "websites": [
+    {
+      "domain": "home.alice.lain",
+      "context": "personal_homepage",
+      "description": "爱丽丝在Wired上的个人主页。看起来像是在一个私有或内部网络上。"
+    }
+  ],
+  "address": "爱丽丝的家",
+  "contact_info": "alice@home.alice.lain"
+}

@@ -196,6 +196,17 @@ int execute_action(const char* action_id, GameState* game_state) {
         }
     }
     
+    // --- TIME PROGRESSION ---
+    const cJSON *time_cost_json = cJSON_GetObjectItemCaseSensitive(payload, "time_cost");
+    if (cJSON_IsNumber(time_cost_json) && time_cost_json->valueint > 0) {
+        game_state->time_of_day += time_cost_json->valueint;
+        // Handle wrapping around midnight (1440 minutes in a day)
+        if (game_state->time_of_day >= 1440) {
+            game_state->time_of_day -= 1440; 
+            // Here you could also increment a 'day_count' flag if needed
+        }
+    }
+
     return scene_changed;
 }
 
@@ -217,7 +228,7 @@ void execute_command(const char* input, GameState* game_state) {
     else if (strcmp(input, "arls") == 0) {
         printf("\n--- Area List Scan ---\n");
         // Refactored to use the CMap hash table for O(1) average lookup time
-        const Location* current_loc = cmap_get(game_state->location_map, game_state->player_state.location);
+        const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
         if (current_loc) {
             printf("Location: %s\n", current_loc->name);
             printf("Description: %s\n", current_loc->description);

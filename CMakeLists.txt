@@ -91,3 +91,16 @@ target_compile_definitions(lain_day_c PUBLIC
     $<$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>:USE_TYPEWRITER_EFFECT>
 )
 
+# --- Installation Rules ---
+install(TARGETS lain_day_c DESTINATION bin)
+install(FILES 
+    character.json
+    items.json
+    actions.json
+    DESTINATION share/${PROJECT_NAME}
+)
+install(DIRECTORY map/ DESTINATION share/${PROJECT_NAME}/map PATTERN ".*" EXCLUDE PATTERN "*~" EXCLUDE)
+install(DIRECTORY story/ DESTINATION share/${PROJECT_NAME}/story PATTERN ".*" EXCLUDE PATTERN "*~" EXCLUDE)
+install(DIRECTORY world/ DESTINATION share/${PROJECT_NAME}/world PATTERN ".*" EXCLUDE PATTERN "*~" EXCLUDE)
+
+

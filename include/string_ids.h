@@ -3,6 +3,7 @@
 
 typedef enum {
     TEXT_INVALID = 0,
+    TEXT_EMPTY_LINE, // Used for intentional empty lines in scene text
     // Navi Scene Text
     TEXT_NAVI_STATE_TITLE,
     TEXT_NAVI_STATE_DESC1,

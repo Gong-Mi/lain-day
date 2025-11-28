@@ -5,6 +5,7 @@
 // to handle ANSI formatting from simpler input.
 const char* g_string_table[TEXT_COUNT] = {
     [TEXT_INVALID] = "ERROR: Invalid Text ID",
+    [TEXT_EMPTY_LINE] = "", // Empty string for intentional empty lines
 
     // Navi Scene Text from 01a_examine_navi.md
     [TEXT_NAVI_STATE_TITLE] = "Navi的状态",
