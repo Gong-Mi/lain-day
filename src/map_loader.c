@@ -1,5 +1,6 @@
 #include "map_loader.h"
 #include "cJSON.h"
+#include "cmap.h" // Include our new CMap header
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,6 +48,13 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
         return 0;
     }
 
+    // --- CMap Integration: Create the hash map ---
+    game_state->location_map = cmap_create(MAX_LOCATIONS);
+    if (game_state->location_map == NULL) {
+        fprintf(stderr, "Error: Failed to create location map hash table.\n");
+        return 0;
+    }
+
     DIR *d;
     struct dirent *dir;
     char full_path[MAX_PATH_LENGTH * 2];
@@ -55,6 +63,7 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 
     d = opendir(map_dir_path);
     if (!d) {
+        cmap_destroy(game_state->location_map); // Clean up on failure
         return 0;
     }
 
@@ -158,6 +167,9 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
                 cJSON_Delete(connections_root);
                 free(connections_json_string);
             }
+
+            // --- CMap Integration: Insert the newly loaded location into the hash map ---
+            cmap_insert(game_state->location_map, current_location);
 
             game_state->location_count++;
         }

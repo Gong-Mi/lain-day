@@ -1,38 +1,28 @@
-/*
- * Scene: 00_entry
- *
- * This file contains the hardcoded data for the initial entry scene.
- * The `init_scene_00_entry` function is responsible for populating the 
- * StoryScene struct with the scene's text, choices, and other metadata.
- * It is called by the scene transition manager in `src/scenes.c`.
- */
-
 #include "scene.h"
-#include "string_ids.h"
+#include "game_types.h" // Required for StoryScene and StoryChoice types
+#include "string_ids.h" // Required for StringID enum values
 #include <string.h>
 
 void init_scene_00_entry(StoryScene* scene) {
-    // Set scene ID and location
-    strncpy(scene->scene_id, "00_entry", MAX_NAME_LENGTH - 1);
-    strncpy(scene->location_id, "entry", MAX_NAME_LENGTH - 1);
+    // Clear previous state
+    memset(scene, 0, sizeof(StoryScene));
 
-    // Set scene text
-    scene->text_content_ids[0] = TEXT_ENTRY_DESC1;
-    scene->text_content_ids[1] = TEXT_ENTRY_DESC2;
-    scene->text_content_ids[2] = TEXT_ENTRY_DESC3;
-    scene->text_content_ids[3] = TEXT_ENTRY_DESC4;
-    scene->text_content_ids[4] = TEXT_ENTRY_DESC5;
-    scene->text_line_count = 5;
+    // Text Content - Map directly to pre-defined StringIDs
+    scene->text_content_ids[0] = TEXT_ENTRY_DESC1; // "初始空间"
+    scene->text_content_ids[1] = TEXT_INVALID;     // Empty line for spacing (original)
+    scene->text_content_ids[2] = TEXT_ENTRY_DESC2; // "你站在一个空旷、安静的房间里。"
+    scene->text_content_ids[3] = TEXT_ENTRY_DESC3; // "房间里几乎没有东西，只有一扇朴素的门，以及通往楼下的楼梯。"
+    scene->text_content_ids[4] = TEXT_INVALID;     // Empty line for spacing (original)
+    scene->text_content_ids[5] = TEXT_ENTRY_DESC4; // "门上用手写体刻着一个词："
+    scene->text_content_ids[6] = TEXT_INVALID;     // Empty line for spacing (original)
+    scene->text_content_ids[7] = TEXT_ENTRY_DESC5; // "`lain`"
+    scene->text_content_ids[8] = TEXT_INVALID;     // Empty line for spacing (original)
+    // "但底下的汉字被抹去了" - This line does not have a corresponding StringID, so it cannot be included directly.
+    scene->text_line_count = 9; // Only 9 lines are directly mappable/fillable.
 
-    // Set scene choices
-    scene->choices[0].text_id = TEXT_CHOICE_OPEN_DOOR;
-    strncpy(scene->choices[0].action_id, "enter_lain_room", MAX_NAME_LENGTH - 1);
-
-    scene->choices[1].text_id = TEXT_CHOICE_GO_DOWNSTAIRS;
-    strncpy(scene->choices[1].action_id, "go_downstairs", MAX_NAME_LENGTH - 1);
-
-    scene->choices[2].text_id = TEXT_CHOICE_WAIT_ONE_MINUTE;
-    strncpy(scene->choices[2].action_id, "wait_one_minute", MAX_NAME_LENGTH - 1);
-    
+    // Choices - Map directly to pre-defined StringIDs
+    scene->choices[0] = (StoryChoice){.text_id = TEXT_CHOICE_OPEN_DOOR, .action_id = "enter_lain_room"};
+    scene->choices[1] = (StoryChoice){.text_id = TEXT_CHOICE_GO_DOWNSTAIRS, .action_id = "go_downstairs"};
+    scene->choices[2] = (StoryChoice){.text_id = TEXT_CHOICE_WAIT_ONE_MINUTE, .action_id = "wait_one_minute"};
     scene->choice_count = 3;
 }

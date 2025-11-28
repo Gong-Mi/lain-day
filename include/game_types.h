@@ -4,6 +4,7 @@
 #include "cJSON.h" // Include cJSON.h for cJSON* type
 #include "string_ids.h" // Include StringID enum
 #include "flag_system.h"
+#include "cmap.h" // Include the new CMap header
 
 #define MAX_NAME_LENGTH 64
 #define MAX_DESC_LENGTH 256
@@ -118,6 +119,8 @@ typedef struct {
     // Game data loaded at startup
     Location all_locations[MAX_LOCATIONS];
     int location_count;
+    CMap* location_map; // Hash map for fast location lookup
+    
     Item all_items[MAX_ITEMS];
     int item_count;
     Action all_actions[MAX_ACTIONS];

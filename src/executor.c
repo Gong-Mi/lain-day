@@ -1,5 +1,6 @@
 #include "executor.h"
 #include "flag_system.h"
+#include "cmap.h" // Use the new CMap module
 #include <stdio.h>
 #include <string.h>
 
@@ -8,16 +9,6 @@ static const Action* find_action_by_id(const char* action_id, const GameState* g
     for (int i = 0; i < game_state->action_count; i++) {
         if (strcmp(game_state->all_actions[i].id, action_id) == 0) {
             return &game_state->all_actions[i];
-        }
-    }
-    return NULL;
-}
-
-// Helper to find a location by its ID
-static const Location* find_location_by_id(const char* location_id, const GameState* game_state) {
-    for (int i = 0; i < game_state->location_count; i++) {
-        if (strcmp(game_state->all_locations[i].id, location_id) == 0) {
-            return &game_state->all_locations[i];
         }
     }
     return NULL;
@@ -225,7 +216,8 @@ void execute_command(const char* input, GameState* game_state) {
     }
     else if (strcmp(input, "arls") == 0) {
         printf("\n--- Area List Scan ---\n");
-        const Location* current_loc = find_location_by_id(game_state->player_state.location, game_state);
+        // Refactored to use the CMap hash table for O(1) average lookup time
+        const Location* current_loc = cmap_get(game_state->location_map, game_state->player_state.location);
         if (current_loc) {
             printf("Location: %s\n", current_loc->name);
             printf("Description: %s\n", current_loc->description);

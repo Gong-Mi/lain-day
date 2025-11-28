@@ -73,6 +73,7 @@ add_executable(lain_day_c
     src/flag_system.c
     src/string_table.c
     src/scenes.c
+    src/cmap.c # Added our new CMap module
     ${SCENE_SOURCES}
 )
 
