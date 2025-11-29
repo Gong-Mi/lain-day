@@ -105,23 +105,34 @@ file(GLOB_RECURSE SCENE_SOURCES "scenes/*/scene.c")
 # Find all plot sequence source files automatically.
 file(GLOB_RECURSE SEQUENCE_SOURCES "sequences/*/scene.c")
 
-# Add executable
-add_executable(lain_day_c 
-    src/main.c 
-    src/cJSON.c 
-    src/data_loader.c 
-    src/map_loader.c 
+
+
+# --- Define common source files for the game engine ---
+set(GAME_ENGINE_SOURCES
+    src/cJSON.c
+    src/data_loader.c
+    src/map_loader.c
     src/executor.c
     src/flag_system.c
     src/string_table.c
     src/scenes.c
-    src/cmap.c # Added our new CMap module
+    src/cmap.c
     src/compression_util.c
+    src/render_utils.c
     ${SCENE_SOURCES}
     ${SEQUENCE_SOURCES}
 )
 
+# --- Define Executables ---
+
+# Main game executable
+add_executable(lain_day_c src/main.c ${GAME_ENGINE_SOURCES})
 target_link_libraries(lain_day_c PUBLIC zlibstatic)
+
+# Scene debugger tool
+add_executable(scene_debugger tools/scene_debugger.c ${GAME_ENGINE_SOURCES})
+target_link_libraries(scene_debugger PUBLIC zlibstatic)
+
 
 # Add compile definitions for character life/death options
 target_compile_definitions(lain_day_c PUBLIC

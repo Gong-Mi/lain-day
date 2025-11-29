@@ -1,4 +1,5 @@
 #include "executor.h"
+#include "render_utils.h"
 #include "flag_system.h"
 #include "cmap.h" // Use the new CMap module
 #include <stdio.h>
