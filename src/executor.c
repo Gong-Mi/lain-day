@@ -230,6 +230,9 @@ void execute_command(const char* input, GameState* game_state) {
         // Refactored to use the CMap hash table for O(1) average lookup time
         const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
         if (current_loc) {
+#ifdef USE_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: Arls: Retrieved location '%s', pois_count: %d\n", current_loc->id, current_loc->pois_count);
+#endif
             printf("Location: %s\n", current_loc->name);
             printf("Description: %s\n", current_loc->description);
             printf("\nPoints of Interest:\n");
@@ -237,6 +240,9 @@ void execute_command(const char* input, GameState* game_state) {
                 printf("  (none)\n");
             }
             for (int i = 0; i < current_loc->pois_count; i++) {
+#ifdef USE_DEBUG_LOGGING
+                fprintf(stderr, "DEBUG: Arls: Printing POI '%s'\n", current_loc->pois[i].name);
+#endif
                 printf("  - %s\n", current_loc->pois[i].name);
             }
             printf("\nConnections:\n");

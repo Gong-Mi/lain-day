@@ -127,6 +127,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     printf("Player data loaded.\n");
+#ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Main: Player location after loading: '%s'\n", game_state.player_state.location);
+#endif
 
     if (!load_map_data(paths.map_dir, &game_state)) {
         // ... error handling

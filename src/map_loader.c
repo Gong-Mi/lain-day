@@ -580,6 +580,18 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 #endif
         }
         game_state->location_count += rooms_added;
+
+        // DEBUG: Verify POI counts for newly added locations
+#ifdef USE_DEBUG_LOGGING
+        fprintf(stderr, "DEBUG: Verifying POIs for dynamically added locations:\n");
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* loc = &game_state->all_locations[game_state->location_count - rooms_added + i];
+            fprintf(stderr, "DEBUG:   Location '%s' (pois_count: %d)\n", loc->id, loc->pois_count);
+            if (loc->pois_count > 0) {
+                fprintf(stderr, "DEBUG:     First POI: '%s' ('%s')\n", loc->pois[0].id, loc->pois[0].name);
+            }
+        }
+#endif
     }
 
 

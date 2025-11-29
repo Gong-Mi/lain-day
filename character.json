@@ -16,7 +16,7 @@
     "intelligence": 12
   },
   "inventory": {},
-  "location": "lain_room",
+  "location": "iwakura_upper_hallway",
   "overload": 0,
   "pseudo_terminal_cwd": "/home/lain",
   "unlocked_commands": [
