@@ -20,6 +20,8 @@
 #include "../include/ansi_colors.h"
 #include "../include/project_status.h"
 #include "flag_system.h"
+#include "compression_util.h" // Include for zlib functions
+#include <zlib.h> // Required for Z_OK, Z_DEFAULT_COMPRESSION, etc.
 
 // --- Path Management Struct ---
 typedef struct {
@@ -53,6 +55,43 @@ int main(int argc, char *argv[]) {
     printf("Lain-day C version starting...\n");
     printf("Build Info - OS: %s, Arch: %s\n", BUILD_OS, BUILD_ARCH);
 
+    // --- Zlib Compression Test ---
+    const char* original_string = "This is a test string for zlib compression and decompression functionality.";
+    unsigned char* compressed_data = NULL;
+    unsigned long compressed_data_len = 0;
+    unsigned char* decompressed_data = NULL;
+    unsigned long decompressed_data_len = 0;
+
+    printf("Original string: \"%s\"\n", original_string);
+
+    if (compress_string(original_string, &compressed_data, &compressed_data_len) == Z_OK) {
+        printf("Compressed data length: %lu\n", compressed_data_len);
+        // For demonstration, print first few bytes of compressed data
+        printf("Compressed data (first 10 bytes): ");
+        for (int i = 0; i < 10 && i < compressed_data_len; i++) {
+            printf("%02x ", compressed_data[i]);
+        }
+        printf("...\n");
+
+        if (decompress_string(compressed_data, compressed_data_len, &decompressed_data, &decompressed_data_len) == Z_OK) {
+            printf("Decompressed data: \"%s\"\n", decompressed_data);
+            if (strcmp(original_string, (char*)decompressed_data) == 0) {
+                printf("Compression/Decompression successful and data matches!\n");
+            } else {
+                printf("Error: Decompressed data does not match original!\n");
+            }
+        } else {
+            fprintf(stderr, "Error: Zlib decompression failed.\n");
+        }
+    } else {
+        fprintf(stderr, "Error: Zlib compression failed.\n");
+    }
+
+    // Free allocated memory
+    if (compressed_data) free(compressed_data);
+    if (decompressed_data) free(decompressed_data);
+    // --- End Zlib Compression Test ---
+    
     GamePaths paths;
     init_paths(argv[0], &paths);
 

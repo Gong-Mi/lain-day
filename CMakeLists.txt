@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 project(lain_day_c VERSION 1.0)
 
+add_subdirectory(external/zlib)
+
 # --- Character Life/Death Options (Compile-time) ---
 # Use these options to exclude specific characters and their associated content
 # from the build. Defaults to ON (character is included).
@@ -82,9 +84,12 @@ add_executable(lain_day_c
     src/string_table.c
     src/scenes.c
     src/cmap.c # Added our new CMap module
+    src/compression_util.c
     ${SCENE_SOURCES}
     ${SEQUENCE_SOURCES}
 )
+
+target_link_libraries(lain_day_c PUBLIC zlibstatic)
 
 # Add compile definitions for character life/death options
 target_compile_definitions(lain_day_c PUBLIC
