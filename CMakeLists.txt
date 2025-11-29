@@ -12,8 +12,11 @@ option(CHARACTER_FUYUKO_MIRA_ALIVE "Include Fuyuko Mira (Doctor) in the game bui
 option(CHARACTER_LAINS_SISTER_MIRA_ALIVE "Include Mira (Lain's Sister) in the game build" ON)
 
 # --- Feature Toggles ---
+option(MASTER_DEBUG_SWITCH "Master switch for all debug logging" ON)
 option(ENABLE_TYPEWRITER_EFFECT "Enable typewriter text rendering effect" OFF)
 option(ENABLE_DEBUG_LOGGING "Enable debug logging to stderr" ON)
+option(ENABLE_STRING_DEBUG_LOGGING "Enable debug logging for string IDs to stderr" OFF)
+option(ENABLE_MAP_DEBUG_LOGGING "Enable debug logging for map loading and processing to stderr" OFF)
 
 # --- Compiler Cache ---
 option(USE_CCACHE "Use ccache to speed up compilation, if available" ON)
@@ -95,7 +98,9 @@ target_compile_definitions(lain_day_c PUBLIC
 # Add feature toggle definitions
 target_compile_definitions(lain_day_c PUBLIC
     $<$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>:USE_TYPEWRITER_EFFECT>
-    $<$<BOOL:${ENABLE_DEBUG_LOGGING}>:USE_DEBUG_LOGGING>
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_DEBUG_LOGGING}>>:USE_DEBUG_LOGGING>
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_STRING_DEBUG_LOGGING}>>:USE_STRING_DEBUG_LOGGING>
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_MAP_DEBUG_LOGGING}>>:USE_MAP_DEBUG_LOGGING>
 )
 
 # --- Installation Rules ---

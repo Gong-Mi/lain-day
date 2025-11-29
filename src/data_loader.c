@@ -9,7 +9,9 @@ static char* read_file_to_buffer(const char* path) {
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
         #ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: Failed to open file: %s\n", path);
+    #ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Failed to open file: %s\n", path);
+#endif
 #endif
         return NULL;
     }
@@ -32,7 +34,9 @@ int load_player_state(const char* path, GameState* game_state) {
     game_state->flags = create_hash_table(128);
     if (game_state->flags == NULL) {
 #ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: Failed to create hash table for flags.\n");
+    #ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Failed to create hash table for flags.\n");
+#endif
 #endif
         return 0;
     }
@@ -41,12 +45,16 @@ int load_player_state(const char* path, GameState* game_state) {
     char *json_string = read_file_to_buffer(path);
     if (json_string == NULL) {
 #ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: Failed to read file to buffer: %s\n", path);
+    #ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Failed to read file to buffer: %s\n", path);
+#endif
 #endif
         return 0;
     }
 #ifdef USE_DEBUG_LOGGING
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Read JSON string:\n%s\n", json_string);
+#endif
 #endif
     cJSON *root = cJSON_Parse(json_string);
     free(json_string); 
@@ -54,16 +62,22 @@ int load_player_state(const char* path, GameState* game_state) {
         const char *error_ptr = cJSON_GetErrorPtr();
         if (error_ptr != NULL) {
 #ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: cJSON_Parse error before: %s\n", error_ptr);
+        #ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: cJSON_Parse error before: %s\n", error_ptr);
+#endif
 #endif
         }
 #ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: Failed to parse JSON from %s\n", path);
+    #ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Failed to parse JSON from %s\n", path);
+#endif
 #endif
         return 0;
     }
 #ifdef USE_DEBUG_LOGGING
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Successfully parsed JSON from %s\n", path);
+#endif
 #endif
 
     const cJSON *location = cJSON_GetObjectItemCaseSensitive(root, "location");
@@ -147,54 +161,12 @@ int load_items_data(const char* path, GameState* game_state) {
     return 1;
 }
 
-int load_actions_data(const char* path, GameState* game_state) {
-    if (game_state == NULL) return 0;
-    char *json_string = read_file_to_buffer(path);
-    if (json_string == NULL) return 0;
-
-    cJSON *root = cJSON_Parse(json_string);
-    free(json_string);
-    if (root == NULL) return 0;
-
-    game_state->action_count = 0;
-    cJSON *action_json = NULL;
-    for (int i = 0; i < cJSON_GetArraySize(root); i++) {
-        action_json = cJSON_GetArrayItem(root, i);
-        if (game_state->action_count >= MAX_ACTIONS) break;
-
-        Action *action = &game_state->all_actions[game_state->action_count];
-        strncpy(action->id, action_json->string, MAX_NAME_LENGTH - 1);
-
-        const cJSON *type = cJSON_GetObjectItemCaseSensitive(action_json, "type");
-        if (cJSON_IsString(type)) strncpy(action->type_str, type->valuestring, MAX_NAME_LENGTH - 1);
-
-        cJSON *payload = cJSON_GetObjectItemCaseSensitive(action_json, "payload");
-        if (payload) {
-            action->payload_json = cJSON_Duplicate(payload, 1);
-        } else {
-            action->payload_json = NULL;
-        }
-
-        game_state->action_count++;
-    }
-
-    cJSON_Delete(root);
-    return 1;
-}
-
 void cleanup_game_state(GameState* game_state) {
     if (game_state == NULL) return;
 
     // Free the flag system hash table
     if (game_state->flags != NULL) {
         free_hash_table(game_state->flags);
-    }
-
-    // Free action payloads
-    for (int i = 0; i < game_state->action_count; i++) {
-        if (game_state->all_actions[i].payload_json != NULL) {
-            cJSON_Delete(game_state->all_actions[i].payload_json);
-        }
     }
 }
 

@@ -68,9 +68,12 @@ static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(
 
 // --- Public API ---
 
-int transition_to_scene(const char* target_story_file, StoryScene* scene, GameState* game_state) {
 #ifdef USE_DEBUG_LOGGING
+int transition_to_scene(const char* target_story_file, StoryScene* scene, GameState* game_state) {
     fprintf(stderr, "DEBUG: Attempting to transition to scene: %s\n", target_story_file);
+    fprintf(stderr, "DEBUG: transition_to_scene: scene ptr: %p\n", (void*)scene);
+#else
+int transition_to_scene(const char* target_story_file, StoryScene* scene, GameState* game_state) {
 #endif
     // Clear the scene to ensure no leftover data
     memset(scene, 0, sizeof(StoryScene));
@@ -95,8 +98,9 @@ int transition_to_scene(const char* target_story_file, StoryScene* scene, GameSt
     }
     
     // 2. If not found, this is a scene we haven't converted yet.
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "ERROR: Scene '%s' is not registered in the C dispatch table.\n", target_story_file);
-    
+#endif
     return 0; // Failure: scene not found
 }
 

@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 #include <libgen.h> // For dirname
+#include <errno.h> // Required for errno and strerror
 
 #include "build_info.h"
 #include "game_types.h"
@@ -13,6 +14,7 @@
 #include "map_loader.h"
 #include "story_parser.h"
 #include "executor.h"
+#include "string_table.h"
 #include "string_table.h"
 #include "scenes.h"
 #include "../include/ansi_colors.h"
@@ -128,7 +130,9 @@ int main(int argc, char *argv[]) {
     }
     printf("Player data loaded.\n");
 #ifdef USE_DEBUG_LOGGING
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Main: Player location after loading: '%s'\n", game_state.player_state.location);
+#endif
 #endif
 
     if (!load_map_data(paths.map_dir, &game_state)) {
@@ -142,12 +146,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     printf("Items data loaded.\n");
-
-    if (!load_actions_data(paths.actions_file, &game_state)) {
-        // ... error handling
-        return 1;
-    }
-    printf("Actions data loaded.\n");
+#ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: main: g_string_table[TEXT_DOWNSTAIRS_DESC1] = %s\n", g_string_table[TEXT_DOWNSTAIRS_DESC1]);
+    fprintf(stderr, "DEBUG: main: g_string_table[TEXT_LAIN_ROOM_TITLE] = %s\n", g_string_table[TEXT_LAIN_ROOM_TITLE]);
+    fprintf(stderr, "DEBUG: main: get_string_by_id(70) returns: %s\n", get_string_by_id(70));
+    fprintf(stderr, "DEBUG: main: get_string_by_id(TEXT_DOWNSTAIRS_DESC1) returns: %s\n", get_string_by_id(TEXT_DOWNSTAIRS_DESC1));
+    fprintf(stderr, "DEBUG: main: get_string_by_id(25) returns: %s\n", get_string_by_id(25));
+    fprintf(stderr, "DEBUG: main: get_string_by_id(TEXT_LAIN_ROOM_TITLE) returns: %s\n", get_string_by_id(TEXT_LAIN_ROOM_TITLE));
+#endif
 
     // --- Game Loop ---
     // ... [The rest of the main function remains largely the same] ...
@@ -244,13 +250,16 @@ void get_base_path(char* exe_path, char* base_path, size_t size) {
 
 void init_paths(char* argv0, GamePaths* paths) {
     char exe_path[MAX_PATH_LENGTH];
-    realpath(argv0, exe_path);
+    char* resolved_path = realpath(argv0, exe_path);
+    if (resolved_path == NULL) {
+        fprintf(stderr, "Error: Could not resolve executable path for '%s'. %s\n", argv0, strerror(errno));
+        exit(EXIT_FAILURE);
+    }
     char install_root[MAX_PATH_LENGTH];
     get_base_path(exe_path, install_root, sizeof(install_root));
     snprintf(paths->base_path, sizeof(paths->base_path), "%s", install_root);
     snprintf(paths->default_character_file, sizeof(paths->default_character_file), "%s/character.json", paths->base_path);
     snprintf(paths->items_file, sizeof(paths->items_file), "%s/items.json", paths->base_path);
-    snprintf(paths->actions_file, sizeof(paths->actions_file), "%s/actions.json", paths->base_path);
     snprintf(paths->map_dir, sizeof(paths->map_dir), "%s/map", paths->base_path);
     snprintf(paths->session_root_dir, sizeof(paths->session_root_dir), "%s/session", paths->base_path);
 }
@@ -343,10 +352,14 @@ void print_colored_line(const char* line, const GameState* game_state) {
 }
 
 void render_current_scene(const StoryScene* scene, const GameState* game_state) {
-    clear_screen(); // Clear screen for each scene render
+    // clear_screen(); // Clear screen for each scene render
     print_game_time(game_state->time_of_day); // Print time at the top-left
     #ifdef USE_DEBUG_LOGGING
+#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Entering render_current_scene.\n");
+    fprintf(stderr, "DEBUG: render_current_scene: scene ptr: %p\n", (void*)scene);
+    fprintf(stderr, "DEBUG: Rendering scene: %s (ID: %s)\n", scene->name, scene->scene_id);
+#endif
 #endif
     if (scene == NULL) {
         printf("Error: Scene is NULL.\n");
@@ -361,6 +374,9 @@ void render_current_scene(const StoryScene* scene, const GameState* game_state) 
     printf("========================================\n");
 
     for (int i = 0; i < scene->text_line_count; i++) {
+#ifdef USE_STRING_DEBUG_LOGGING
+        fprintf(stderr, "DEBUG:   Printing StringID: %d (%s)\n", scene->text_content_ids[i], get_string_by_id(scene->text_content_ids[i]));
+#endif
         print_colored_line(get_string_by_id(scene->text_content_ids[i]), game_state);
     }
 

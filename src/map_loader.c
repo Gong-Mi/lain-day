@@ -1,572 +1,146 @@
 #include "map_loader.h"
-#include "cJSON.h"
+#include "cJSON.h" // Still needed for other uses potentially, keep for now
 #include "cmap.h" // Include our new CMap header
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h> 
-#include <sys/stat.h> 
-#include <ctype.h>
-#include "../sequences/miyanosaka/iwakura_house/scene.h"
+// #include <dirent.h> // No longer needed for file system traversal
+// #include <sys/stat.h> // No longer needed for file system checks
+// #include <ctype.h> // No longer directly used for map loading
 
-// Helper function to read a whole file into a string buffer.
-// The caller is responsible for freeing the returned buffer.
-static char* read_file_to_buffer(const char* path) {
-    FILE *file = fopen(path, "rb");
-    if (file == NULL) {
-#ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: Failed to open file for reading: %s\n", path); // Debug added
-#endif
-        return NULL;
-    }
+#include "../sequences/miyanosaka/iwakura_house/scene.h" // For dynamic layout
 
-    fseek(file, 0, SEEK_END);
-    long length = ftell(file);
-    fseek(file, 0, SEEK_SET);
+// --- Helper Functions for Programmatic Map Definition ---
 
-    if (length == -1) {
-        fclose(file);
-        return NULL;
-    }
-
-    char *buffer = (char*)malloc(length + 1);
-    if (buffer == NULL) {
-        fclose(file);
-        return NULL;
-    }
-
-    if (fread(buffer, 1, length, file) != (size_t)length) {
-        fclose(file);
-        free(buffer);
-        return NULL;
-    }
-
-    buffer[length] = '\0';
-    fclose(file);
-    return buffer;
+void init_location(Location* loc, const char* id, const char* name, const char* description) {
+    memset(loc, 0, sizeof(Location));
+    strncpy(loc->id, id, MAX_NAME_LENGTH - 1);
+    loc->id[MAX_NAME_LENGTH - 1] = '\0';
+    strncpy(loc->name, name, MAX_NAME_LENGTH - 1);
+    loc->name[MAX_NAME_LENGTH - 1] = '\0';
+    strncpy(loc->description, description, (MAX_DESC_LENGTH * 4) - 1);
+    loc->description[(MAX_DESC_LENGTH * 4) - 1] = '\0';
 }
 
+void add_poi_to_location(Location* loc, const char* id, const char* name, const char* description) {
+    if (loc->pois_count >= MAX_POIS) {
+        fprintf(stderr, "WARNING: Max POIs reached for location %s. Cannot add %s.\n", loc->id, id);
+        return;
+    }
+    POI* current_poi = &loc->pois[loc->pois_count];
+    memset(current_poi, 0, sizeof(POI));
+    strncpy(current_poi->id, id, MAX_NAME_LENGTH - 1);
+    current_poi->id[MAX_NAME_LENGTH - 1] = '\0';
+    strncpy(current_poi->name, name, MAX_NAME_LENGTH - 1);
+    current_poi->name[MAX_NAME_LENGTH - 1] = '\0';
+    strncpy(current_poi->description, description, (MAX_DESC_LENGTH * 2) - 1);
+    current_poi->description[(MAX_DESC_LENGTH * 2) - 1] = '\0';
+    loc->pois_count++;
+}
+
+void add_connection_to_location(Location* loc, const char* target_id) {
+    if (loc->connection_count >= MAX_CONNECTIONS) {
+        fprintf(stderr, "WARNING: Max connections reached for location %s. Cannot add connection to %s.\n", loc->id, target_id);
+        return;
+    }
+    strncpy(loc->connections[loc->connection_count], target_id, MAX_NAME_LENGTH - 1);
+    loc->connections[loc->connection_count][MAX_NAME_LENGTH - 1] = '\0';
+    loc->connection_count++;
+}
+
+// --- Programmatic Map Data Definition ---
+
+static int load_programmatic_map_data(GameState* game_state) {
+    if (game_state->location_count >= MAX_LOCATIONS) {
+        fprintf(stderr, "WARNING: Max locations reached. Cannot add more programmatic locations.\n");
+        return 0;
+    }
+
+    // --- Placeholder: lain_room ---
+    Location* lain_room = &game_state->all_locations[game_state->location_count];
+    init_location(lain_room, "lain_room", "Lain's Room", "A messy room filled with wires and humming electronics. The air hums with the presence of your NAVI.");
+    add_poi_to_location(lain_room, "navi", "NAVI", "Your trusty personal computer, covered in strange symbols.");
+    add_poi_to_location(lain_room, "bed", "Bed", "A simple, unmade bed.");
+    add_connection_to_location(lain_room, "downstairs");
+    cmap_insert(game_state->location_map, lain_room);
+#ifdef USE_MAP_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", lain_room->id);
+#endif
+    game_state->location_count++;
+
+    // --- Placeholder: downstairs ---
+    if (game_state->location_count >= MAX_LOCATIONS) return 0;
+    Location* downstairs = &game_state->all_locations[game_state->location_count];
+    init_location(downstairs, "downstairs", "Downstairs", "The living room and kitchen area of your home. It feels quiet, almost too quiet.");
+    add_poi_to_location(downstairs, "kitchen", "Kitchen", "A functional but sparsely used kitchen.");
+    add_poi_to_location(downstairs, "tv", "Television", "A large, old-fashioned television set.");
+    add_connection_to_location(downstairs, "lain_room");
+    add_connection_to_location(downstairs, "outside_house"); // Example new connection
+    cmap_insert(game_state->location_map, downstairs);
+#ifdef USE_MAP_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", downstairs->id);
+#endif
+    game_state->location_count++;
+
+    // --- Placeholder: outside_house ---
+    if (game_state->location_count >= MAX_LOCATIONS) return 0;
+    Location* outside_house = &game_state->all_locations[game_state->location_count];
+    init_location(outside_house, "outside_house", "Outside the House", "The quiet suburban street where you live. The air is surprisingly crisp.");
+    add_poi_to_location(outside_house, "mailbox", "Mailbox", "A standard mailbox, mostly empty.");
+    add_connection_to_location(outside_house, "downstairs");
+    add_connection_to_location(outside_house, "shibuya_street"); // Example new connection
+    cmap_insert(game_state->location_map, outside_house);
+#ifdef USE_MAP_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", outside_house->id);
+#endif
+    game_state->location_count++;
+
+    // --- Placeholder: shibuya_street ---
+    if (game_state->location_count >= MAX_LOCATIONS) return 0;
+    Location* shibuya_street = &game_state->all_locations[game_state->location_count];
+    init_location(shibuya_street, "shibuya_street", "Shibuya Street", "The neon glow of Shibuya. Crowds move with an almost hypnotic rhythm.");
+    add_poi_to_location(shibuya_street, "crosswalk", "Shibuya Crossing", "The famous scramble crosswalk, a river of humanity.");
+    add_connection_to_location(shibuya_street, "outside_house");
+    add_connection_to_location(shibuya_street, "cyberia_club"); // Example new connection
+    cmap_insert(game_state->location_map, shibuya_street);
+#ifdef USE_MAP_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", shibuya_street->id);
+#endif
+    game_state->location_count++;
 
 
+    return 1; // Success
+}
 
-
-
-
-
-
-
+// --- Public API Implementation ---
 
 int load_map_data(const char* map_dir_path, GameState* game_state) {
-
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Entering load_map_data for path: %s\n", map_dir_path);
+#ifdef USE_MAP_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Entering load_map_data (programmatic) for path: %s\n", map_dir_path); // Path is ignored now
 #endif
 
     if (game_state == NULL) {
-
-
         fprintf(stderr, "ERROR: GameState is NULL in load_map_data.\n");
-
-
         return 0;
-
-
     }
-
-
-
-
 
     // --- CMap Integration: Create the hash map ---
-
-
     game_state->location_map = cmap_create(MAX_LOCATIONS);
-
-
     if (game_state->location_map == NULL) {
-
-
         fprintf(stderr, "ERROR: Failed to create location map hash table.\n");
-
-
         return 0;
-
-
     }
 
-#ifdef USE_DEBUG_LOGGING
+#ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: CMap created with size %d.\n", MAX_LOCATIONS);
 #endif
 
-
-
-
-    DIR *d;
-
-
-    struct dirent *dir;
-
-
-    char full_path[MAX_PATH_LENGTH * 2];
-
-
-    char file_path[MAX_PATH_LENGTH * 2];
-
-
-    game_state->location_count = 0;
-
-
-
-
-
-    d = opendir(map_dir_path);
-
-
-    if (!d) {
-
-
-        fprintf(stderr, "ERROR: Failed to open map directory: %s\n", map_dir_path);
-
-
-        cmap_destroy(game_state->location_map); // Clean up on failure
-
-
+    // Load locations programmatically
+    if (!load_programmatic_map_data(game_state)) {
+        fprintf(stderr, "ERROR: Failed to load programmatic map data.\n");
+        cmap_destroy(game_state->location_map);
         return 0;
-
-
     }
-
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Successfully opened map directory: %s\n", map_dir_path);
-#endif
-
-
-
-
-    while ((dir = readdir(d)) != NULL) {
-
-
-        if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0) {
-
-
-            continue;
-
-
-        }
-
-
-
-
-
-        snprintf(full_path, sizeof(full_path), "%s/%s", map_dir_path, dir->d_name);
-
-
-
-
-
-        struct stat st;
-
-
-        if (stat(full_path, &st) == -1) {
-
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: stat failed for %s. Skipping.\n", full_path);
-#endif
-
-            continue;
-
-
-        }
-
-
-
-
-
-        if (S_ISDIR(st.st_mode)) {
-
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Processing location directory: %s\n", dir->d_name);
-#endif
-
-            if (game_state->location_count >= MAX_LOCATIONS) {
-
-
-                fprintf(stderr, "WARNING: Max locations reached. Breaking map loading loop.\n");
-
-
-                break;
-
-
-            }
-
-
-
-
-
-            Location *current_location = &game_state->all_locations[game_state->location_count];
-
-
-            memset(current_location, 0, sizeof(Location));
-
-
-
-
-
-            strncpy(current_location->id, dir->d_name, MAX_NAME_LENGTH - 1);
-
-
-            current_location->id[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null-termination
-
-
-
-
-
-            // --- Read name.txt ---
-
-
-            snprintf(file_path, sizeof(file_path), "%s/name.txt", full_path);
-
-
-            char *name_buffer = read_file_to_buffer(file_path);
-
-
-            if (name_buffer) {
-
-
-                size_t name_len = strlen(name_buffer);
-
-
-                if (name_len > 0 && name_buffer[name_len - 1] == '\n') {
-
-
-                    name_buffer[name_len - 1] = '\0';
-
-
-                }
-
-
-                strncpy(current_location->name, name_buffer, MAX_NAME_LENGTH - 1);
-
-
-                current_location->name[MAX_NAME_LENGTH - 1] = '\0';
-
-
-                free(name_buffer);
-
-
-            } else {
-
-
-                fprintf(stderr, "WARNING: Could not read name.txt for location %s. Path: %s\n", dir->d_name, file_path);
-
-
-            }
-
-
-
-
-
-            // --- Read description.txt ---
-
-
-            snprintf(file_path, sizeof(file_path), "%s/description.txt", full_path);
-
-
-            char *desc_buffer = read_file_to_buffer(file_path);
-
-
-            if (desc_buffer) {
-
-
-                size_t desc_len = strlen(desc_buffer);
-
-
-                if (desc_len > 0 && desc_buffer[desc_len - 1] == '\n') {
-
-
-                    desc_buffer[desc_len - 1] = '\0';
-
-
-                }
-
-
-                strncpy(current_location->description, desc_buffer, (MAX_DESC_LENGTH * 4) - 1);
-
-
-                current_location->description[(MAX_DESC_LENGTH * 4) - 1] = '\0';
-
-
-                free(desc_buffer);
-
-
-            } else {
-
-
-                fprintf(stderr, "WARNING: Could not read description.txt for location %s. Path: %s\n", dir->d_name, file_path);
-
-
-            }
-
-
-
-
-
-            // --- Read poi.json ---
-
-
-            snprintf(file_path, sizeof(file_path), "%s/poi.json", full_path);
-
-
-            char *poi_json_string = read_file_to_buffer(file_path);
-
-
-            if (poi_json_string) {
-
-
-                cJSON *poi_root = cJSON_Parse(poi_json_string);
-
-
-                if (!poi_root) { // Debug added for cJSON_Parse failure
-
-
-                    fprintf(stderr, "ERROR: cJSON_Parse failed for poi.json in %s. Path: %s\n", dir->d_name, file_path);
-
-
-                } else if (cJSON_IsArray(poi_root)) {
-
-
-                    cJSON *poi_item;
-
-
-                    cJSON_ArrayForEach(poi_item, poi_root) {
-
-
-                        if (current_location->pois_count < MAX_POIS) {
-
-
-                            POI *current_poi = &current_location->pois[current_location->pois_count];
-
-
-                            memset(current_poi, 0, sizeof(POI)); // Initialize POI struct
-
-
-
-
-
-                            if (cJSON_IsObject(poi_item)) {
-
-
-                                const cJSON *id_json = cJSON_GetObjectItemCaseSensitive(poi_item, "id");
-
-
-                                const cJSON *name_json = cJSON_GetObjectItemCaseSensitive(poi_item, "name");
-
-
-                                const cJSON *desc_json = cJSON_GetObjectItemCaseSensitive(poi_item, "description");
-
-
-
-
-
-                                if (cJSON_IsString(id_json) && id_json->valuestring != NULL) {
-
-
-                                    strncpy(current_poi->id, id_json->valuestring, MAX_NAME_LENGTH - 1);
-
-
-                                    current_poi->id[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null-termination
-
-
-                                }
-
-
-                                if (cJSON_IsString(name_json) && name_json->valuestring != NULL) {
-
-
-                                    strncpy(current_poi->name, name_json->valuestring, MAX_NAME_LENGTH - 1);
-
-
-                                    current_poi->name[MAX_NAME_LENGTH - 1] = '\0';
-
-
-                                } else if (cJSON_IsString(id_json) && id_json->valuestring != NULL) { // Fallback name to id if name is missing
-
-
-                                    strncpy(current_poi->name, id_json->valuestring, MAX_NAME_LENGTH - 1);
-
-
-                                    current_poi->name[MAX_NAME_LENGTH - 1] = '\0';
-
-
-                                }
-
-
-                                if (cJSON_IsString(desc_json) && desc_json->valuestring != NULL) {
-
-
-                                    strncpy(current_poi->description, desc_json->valuestring, (MAX_DESC_LENGTH * 2) - 1);
-
-
-                                    current_poi->description[(MAX_DESC_LENGTH * 2) - 1] = '\0';
-
-
-                                }
-
-
-                            } else if (cJSON_IsString(poi_item)) { // Handle old simple string POI format
-
-
-                                strncpy(current_poi->id, poi_item->valuestring, MAX_NAME_LENGTH - 1);
-
-
-                                current_poi->id[MAX_NAME_LENGTH - 1] = '\0';
-
-
-                                strncpy(current_poi->name, poi_item->valuestring, MAX_NAME_LENGTH - 1);
-
-
-                                current_poi->name[MAX_NAME_LENGTH - 1] = '\0';
-
-
-                                strncpy(current_poi->description, "No detailed description.", (MAX_DESC_LENGTH * 2) - 1);
-
-
-                                current_poi->description[(MAX_DESC_LENGTH * 2) - 1] = '\0';
-
-
-                            }
-
-
-                            current_location->pois_count++;
-
-
-                        }
-
-
-                    }
-
-
-                } else {
-
-
-                    fprintf(stderr, "WARNING: poi.json for location %s is not a JSON array or invalid. Path: %s\n", dir->d_name, file_path);
-
-
-                }
-
-
-                cJSON_Delete(poi_root);
-
-
-                free(poi_json_string);
-
-
-            } else {
-
-
-                fprintf(stderr, "WARNING: Could not read or parse poi.json for location %s. Path: %s\n", dir->d_name, file_path);
-
-
-            }
-
-
-
-
-
-            // --- Read connections.json ---
-
-
-            snprintf(file_path, sizeof(file_path), "%s/connections.json", full_path);
-
-
-            char *connections_json_string = read_file_to_buffer(file_path);
-
-
-            if (connections_json_string) {
-
-
-                cJSON *connections_root = cJSON_Parse(connections_json_string);
-
-
-                if (!connections_root) { // Debug added for cJSON_Parse failure
-
-
-                    fprintf(stderr, "ERROR: cJSON_Parse failed for connections.json in %s. Path: %s\n", dir->d_name, file_path);
-
-
-                } else if (cJSON_IsObject(connections_root)) {
-
-
-                    cJSON *conn_item;
-
-
-                    cJSON_ArrayForEach(conn_item, connections_root) {
-
-
-                        if (cJSON_IsString(conn_item) && current_location->connection_count < MAX_CONNECTIONS) {
-
-
-                            strncpy(current_location->connections[current_location->connection_count], conn_item->valuestring, MAX_NAME_LENGTH - 1);
-
-
-                            current_location->connections[current_location->connection_count][MAX_NAME_LENGTH - 1] = '\0'; // Ensure null-termination
-
-
-                            current_location->connection_count++;
-
-
-                        }
-
-
-                    }
-
-
-                } else {
-
-
-                    fprintf(stderr, "WARNING: connections.json for location %s is not a JSON object or invalid. Path: %s\n", dir->d_name, file_path);
-
-
-                }
-
-
-                cJSON_Delete(connections_root);
-
-
-                free(connections_json_string);
-
-
-            } else {
-
-
-                fprintf(stderr, "WARNING: Could not read or parse connections.json for location %s. Path: %s\n", dir->d_name, file_path);
-
-
-            }
-
-
-
-
-
-            cmap_insert(game_state->location_map, (struct Location*)current_location);
-
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Inserted location '%s' into CMap.\n", current_location->id);
-#endif
-
-
-
-
-            game_state->location_count++;
-
-
-        }
-
-
-    }
-
-
-    closedir(d);
 
     // --- Dynamically add Iwakura House layout ---
     int rooms_added = create_iwakura_house_layout(game_state->all_locations, game_state->location_count);
@@ -575,14 +149,14 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
         for (int i = 0; i < rooms_added; ++i) {
             Location* new_loc = &game_state->all_locations[game_state->location_count + i];
             cmap_insert(game_state->location_map, new_loc);
-#ifdef USE_DEBUG_LOGGING
+#ifdef USE_MAP_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
 #endif
         }
         game_state->location_count += rooms_added;
 
         // DEBUG: Verify POI counts for newly added locations
-#ifdef USE_DEBUG_LOGGING
+#ifdef USE_MAP_DEBUG_LOGGING
         fprintf(stderr, "DEBUG: Verifying POIs for dynamically added locations:\n");
         for (int i = 0; i < rooms_added; ++i) {
             Location* loc = &game_state->all_locations[game_state->location_count - rooms_added + i];
@@ -595,11 +169,9 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
     }
 
 
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Successfully loaded %d locations from map data.\n", game_state->location_count);
+#ifdef USE_MAP_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Successfully loaded %d locations (programmatic + dynamic) .\n", game_state->location_count);
 #endif
 
     return 1;
-
-
 }

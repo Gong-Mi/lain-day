@@ -44,13 +44,13 @@ typedef struct {
     int required_credit;
 } Item;
 
-// Main Action struct (from actions.json)
-// Stores payload as a raw cJSON object for flexibility
-typedef struct {
-    char id[MAX_NAME_LENGTH]; // e.g., "default_story_change_action"
-    char type_str[MAX_NAME_LENGTH]; // Action type as string (e.g., "story_change")
-    cJSON *payload_json; // Store the raw payload as a cJSON object, to be parsed at execution
-} Action;
+// Main Action struct (from actions.json) - REMOVED
+// Stores payload as a raw cJSON object for flexibility - REMOVED
+// typedef struct {
+//     char id[MAX_NAME_LENGTH]; // e.g., "default_story_change_action"
+//     char type_str[MAX_NAME_LENGTH]; // Action type as string (e.g., "story_change")
+//     cJSON *payload_json; // Store the raw payload as a cJSON object, to be parsed at execution
+// } Action;
 
 // Represents a Point of Interest within a Location (from poi.json)
 typedef struct {
@@ -63,7 +63,7 @@ typedef struct {
 } POI;
 
 // Represents a single location in the game world
-typedef struct {
+typedef struct Location_struct {
     char id[MAX_NAME_LENGTH];
     char name[MAX_NAME_LENGTH];
     char description[MAX_DESC_LENGTH * 4]; // Longer for full descriptions
@@ -125,8 +125,8 @@ typedef struct {
     
     Item all_items[MAX_ITEMS];
     int item_count;
-    Action all_actions[MAX_ACTIONS];
-    int action_count;
+    // Action all_actions[MAX_ACTIONS]; // Actions are now programmatic
+    // int action_count; // Actions are now programmatic
 
     // Generic game flags, managed by the flag system
     HashTable* flags;

@@ -42,12 +42,12 @@ CMap* cmap_create(int size) {
     return cmap;
 }
 
-void cmap_insert(CMap* cmap, struct Location* location) {
+void cmap_insert(CMap* cmap, struct Location_struct* location) {
     if (!cmap || !location) { // Removed !location->id check as it's an array and always true
         return;
     }
 
-    unsigned long hash = hash_string(((Location*)location)->id);
+    unsigned long hash = hash_string(location->id);
     int index = hash % cmap->size;
 
     // Create a new node
@@ -60,8 +60,8 @@ void cmap_insert(CMap* cmap, struct Location* location) {
     
     // The key needs to be duplicated as the original location->id might change
     // or the location struct might be freed elsewhere.
-    new_node->key = strdup(((Location*)location)->id); 
-    new_node->value = (struct Location*)location; // Store pointer to the actual location
+    new_node->key = strdup(location->id); 
+    new_node->value = location; // Store pointer to the actual location
     new_node->next = NULL;
 
     // Insert into the bucket (handle collision by chaining)
@@ -74,7 +74,7 @@ void cmap_insert(CMap* cmap, struct Location* location) {
     }
 }
 
-struct Location* cmap_get(CMap* cmap, const char* location_id) {
+struct Location_struct* cmap_get(CMap* cmap, const char* location_id) {
     if (!cmap || !location_id) {
         return NULL;
     }
@@ -85,7 +85,7 @@ struct Location* cmap_get(CMap* cmap, const char* location_id) {
     MapNode* current = cmap->buckets[index];
     while (current != NULL) {
         if (strcmp(current->key, location_id) == 0) {
-            return (struct Location*)current->value;
+            return current->value;
         }
         current = current->next;
     }
