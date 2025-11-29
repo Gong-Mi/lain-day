@@ -5,7 +5,8 @@
 
 void init_scene_01a_examine_navi(StoryScene* scene) {
     memset(scene, 0, sizeof(StoryScene));
-    strcpy(scene->location_id, "lain_room");
+    strcpy(scene->name, "检查导航器");
+    strcpy(scene->location_id, "iwakura_lains_room");
 
     scene->text_content_ids[0] = TEXT_NAVI_STATE_TITLE;
     scene->text_content_ids[1] = TEXT_EMPTY_LINE;

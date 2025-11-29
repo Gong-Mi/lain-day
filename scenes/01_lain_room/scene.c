@@ -5,7 +5,8 @@
 
 void init_scene_01_lain_room(StoryScene* scene) {
     memset(scene, 0, sizeof(StoryScene));
-    strcpy(scene->location_id, "lain_room");
+    strcpy(scene->name, "玲音的房间");
+    strcpy(scene->location_id, "iwakura_lains_room");
 
     scene->text_content_ids[0] = TEXT_LAIN_ROOM_TITLE;
     scene->text_content_ids[1] = TEXT_EMPTY_LINE;

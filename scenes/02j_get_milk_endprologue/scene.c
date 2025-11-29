@@ -5,7 +5,8 @@
 
 void init_scene_02j_get_milk_endprologue(StoryScene* scene) {
     memset(scene, 0, sizeof(StoryScene));
-    strcpy(scene->location_id, "kurani_residence/living_room"); // Assuming takes place in living room
+    strcpy(scene->name, "去拿牛奶");
+    strcpy(scene->location_id, "iwakura_living_dining_kitchen"); // Assuming takes place in living room
 
     scene->text_content_ids[0] = TEXT_GET_MILK_TITLE;
     scene->text_content_ids[1] = TEXT_EMPTY_LINE;

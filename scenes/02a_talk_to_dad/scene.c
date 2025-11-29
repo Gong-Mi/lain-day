@@ -5,7 +5,8 @@
 
 void init_scene_02a_talk_to_dad(StoryScene* scene) {
     memset(scene, 0, sizeof(StoryScene));
-    strcpy(scene->location_id, "kurani_residence/living_room");
+    strcpy(scene->name, "与父亲对话");
+    strcpy(scene->location_id, "iwakura_living_dining_kitchen");
 
     scene->text_content_ids[0] = TEXT_TALK_TO_DAD_DESC1;
     scene->text_content_ids[1] = TEXT_EMPTY_LINE;

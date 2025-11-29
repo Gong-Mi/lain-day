@@ -5,7 +5,7 @@
 
 void init_scene_02d_talk_to_mom_normal(StoryScene* scene) {
     memset(scene, 0, sizeof(StoryScene));
-    strcpy(scene->location_id, "kurani_residence/living_room");
+    strcpy(scene->location_id, "iwakura_living_dining_kitchen");
 
     scene->text_content_ids[0] = TEXT_TALK_TO_MOM_NORMAL_DESC1;
     scene->text_content_ids[1] = TEXT_EMPTY_LINE;

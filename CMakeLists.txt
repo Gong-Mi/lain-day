@@ -57,12 +57,16 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Include directories
 include_directories(include)
 include_directories(scenes) # Add scenes directory to include path
+include_directories(sequences) # Add sequences directory to include path
 include_directories("${PROJECT_BINARY_DIR}/include") # For generated headers
 
 # Find all scene source files automatically.
 # This allows new scenes to be added simply by creating a new directory
 # under /scenes/ with a scene.c file, without needing to modify this file.
 file(GLOB_RECURSE SCENE_SOURCES "scenes/*/scene.c")
+
+# Find all plot sequence source files automatically.
+file(GLOB_RECURSE SEQUENCE_SOURCES "sequences/*/scene.c")
 
 # Add executable
 add_executable(lain_day_c 
@@ -76,6 +80,7 @@ add_executable(lain_day_c
     src/scenes.c
     src/cmap.c # Added our new CMap module
     ${SCENE_SOURCES}
+    ${SEQUENCE_SOURCES}
 )
 
 # Add compile definitions for character life/death options

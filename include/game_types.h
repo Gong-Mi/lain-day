@@ -97,6 +97,7 @@ typedef struct {
 // A single story scene loaded from a Markdown file
 typedef struct {
     char scene_id[MAX_NAME_LENGTH]; // Unique ID for the scene
+    char name[MAX_NAME_LENGTH];     // The official display name for the scene
     // FrontMatter front_matter; // Can be integrated or kept for legacy if needed
     char location_id[MAX_NAME_LENGTH]; // Direct location ID for this scene
     StringID text_content_ids[MAX_TEXT_LINES_PER_SCENE]; // Array of StringIDs for text lines

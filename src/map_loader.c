@@ -7,6 +7,7 @@
 #include <dirent.h> 
 #include <sys/stat.h> 
 #include <ctype.h>
+#include "../sequences/miyanosaka/iwakura_house/scene.h"
 
 // Helper function to read a whole file into a string buffer.
 // The caller is responsible for freeing the returned buffer.
@@ -566,6 +567,21 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 
 
     closedir(d);
+
+    // --- Dynamically add Iwakura House layout ---
+    int rooms_added = create_iwakura_house_layout(game_state->all_locations, game_state->location_count);
+    if (rooms_added > 0) {
+        // Need to insert newly added locations into the cmap as well.
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* new_loc = &game_state->all_locations[game_state->location_count + i];
+            cmap_insert(game_state->location_map, new_loc);
+#ifdef USE_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
+#endif
+        }
+        game_state->location_count += rooms_added;
+    }
+
 
 #ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Successfully loaded %d locations from map data.\n", game_state->location_count);

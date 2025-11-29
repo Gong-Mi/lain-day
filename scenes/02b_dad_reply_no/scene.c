@@ -5,7 +5,8 @@
 
 void init_scene_02b_dad_reply_no(StoryScene* scene) {
     memset(scene, 0, sizeof(StoryScene));
-    strcpy(scene->location_id, "kurani_residence/living_room");
+    strcpy(scene->name, "父亲的回应：不");
+    strcpy(scene->location_id, "iwakura_living_dining_kitchen");
 
     scene->text_content_ids[0] = TEXT_DAD_REPLY_NO_DESC1;
     scene->text_content_ids[1] = TEXT_EMPTY_LINE;

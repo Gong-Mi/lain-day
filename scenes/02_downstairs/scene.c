@@ -5,7 +5,8 @@
 
 void init_scene_02_downstairs(StoryScene* scene) {
     memset(scene, 0, sizeof(StoryScene));
-    strcpy(scene->location_id, "kurani_residence/living_room");
+    strcpy(scene->name, "楼下的客厅与厨房");
+    strcpy(scene->location_id, "iwakura_living_dining_kitchen");
 
     // The title "楼下的客厅与厨房" has no StringID, so it's omitted.
     scene->text_content_ids[0] = TEXT_EMPTY_LINE;

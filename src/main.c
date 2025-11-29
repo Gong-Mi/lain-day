@@ -19,7 +19,7 @@
 #include "../include/project_status.h"
 #include "flag_system.h"
 
-// --- Path Management ---
+// --- Path Management Struct ---
 typedef struct {
     char base_path[MAX_PATH_LENGTH];
     char default_character_file[MAX_PATH_LENGTH];
@@ -29,212 +29,23 @@ typedef struct {
     char session_root_dir[MAX_PATH_LENGTH];
 } GamePaths;
 
-// Gets the base path of the installation
-void get_base_path(char* exe_path, char* base_path, size_t size) {
-    char* exe_dir = dirname(exe_path);
-    // The executable is in 'bin/', so we go up one level to get the install root
-    snprintf(base_path, size, "%s/..", exe_dir);
-}
+// --- Function Prototypes ---
 
-void init_paths(char* argv0, GamePaths* paths) {
-    char exe_path[MAX_PATH_LENGTH];
-    realpath(argv0, exe_path); // Resolves the absolute path of the executable
+// System Helpers
+void clear_screen();
+void print_game_time(int time_of_day);
 
-    char install_root[MAX_PATH_LENGTH];
-    get_base_path(exe_path, install_root, sizeof(install_root));
+// Path Management
+void get_base_path(char* exe_path, char* base_path, size_t size);
+void init_paths(char* argv0, GamePaths* paths);
 
-    // Construct all data paths relative to the installation root
-    snprintf(paths->base_path, sizeof(paths->base_path), "%s/share/lain_day_c", install_root);
-    snprintf(paths->default_character_file, sizeof(paths->default_character_file), "%s/character.json", paths->base_path);
-    snprintf(paths->items_file, sizeof(paths->items_file), "%s/items.json", paths->base_path);
-    snprintf(paths->actions_file, sizeof(paths->actions_file), "%s/actions.json", paths->base_path);
-    snprintf(paths->map_dir, sizeof(paths->map_dir), "%s/map", paths->base_path);
-    snprintf(paths->session_root_dir, sizeof(paths->session_root_dir), "%s/session", paths->base_path);
-}
+// Game Loop Components
+int copy_file(const char *src_path, const char *dest_path);
+void print_colored_line(const char* line, const GameState* game_state);
+void render_current_scene(const StoryScene* scene, const GameState* game_state);
+void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index);
+int is_numeric(const char* str);
 
-
-// --- Helper Functions --- (copy_file, print_colored_line, etc. remain the same)
-// ... [Existing helper functions like copy_file, print_colored_line, render_current_scene, etc.] ...
-
-// Helper function to copy a file
-int copy_file(const char *src_path, const char *dest_path) {
-    FILE *src = fopen(src_path, "rb");
-    if (src == NULL) {
-        fprintf(stderr, "Error: Could not open source file %s\n", src_path);
-        return 0;
-    }
-
-    FILE *dest = fopen(dest_path, "wb");
-    if (dest == NULL) {
-        fprintf(stderr, "Error: Could not open destination file %s\n", dest_path);
-        fclose(src);
-        return 0;
-    }
-
-    char buffer[4096];
-    size_t bytes_read;
-    while ((bytes_read = fread(buffer, 1, sizeof(buffer), src)) > 0) {
-        fwrite(buffer, 1, bytes_read, dest);
-    }
-
-    fclose(src);
-    fclose(dest);
-    return 1;
-}
-
-// Helper function to print a line with typewriter effect and colored speaker name
-void print_colored_line(const char* line, const GameState* game_state) {
-    if (line == NULL) {
-        printf("\n");
-        fflush(stdout);
-        return;
-    }
-
-    // List of speakers and their colors.
-    struct {
-        const char* name_prefix;
-        const char* color_code;
-    } speakers[] = {
-        {"Alice:", ALICE_COLOR},
-        {"Chisa:", CHISA_COLOR},
-        {"Father:", FATHER_COLOR},
-        {"米良柊子:", FUYUKO_MIRA_COLOR}, // Doctor
-        {"Mira:", LAINS_SISTER_MIRA_COLOR}, // Lain's Sister
-        {"幽灵:", ANSI_COLOR_RED}, // Ghost
-        {"爸爸:", FATHER_COLOR}, // Father
-        {"妈妈:", ANSI_COLOR_MAGENTA}, // Mom
-    };
-    int num_speakers = sizeof(speakers) / sizeof(speakers[0]);
-
-#ifdef USE_TYPEWRITER_EFFECT
-    // --- Typewriter Effect Implementation ---
-    const char* content_start = line;
-    for (int i = 0; i < num_speakers; i++) {
-        size_t prefix_len = strlen(speakers[i].name_prefix);
-        if (strncmp(line, speakers[i].name_prefix, prefix_len) == 0) {
-            // Found a speaker prefix, print it at once
-            printf("%s%s%s", speakers[i].color_code, speakers[i].name_prefix, ANSI_COLOR_RESET);
-            content_start += prefix_len;
-            break;
-        }
-    }
-
-    // Print the rest of the line char by char
-    for (int i = 0; content_start[i] != '\0'; i++) {
-        putchar(content_start[i]);
-        fflush(stdout);
-        usleep((useconds_t)(game_state->typewriter_delay * 1000000));
-    }
-
-    printf("\n");
-    fflush(stdout);
-
-#else
-    // --- Standard Instant Implementation ---
-    for (int i = 0; i < num_speakers; i++) {
-        size_t prefix_len = strlen(speakers[i].name_prefix);
-        if (strncmp(line, speakers[i].name_prefix, prefix_len) == 0) {
-            // Found a speaker prefix
-            printf("%s%s%s%s\n", speakers[i].color_code, speakers[i].name_prefix, ANSI_COLOR_RESET, line + prefix_len);
-            return;
-        }
-    }
-
-    // No speaker detected, print the line as is
-    printf("%s\n", line);
-#endif
-}
-
-// --- Helper Functions for Game Loop ---
-void render_current_scene(const StoryScene* scene, const GameState* game_state) {
-    #ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Entering render_current_scene.\n");
-#endif
-    if (scene == NULL) {
-        printf("Error: Scene is NULL.\n");
-        return;
-    }
-
-    printf("\n========================================\n");
-    if (scene->location_id[0] != '\0') {
-        // This part doesn't need typewriter effect
-        printf("Location: %s\n", scene->location_id);
-    }
-    printf("========================================\n");
-
-    for (int i = 0; i < scene->text_line_count; i++) {
-        print_colored_line(get_string_by_id(scene->text_content_ids[i]), game_state);
-    }
-
-    if (scene->choice_count > 0) {
-        printf("\n--- Choices ---\n");
-        int visible_choice_index = 1;
-        for (int i = 0; i < scene->choice_count; i++) {
-            const StoryChoice* choice = &scene->choices[i];
-            int is_selectable = 0;
-
-            // Check if there is a condition
-            if (choice->condition.flag_name[0] == '\0') {
-                is_selectable = 1; // No condition, always selectable
-            } else {
-                const char* flag_value_str = hash_table_get(game_state->flags, choice->condition.flag_name);
-                if (flag_value_str != NULL) {
-                    // Flag exists, compare its value
-                    int current_value = atoi(flag_value_str);
-                    if (current_value == choice->condition.required_value) {
-                        is_selectable = 1;
-                    }
-                }
-                // If flag is not set, is_selectable remains 0.
-            }
-
-            if (is_selectable) {
-                printf("%d. %s\n", visible_choice_index++, get_string_by_id(choice->text_id));
-            } else {
-                // Print disabled choice in gray and without a number
-                printf("   %s%s%s\n", ANSI_COLOR_BRIGHT_BLACK, get_string_by_id(choice->text_id), ANSI_COLOR_RESET);
-            }
-        }
-        printf("---------------\n");
-    }
-}
-
-// Reads player input into a buffer, from argv or stdin
-void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index) {
-    if (argc > 1 && *arg_index < argc) {
-        // Automated mode: get input from command-line arguments
-        strncpy(buffer, argv[*arg_index], buffer_size - 1);
-        buffer[buffer_size - 1] = '\0';
-        printf("> %s\n", buffer); // Echo the automated input
-        (*arg_index)++;
-    } else {
-        // Manual mode: get input from stdin
-        printf("> ");
-        if (fgets(buffer, buffer_size, stdin) != NULL) {
-            buffer[strcspn(buffer, "\n")] = 0;
-        }
-    }
-}
-
-// Checks if a string contains only digits
-int is_numeric(const char* str) {
-    if (str == NULL || *str == '\0') {
-        return 0;
-    }
-    for (int i = 0; str[i] != '\0'; i++) {
-        if (!isdigit((unsigned char)str[i])) {
-            return 0;
-        }
-    }
-    return 1;
-}
-
-// Helper to print the current game time
-void print_game_time(int time_of_day) {
-    int hours = time_of_day / 60;
-    int minutes = time_of_day % 60;
-    printf(ANSI_COLOR_YELLOW "[%02d:%02d]" ANSI_COLOR_RESET "\n", hours, minutes);
-}
 
 int main(int argc, char *argv[]) {
     printf("Lain-day C version starting...\n");
@@ -349,7 +160,6 @@ int main(int argc, char *argv[]) {
     render_current_scene(&current_scene, &game_state);
 
     while (running) {
-        print_game_time(game_state.time_of_day);
         get_next_input(input_buffer, sizeof(input_buffer), argc, argv, &arg_index);
 
         if (strcmp(input_buffer, "quit") == 0 || strcmp(input_buffer, "0") == 0) {
@@ -419,4 +229,205 @@ int main(int argc, char *argv[]) {
 
     printf("\nLain-day C version exiting.\n");
     return 0;
+}
+
+
+// --- Function Definitions ---
+
+void get_base_path(char* exe_path, char* base_path, size_t size) {
+    char* exe_dir = dirname(exe_path);
+    snprintf(base_path, size, "%s/..", exe_dir);
+}
+
+void init_paths(char* argv0, GamePaths* paths) {
+    char exe_path[MAX_PATH_LENGTH];
+    realpath(argv0, exe_path);
+    char install_root[MAX_PATH_LENGTH];
+    get_base_path(exe_path, install_root, sizeof(install_root));
+    snprintf(paths->base_path, sizeof(paths->base_path), "%s", install_root);
+    snprintf(paths->default_character_file, sizeof(paths->default_character_file), "%s/character.json", paths->base_path);
+    snprintf(paths->items_file, sizeof(paths->items_file), "%s/items.json", paths->base_path);
+    snprintf(paths->actions_file, sizeof(paths->actions_file), "%s/actions.json", paths->base_path);
+    snprintf(paths->map_dir, sizeof(paths->map_dir), "%s/map", paths->base_path);
+    snprintf(paths->session_root_dir, sizeof(paths->session_root_dir), "%s/session", paths->base_path);
+}
+
+int copy_file(const char *src_path, const char *dest_path) {
+    FILE *src = fopen(src_path, "rb");
+    if (src == NULL) {
+        fprintf(stderr, "Error: Could not open source file %s\n", src_path);
+        return 0;
+    }
+
+    FILE *dest = fopen(dest_path, "wb");
+    if (dest == NULL) {
+        fprintf(stderr, "Error: Could not open destination file %s\n", dest_path);
+        fclose(src);
+        return 0;
+    }
+
+    char buffer[4096];
+    size_t bytes_read;
+    while ((bytes_read = fread(buffer, 1, sizeof(buffer), src)) > 0) {
+        fwrite(buffer, 1, bytes_read, dest);
+    }
+
+    fclose(src);
+    fclose(dest);
+    return 1;
+}
+
+void print_colored_line(const char* line, const GameState* game_state) {
+    if (line == NULL) {
+        printf("\n");
+        fflush(stdout);
+        return;
+    }
+
+    // List of speakers and their colors.
+    struct {
+        const char* name_prefix;
+        const char* color_code;
+    } speakers[] = {
+        {"Alice:", ALICE_COLOR},
+        {"Chisa:", CHISA_COLOR},
+        {"Father:", FATHER_COLOR},
+        {"米良柊子:", FUYUKO_MIRA_COLOR}, // Doctor
+        {"Mira:", LAINS_SISTER_MIRA_COLOR}, // Lain's Sister
+        {"幽灵:", ANSI_COLOR_RED}, // Ghost
+        {"爸爸:", FATHER_COLOR}, // Father
+        {"妈妈:", ANSI_COLOR_MAGENTA}, // Mom
+    };
+    int num_speakers = sizeof(speakers) / sizeof(speakers[0]);
+
+#ifdef USE_TYPEWRITER_EFFECT
+    // --- Typewriter Effect Implementation ---
+    const char* content_start = line;
+    for (int i = 0; i < num_speakers; i++) {
+        size_t prefix_len = strlen(speakers[i].name_prefix);
+        if (strncmp(line, speakers[i].name_prefix, prefix_len) == 0) {
+            // Found a speaker prefix, print it at once
+            printf("%s%s%s", speakers[i].color_code, speakers[i].name_prefix, ANSI_COLOR_RESET);
+            content_start += prefix_len;
+            break;
+        }
+    }
+
+    // Print the rest of the line char by char
+    for (int i = 0; content_start[i] != '\0'; i++) {
+        putchar(content_start[i]);
+        fflush(stdout);
+        usleep((useconds_t)(game_state->typewriter_delay * 1000000));
+    }
+
+    printf("\n");
+    fflush(stdout);
+
+#else
+    // --- Standard Instant Implementation ---
+    for (int i = 0; i < num_speakers; i++) {
+        size_t prefix_len = strlen(speakers[i].name_prefix);
+        if (strncmp(line, speakers[i].name_prefix, prefix_len) == 0) {
+            // Found a speaker prefix
+            printf("%s%s%s%s\n", speakers[i].color_code, speakers[i].name_prefix, ANSI_COLOR_RESET, line + prefix_len);
+            return;
+        }
+    }
+
+    // No speaker detected, print the line as is
+    printf("%s\n", line);
+#endif
+}
+
+void render_current_scene(const StoryScene* scene, const GameState* game_state) {
+    clear_screen(); // Clear screen for each scene render
+    print_game_time(game_state->time_of_day); // Print time at the top-left
+    #ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Entering render_current_scene.\n");
+#endif
+    if (scene == NULL) {
+        printf("Error: Scene is NULL.\n");
+        return;
+    }
+
+    printf("\n========================================\n");
+    if (scene->location_id[0] != '\0') {
+        // This part doesn't need typewriter effect
+        printf("Location: %s\n", scene->location_id);
+    }
+    printf("========================================\n");
+
+    for (int i = 0; i < scene->text_line_count; i++) {
+        print_colored_line(get_string_by_id(scene->text_content_ids[i]), game_state);
+    }
+
+    if (scene->choice_count > 0) {
+        printf("\n--- Choices ---\n");
+        int visible_choice_index = 1;
+        for (int i = 0; i < scene->choice_count; i++) {
+            const StoryChoice* choice = &scene->choices[i];
+            int is_selectable = 0;
+
+            // Check if there is a condition
+            if (choice->condition.flag_name[0] == '\0') {
+                is_selectable = 1; // No condition, always selectable
+            } else {
+                const char* flag_value_str = hash_table_get(game_state->flags, choice->condition.flag_name);
+                if (flag_value_str != NULL) {
+                    // Flag exists, compare its value
+                    int current_value = atoi(flag_value_str);
+                    if (current_value == choice->condition.required_value) {
+                        is_selectable = 1;
+                    }
+                }
+                // If flag is not set, is_selectable remains 0.
+            }
+
+            if (is_selectable) {
+                printf("%d. %s\n", visible_choice_index++, get_string_by_id(choice->text_id));
+            } else {
+                // Print disabled choice in gray and without a number
+                printf("   %s%s%s\n", ANSI_COLOR_BRIGHT_BLACK, get_string_by_id(choice->text_id), ANSI_COLOR_RESET);
+            }
+        }
+        printf("---------------\n");
+    }
+}
+
+void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index) {
+    if (argc > 1 && *arg_index < argc) {
+        // Automated mode: get input from command-line arguments
+        strncpy(buffer, argv[*arg_index], buffer_size - 1);
+        buffer[buffer_size - 1] = '\0';
+        printf("> %s\n", buffer); // Echo the automated input
+        (*arg_index)++;
+    } else {
+        // Manual mode: get input from stdin
+        printf("> ");
+        if (fgets(buffer, buffer_size, stdin) != NULL) {
+            buffer[strcspn(buffer, "\n")] = 0;
+        }
+    }
+}
+
+int is_numeric(const char* str) {
+    if (str == NULL || *str == '\0') {
+        return 0;
+    }
+    for (int i = 0; str[i] != '\0'; i++) {
+        if (!isdigit((unsigned char)str[i])) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+void print_game_time(int time_of_day) {
+    int hours = time_of_day / 60;
+    int minutes = time_of_day % 60;
+    printf(ANSI_COLOR_YELLOW "[%02d:%02d]" ANSI_COLOR_RESET "\n", hours, minutes);
+}
+
+void clear_screen() {
+    printf("\033[2J\033[H");
 }

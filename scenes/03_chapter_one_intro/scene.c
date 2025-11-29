@@ -5,8 +5,8 @@
 
 void init_scene_03_chapter_one_intro(StoryScene* scene) {
     memset(scene, 0, sizeof(StoryScene));
-    // Assuming this scene takes place in the 'lain_room' or 'entry' area before going to school
-    strcpy(scene->location_id, "lain_room"); // Or 'entry' depending on context
+    strcpy(scene->name, "第一章介绍");
+    strcpy(scene->location_id, "iwakura_lains_room"); // Or 'entry' depending on context
 
     scene->text_content_ids[0] = TEXT_CH1_INTRO_DESC1;
     scene->text_content_ids[1] = TEXT_CH1_INTRO_YOU_QUOTE1;

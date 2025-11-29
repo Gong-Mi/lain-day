@@ -5,9 +5,9 @@
 
 void init_scene_00_entry(StoryScene* scene) {
     // Clear previous state
-    memset(scene, 0, sizeof(StoryScene));
-
-    // The title "初始空间" is usually handled by a different UI element or omitted,
+        memset(scene, 0, sizeof(StoryScene));
+        strcpy(scene->name, "初始空间");
+        // The title "初始空间" is usually handled by a different UI element or omitted,
     // as it's not part of the sequential text content in the string table.
     scene->text_content_ids[0] = TEXT_EMPTY_LINE;
     scene->text_content_ids[1] = TEXT_ENTRY_DESC1;
