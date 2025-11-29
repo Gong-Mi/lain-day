@@ -413,24 +413,28 @@ void execute_command(const char* input, GameState* game_state) {
 #ifdef USE_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: Arls: Retrieved location '%s', pois_count: %d\n", current_loc->id, current_loc->pois_count);
 #endif
-            printf("Location: %s\n", current_loc->name);
-            printf("Description: %s\n", current_loc->description);
+            print_colored_line(current_loc->name, (const struct GameState*)game_state);
+            print_colored_line(current_loc->description, (const struct GameState*)game_state);
             printf("\nPoints of Interest:\n");
             if (current_loc->pois_count == 0) {
-                printf("  (none)\n");
+                print_colored_line("  (none)", (const struct GameState*)game_state);
             }
             for (int i = 0; i < current_loc->pois_count; i++) {
 #ifdef USE_DEBUG_LOGGING
                 fprintf(stderr, "DEBUG: Arls: Printing POI '%s'\n", current_loc->pois[i].name);
 #endif
-                printf("  - %s\n", current_loc->pois[i].name);
+                char poi_buf[MAX_LINE_LENGTH];
+                snprintf(poi_buf, MAX_LINE_LENGTH, "  - %s", current_loc->pois[i].name);
+                print_colored_line(poi_buf, (const struct GameState*)game_state);
             }
             printf("\nConnections:\n");
             if (current_loc->connection_count == 0) {
-                printf("  (none)\n");
+                print_colored_line("  (none)", (const struct GameState*)game_state);
             }
             for (int i = 0; i < current_loc->connection_count; i++) {
-                printf("  - %s\n", current_loc->connections[i]);
+                char conn_buf[MAX_LINE_LENGTH];
+                snprintf(conn_buf, MAX_LINE_LENGTH, "  - %s", current_loc->connections[i]);
+                print_colored_line(conn_buf, (const struct GameState*)game_state);
             }
         } else {
             printf("Error: Current location '%s' not found in map data.\n", game_state->player_state.location);

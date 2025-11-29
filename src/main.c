@@ -45,7 +45,7 @@ void init_paths(char* argv0, GamePaths* paths);
 
 // Game Loop Components
 int copy_file(const char *src_path, const char *dest_path);
-void print_colored_line(const char* line, const GameState* game_state);
+// void print_colored_line(const char* line, const GameState* game_state); // Prototype moved to game_types.h
 void render_current_scene(const StoryScene* scene, const GameState* game_state);
 void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index);
 int is_numeric(const char* str);
@@ -328,7 +328,7 @@ int copy_file(const char *src_path, const char *dest_path) {
     return 1;
 }
 
-void print_colored_line(const char* line, const GameState* game_state) {
+void print_colored_line(const char* line, const struct GameState* game_state) {
     if (line == NULL) {
         printf("\n");
         fflush(stdout);
@@ -391,7 +391,9 @@ void print_colored_line(const char* line, const GameState* game_state) {
 }
 
 void render_current_scene(const StoryScene* scene, const GameState* game_state) {
-    // clear_screen(); // Clear screen for each scene render
+    #ifdef USE_CLEAR_SCREEN
+    clear_screen(); // Clear screen for each scene render
+    #endif
     print_game_time(game_state->time_of_day); // Print time at the top-left
     #ifdef USE_DEBUG_LOGGING
 #ifdef USE_DEBUG_LOGGING

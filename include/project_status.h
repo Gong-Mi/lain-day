@@ -36,9 +36,8 @@
 //      - (GameState, PlayerState, Location, Item, Action, StoryScene, etc.)
 
 //  [✓] 4. 数据加载模块 (Data Loading Module)
-//      - 实现了从 'character.json' 加载玩家和初始游戏状态。
-//      - 实现了从 'items.json' 加载所有物品定义。
-//      - 实现了从 'actions.json' 加载所有动作定义 (将 payload 存为原始 cJSON 对象以保证灵活性)。
+//      - 已实现从 'character.json' 加载玩家和初始游戏状态，以及从 'items.json' 加载所有物品定义。
+//      - `actions.json` 文件已废弃，所有动作逻辑已迁移至 C 引擎代码中。
 
 //  [✓] 5. 地图系统加载 (Map System Loading)
 //      - 实现了遍历 'map/' 目录并加载每个地点的详细信息 (name, description, poi, connections)。
@@ -56,9 +55,8 @@
 //      - 实现了基于 'scene_changed' 标志的智能渲染，避免在执行信息展示类命令后重复刷新屏幕。
 
 //  [✓] 8. 动作与命令执行器 (Action & Command Executor)
-//      - 在 'executor.c' 中实现了执行器框架。
-//      - 已实现基础的动作类型，如 'story_change', 'location_change', 'acquire_item'。
-//      - 已实现基础的命令，如 'arls', 'inventory', 'help'。
+//      - 已实现基础的动作类型和命令 (例如 `story_change`, `location_change`, `acquire_item`, `arls`, `inventory`, `help`)。
+//      - `arls` 命令已增强，支持中文字符的正确显示。
 
 //  [✓] 9. 状态保存 (State Saving)
 //      - 实现了 'save_game_state' 函数，可在游戏退出时将玩家位置、物品、命令等状态写回 'character.json'。
@@ -67,21 +65,23 @@
 //      - 通过 CMake 选项实现了角色的编译时“生死”控制 (CHARACTER_NAME_ALIVE)。
 //      - 采用“条件代码/数据”方案 (Option B)，允许在编译时根据选项决定是否包含角色相关内容。
 
+//  [✓] 11. 调试与显示控制系统 (Debugging and Display Control System)
+//      - 引入了 CMake 级别的精细化调试开关 (`MASTER_DEBUG_SWITCH`, `ENABLE_DEBUG_LOGGING`, `ENABLE_STRING_DEBUG_LOGGING`, `ENABLE_MAP_DEBUG_LOGGING`) 和屏幕清理控制 (`ENABLE_CLEAR_SCREEN`)。
+//      - 所有调试信息已通过条件编译受控。
+
+//  [✓] 12. `zlib` 压缩库集成 (`zlib` Compression Library Integration)
+//      - 成功集成了 `external/zlib` 子模块，并在项目中添加了基于 `zlib` 的字符串压缩与解压缩工具函数。
+
 
 // =====================================================================================
 // --- 未完成功能 (UNIMPLEMENTED FEATURES / TODO) ---
 // =====================================================================================
 
 //  [ ] 1. 完整的动作执行逻辑 (Full Action Execution Logic)
-//      - 当前的 'executor.c' 需要扩展以支持 'actions.json' 中的所有动作类型，特别是：
-//        - `*_and_set_flags`: 所有带标志设置的复合动作。
-//        - `conditional_story_change`: 实现条件判断逻辑。
-//        - `enter_story` / `exit_story`: 实现支线故事的进入和返回。
-//        - `toggle_protocol`: 实现对 'network_status' 的修改。
+//      - 需要继续扩展 `executor.c` 中的动作逻辑，以实现更复杂的动作类型（如所有带标志设置的复合动作、条件判断逻辑等），并完善支线故事的进入和返回机制。
 
 //  [ ] 2. 完整的游戏内标志系统 (Generic Game Flag System)
-//      - 需要一个通用的系统来管理 `GameState` 中的任意标志（例如，一个哈希表或链表）。
-//      - 当前 `set_flags` 动作的实现非常初级，仅为占位符。
+//      - 需要一个通用的系统来管理 `GameState` 中的任意标志。当前的 `set_flags` 动作实现仍需完善。
 
 //  [ ] 3. 高级模拟终端命令 (Advanced Terminal Commands)
 //      - `examine <poi>`: 查看兴趣点的详细描述。
@@ -90,8 +90,7 @@
 
 //  [ ] 4. UI/渲染增强 (UI/Rendering Enhancements)
 //      - 实现 'character.json' 中定义的 `typewriter_delay` 打字机效果。
-//      - [进行中] 为说话人姓名实现 ANSI 颜色高亮功能。
-//      - [ ] 实现 ANSI Block Art 的渲染功能。
+//      - 实现 ANSI Block Art 的渲染功能。
 
 
 // =====================================================================================

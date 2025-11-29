@@ -52,6 +52,11 @@ typedef struct {
 //     cJSON *payload_json; // Store the raw payload as a cJSON object, to be parsed at execution
 // } Action;
 
+// Forward declarations
+struct GameState; // Forward declaration
+
+void print_colored_line(const char* line, const struct GameState* game_state);
+
 // Represents a Point of Interest within a Location (from poi.json)
 typedef struct {
     char id[MAX_NAME_LENGTH];

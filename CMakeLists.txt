@@ -14,11 +14,43 @@ option(CHARACTER_FUYUKO_MIRA_ALIVE "Include Fuyuko Mira (Doctor) in the game bui
 option(CHARACTER_LAINS_SISTER_MIRA_ALIVE "Include Mira (Lain's Sister) in the game build" ON)
 
 # --- Feature Toggles ---
+# MASTER_DEBUG_SWITCH:
+# This is the master switch for all debug-related options.
+# If set to OFF, all other debug-specific toggles below will be ignored,
+# effectively disabling all debug output.
+# If set to ON, the individual debug toggles (ENABLE_DEBUG_LOGGING, etc.) will be respected.
+# Default: ON (allowing individual toggles to be used or providing a quick way to disable all debugs).
 option(MASTER_DEBUG_SWITCH "Master switch for all debug logging" ON)
+# ENABLE_TYPEWRITER_EFFECT:
+# Controls the typewriter text rendering effect.
+# When MASTER_DEBUG_SWITCH is ON, this toggle determines if text is printed character by character.
+# Default: OFF (faster text display).
 option(ENABLE_TYPEWRITER_EFFECT "Enable typewriter text rendering effect" OFF)
+# ENABLE_DEBUG_LOGGING:
+# Controls general debug log messages printed to stderr.
+# These messages provide insight into core game logic and data loading.
+# Only effective if MASTER_DEBUG_SWITCH is ON.
+# Default: ON (useful for general development tracking).
 option(ENABLE_DEBUG_LOGGING "Enable debug logging to stderr" ON)
+# ENABLE_STRING_DEBUG_LOGGING:
+# Controls detailed debug messages related to String IDs and their content during scene rendering.
+# Useful for debugging text display and internationalization issues.
+# Only effective if MASTER_DEBUG_SWITCH is ON.
+# Default: OFF (to keep console output clean during normal development).
 option(ENABLE_STRING_DEBUG_LOGGING "Enable debug logging for string IDs to stderr" OFF)
+# ENABLE_MAP_DEBUG_LOGGING:
+# Controls detailed debug messages during map loading and processing (e.g., programmatic location additions, POI verification).
+# Useful for debugging world structure and navigation.
+# Only effective if MASTER_DEBUG_SWITCH is ON.
+# Default: OFF (to keep console output clean during normal development).
 option(ENABLE_MAP_DEBUG_LOGGING "Enable debug logging for map loading and processing to stderr" OFF)
+# ENABLE_CLEAR_SCREEN:
+# Controls whether the terminal screen is cleared on each scene render.
+# When MASTER_DEBUG_SWITCH is ON, this option functions as a game style toggle.
+# When MASTER_DEBUG_SWITCH is OFF, this option serves as a debugging aid (keeping previous output for inspection).
+# Only effective if MASTER_DEBUG_SWITCH is ON.
+# Default: OFF (keeps previous output, useful for debugging by default).
+option(ENABLE_CLEAR_SCREEN "Enable clearing screen on each scene render" OFF)
 
 # --- Compiler Cache ---
 option(USE_CCACHE "Use ccache to speed up compilation, if available" ON)
@@ -101,11 +133,16 @@ target_compile_definitions(lain_day_c PUBLIC
 )
 
 # Add feature toggle definitions
+# The following compile definitions (USE_TYPEWRITER_EFFECT, USE_DEBUG_LOGGING, etc.)
+# are enabled based on their respective CMake options, but are also dependent
+# on MASTER_DEBUG_SWITCH being ON. This means if MASTER_DEBUG_SWITCH is OFF,
+# none of these features will be enabled, regardless of their individual settings.
 target_compile_definitions(lain_day_c PUBLIC
-    $<$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>:USE_TYPEWRITER_EFFECT>
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>>:USE_TYPEWRITER_EFFECT>
     $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_DEBUG_LOGGING}>>:USE_DEBUG_LOGGING>
     $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_STRING_DEBUG_LOGGING}>>:USE_STRING_DEBUG_LOGGING>
     $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_MAP_DEBUG_LOGGING}>>:USE_MAP_DEBUG_LOGGING>
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_CLEAR_SCREEN}>>:USE_CLEAR_SCREEN>
 )
 
 # --- Installation Rules ---
