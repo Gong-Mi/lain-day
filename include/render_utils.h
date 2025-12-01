@@ -3,8 +3,13 @@
 
 #include "game_types.h" // For GameState definition
 
-// Prints a line of text, applying color coding for speakers.
-void print_colored_line(const char* line, const struct GameState* game_state);
+void print_game_time(int time_of_day);
+
+// Prints a line of dialogue, handling speaker names and colors.
+void print_colored_line(SpeakerID speaker_id, StringID text_id, const struct GameState* game_state);
+
+// Prints a raw, unformatted line of text.
+void print_raw_text(const char* text);
 
 // Clears the terminal screen.
 void clear_screen();

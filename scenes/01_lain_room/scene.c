@@ -14,21 +14,22 @@ void init_scene_01_lain_room(StoryScene* scene) {
     fprintf(stderr, "DEBUG: init_scene_01_lain_room: TEXT_LAIN_ROOM_TITLE value: %d\n", TEXT_LAIN_ROOM_TITLE);
 #endif
 
-    scene->text_content_ids[0] = TEXT_LAIN_ROOM_TITLE;
-    scene->text_content_ids[1] = TEXT_EMPTY_LINE;
-    scene->text_content_ids[2] = TEXT_LAIN_ROOM_DESC1;
-    scene->text_content_ids[3] = TEXT_EMPTY_LINE;
-    scene->text_content_ids[4] = TEXT_LAIN_ROOM_DESC2;
-    scene->text_content_ids[5] = TEXT_EMPTY_LINE;
-    scene->text_content_ids[6] = TEXT_LAIN_ROOM_DESC3;
-    scene->text_content_ids[7] = TEXT_EMPTY_LINE;
-    scene->text_content_ids[8] = TEXT_LAIN_ROOM_DESC4;
-    scene->text_line_count = 9;
+    scene->dialogue_lines[0] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_LAIN_ROOM_TITLE};
+    scene->dialogue_lines[1] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_EMPTY_LINE};
+    scene->dialogue_lines[2] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_LAIN_ROOM_DESC1};
+    scene->dialogue_lines[3] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_EMPTY_LINE};
+    scene->dialogue_lines[4] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_LAIN_ROOM_DESC2};
+    scene->dialogue_lines[5] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_EMPTY_LINE};
+    scene->dialogue_lines[6] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_LAIN_ROOM_DESC3};
+    scene->dialogue_lines[7] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_EMPTY_LINE};
+    scene->dialogue_lines[8] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_LAIN_ROOM_DESC4};
+    scene->dialogue_lines[9] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_LAIN_ROOM_DESC5}; // TEXT_LAIN_ROOM_DESC5 was not part of the old block
+    scene->dialogue_line_count = 10;
     scene->choices[0] = (StoryChoice){.text_id = TEXT_CHOICE_TALK_TO_FIGURE, .action_id = "talk_to_figure"};
     scene->choices[1] = (StoryChoice){.text_id = TEXT_CHOICE_EXAMINE_NAVI, .action_id = "examine_navi"};
     scene->choices[2] = (StoryChoice){.text_id = TEXT_CHOICE_LEAVE_ROOM, .action_id = "return_to_entry"};
     scene->choice_count = 3;
 #ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: init_scene_01_lain_room: scene->text_content_ids[0] after assignment: %d\n", scene->text_content_ids[0]);
+    fprintf(stderr, "DEBUG: init_scene_01_lain_room: scene->dialogue_lines[0].text_id after assignment: %d\n", scene->dialogue_lines[0].text_id);
 #endif
 }

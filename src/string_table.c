@@ -66,41 +66,41 @@ const char* g_string_table[TEXT_COUNT] = {
     // 01c_talk_to_figure_endprologue Text
     [TEXT_TALK_FIGURE_TITLE] = "序章结束（结局G：停火）",
     [TEXT_TALK_FIGURE_DESC1] = "你走上前，对着窗边的那个身影开口：",
-    [TEXT_TALK_FIGURE_YOU_QUOTE1] = "你: “你这个幽灵……是想占据我的全部吗？”",
+    [TEXT_TALK_FIGURE_YOU_QUOTE1] = "“你这个幽灵……是想占据我的全部吗？”",
     [TEXT_TALK_FIGURE_DESC2] = "那个身影缓缓地转过头来。TA的脸和你一模一样，但眼神空洞，没有任何情绪。",
-    [TEXT_TALK_FIGURE_GHOST_QUOTE1] = "幽灵: “不知道。我只是被世界选中的载体，而你……是那个进行选择的人。”",
-    [TEXT_TALK_FIGURE_GHOST_QUOTE2] = "幽灵: “我对你的一切毫无兴趣。”",
-    [TEXT_TALK_FIGURE_YOU_QUOTE2] = "你： “但你还是开始入侵我的房间了。”",
-    [TEXT_TALK_FIGURE_GHOST_QUOTE3] = "幽灵： “不是入侵，这一切都是自动。我也没有选择……要不，我们暂时停火好吗？”",
-    [TEXT_TALK_FIGURE_YOU_QUOTE3] = "你： “……希望如此。”",
+    [TEXT_TALK_FIGURE_GHOST_QUOTE1] = "“不知道。我只是被世界选中的载体，而你……是那个进行选择的人。”",
+    [TEXT_TALK_FIGURE_GHOST_QUOTE2] = "“我对你的一切毫无兴趣。”",
+    [TEXT_TALK_FIGURE_YOU_QUOTE2] = "“但你还是开始入侵我的房间了。”",
+    [TEXT_TALK_FIGURE_GHOST_QUOTE3] = "“不是入侵，这一切都是自动。我也没有选择……要不，我们暂时停火好吗？”",
+    [TEXT_TALK_FIGURE_YOU_QUOTE3] = "“……希望如此。”",
     [TEXT_TALK_FIGURE_DESC3] = "说完，你转身按下了Navi的电源。屏幕熄灭，房间陷入黑暗。但这一次，你知道，那个“幽灵”并没有消失，只是暂时休眠了。",
 
     // 01d_navi_reboot_endprologue Text
     [TEXT_NAVI_REBOOT_TITLE] = "序章结束（结局H：重启）",
     [TEXT_NAVI_REBOOT_DESC1] = "你选择了【重启Navi】。屏幕瞬间变黑，然后一行行启动代码飞速滚过。",
     [TEXT_NAVI_REBOOT_DESC2] = "与此同时，窗边的幽灵闪烁了一下，消失了——不，不是消失。TA身上的衣服在一瞬间变了，从白色的连衣裙变成了一套你从未见过的、似乎是某个校服的样式。",
-    [TEXT_NAVI_REBOOT_YOU_QUOTE1] = "你: “所以……你现在是谁？”",
+    [TEXT_NAVI_REBOOT_YOU_QUOTE1] = "“所以……你现在是谁？”",
     [TEXT_NAVI_REBOOT_DESC3] = "TA没有立刻回答，而是慢慢向你走来，靠近，然后……轻轻地抱住了你。一个冰冷的、没有实感的拥抱。",
     [TEXT_NAVI_REBOOT_GHOST_QUOTE1] = "幽灵: “我就是你。或者说，是你的一个‘可能’。”",
-    [TEXT_NAVI_REBOOT_GHOST_QUOTE2] = "幽灵： “比如，你曾经想过去美国留学，然后回国当一名医生。”",
-    [TEXT_NAVI_REBOOT_YOU_QUOTE2] = "你： “我没有！”",
-    [TEXT_NAVI_REBOOT_GHOST_QUOTE3] = "幽灵： “所以我说，只是一个‘可能’。那么，你是谁？”",
-    [TEXT_NAVI_REBOOT_YOU_QUOTE3] = "你： “我就是我。”",
+    [TEXT_NAVI_REBOOT_GHOST_QUOTE2] = "“比如，你曾经想过去美国留学，然后回国当一名医生。”",
+    [TEXT_NAVI_REBOOT_YOU_QUOTE2] = "“我没有！”",
+    [TEXT_NAVI_REBOOT_GHOST_QUOTE3] = "“所以我说，只是一个‘可能’。那么，你是谁？”",
+    [TEXT_NAVI_REBOOT_YOU_QUOTE3] = "“我就是我。”",
     [TEXT_NAVI_REBOOT_DESC4] = "TA松开了拥抱，嘴角似乎有一丝微笑，说出了一句你无法理解的话：",
-    [TEXT_NAVI_REBOOT_GHOST_QUOTE4] = "幽灵： “是吗？我软链接我自己吗？……不，并没有。我们都只是空文件而已。”",
+    [TEXT_NAVI_REBOOT_GHOST_QUOTE4] = "“是吗？我软链接我自己吗？……不，并没有。我们都只是空文件而已。”",
 
     // 01e_navi_connect_endprologue Text
     [TEXT_NAVI_CONNECT_TITLE] = "序章结束（结局I：403 Forbidden）",
     [TEXT_NAVI_CONNECT_DESC1] = "你选择了【尝试打开网络链接】。屏幕上的进度条消失了，取而代之的是一行冷冰冰的错误代码：",
     [TEXT_NAVI_CONNECT_STATUS_CODE] = "> Status: 403 Forbidden",
     [TEXT_NAVI_CONNECT_DESC2] = "窗边的幽灵开口了，带着一丝嘲弄：",
-    [TEXT_NAVI_CONNECT_GHOST_QUOTE1] = "幽灵： “没用的。你现在只是独自一人。”",
-    [TEXT_NAVI_CONNECT_YOU_QUOTE1] = "你： “你甚至都不是‘人’。”",
-    [TEXT_NAVI_CONNECT_GHOST_QUOTE2] = "幽灵： “不是‘404 Not Found’，就还有希望。你只是被‘拒绝’了……只要你登录那个账号……”",
-    [TEXT_NAVI_CONNECT_YOU_QUOTE2] = "你： “不！你又要怂恿我！我就是不……”",
-    [TEXT_NAVI_CONNECT_GHOST_QUOTE3] = "幽灵： “你会想的。没有人会拒绝被人理解的感觉。”",
-    [TEXT_NAVI_CONNECT_YOU_QUOTE3] = "你： “哪怕是不情愿的吗？”",
-    [TEXT_NAVI_CONNECT_GHOST_QUOTE4] = "幽灵： “是的。”",
+    [TEXT_NAVI_CONNECT_GHOST_QUOTE1] = "“没用的。你现在只是独自一人。”",
+    [TEXT_NAVI_CONNECT_YOU_QUOTE1] = "“你甚至都不是‘人’。”",
+    [TEXT_NAVI_CONNECT_GHOST_QUOTE2] = "“不是‘404 Not Found’，就还有希望。你只是被‘拒绝’了……只要你登录那个账号……”",
+    [TEXT_NAVI_CONNECT_YOU_QUOTE2] = "“不！你又要怂恿我！我就是不……”",
+    [TEXT_NAVI_CONNECT_GHOST_QUOTE3] = "“你会想的。没有人会拒绝被人理解的感觉。”",
+    [TEXT_NAVI_CONNECT_YOU_QUOTE3] = "“哪怕是不情愿的吗？”",
+    [TEXT_NAVI_CONNECT_GHOST_QUOTE4] = "“是的。”",
     [TEXT_NAVI_CONNECT_DESC3] = "幽灵的话语在寂静的房间里回响。屏幕上的“403 Forbidden”像是一种最终的宣判。",
 
     // 02_downstairs.md
@@ -116,7 +116,7 @@ const char* g_string_table[TEXT_COUNT] = {
 
     // 02a_talk_to_dad.md
     [TEXT_TALK_TO_DAD_DESC1] = "你走到爸爸面前。他从报纸上抬起头，扶了扶眼镜，看着你问道：",
-    [TEXT_TALK_TO_DAD_DAD_QUOTE1] = "爸爸: “lain，这几天熟悉Navi的操作没有？要是有什么困难，可以问我。”",
+    [TEXT_TALK_TO_DAD_DAD_QUOTE1] = "“lain，这几天熟悉Navi的操作没有？要是有什么困难，可以问我。”",
     [TEXT_TALK_TO_DAD_DESC2] = "他的语气很平常，就像在问你学校的功课一样。",
     [TEXT_TALK_TO_DAD_DESC3] = "你如何回应？",
     [TEXT_CHOICE_DAD_REPLY_NO] = "“还没有。”",
@@ -125,28 +125,28 @@ const char* g_string_table[TEXT_COUNT] = {
 
     // 02b_dad_reply_no.md
     [TEXT_DAD_REPLY_NO_DESC1] = "听到你的回答，爸爸点了点头，脸上没有什么特别的表情。他把目光重新投向报纸，随口说道：",
-    [TEXT_DAD_REPLY_NO_DAD_QUOTE1] = "爸爸: “看样子还为时过早……没事，这个Navi是lain的，lain自己可以决定怎么用。”",
+    [TEXT_DAD_REPLY_NO_DAD_QUOTE1] = "“看样子还为时过早……没事，这个Navi是lain的，lain自己可以决定怎么用。”",
     [TEXT_DAD_REPLY_NO_DESC2] = "说完，他便不再作声，似乎完全沉浸在了报纸的世界里。对话自然而然地结束了。",
     [TEXT_CHOICE_RETURN_TO_LIVING_ROOM_FROM_DAD] = "返回客厅",
 
     // 02c_dad_ask_help.md
     [TEXT_DAD_ASK_HELP_DESC1] = "听到你的请求，爸爸放下了报纸，认真地看向你。",
-    [TEXT_DAD_ASK_HELP_DAD_QUOTE1] = "爸爸: “帮助……吗。也好。”",
+    [TEXT_DAD_ASK_HELP_DAD_QUOTE1] = "“帮助……吗。也好。”",
     [TEXT_DAD_ASK_HELP_DESC2] = "他沉吟了一下，然后指了指你的方向，仿佛你的眼前就有一块看不见的屏幕。",
-    [TEXT_DAD_ASK_HELP_DAD_QUOTE2] = "爸爸: “世界的基础是连接，而连接的工具就是命令。仔细看好……”",
+    [TEXT_DAD_ASK_HELP_DAD_QUOTE2] = "“世界的基础是连接，而连接的工具就是命令。仔细看好……”",
     [TEXT_DAD_ASK_HELP_DESC3] = "【开发者说明：此处进入游戏的帮助/教程系统。系统将以伪终端的形式，介绍核心的游戏命令，例如 `connect`, `scan`, `read`, `whoami` 等。教程结束后，玩家将返回客厅。】",
     [TEXT_CHOICE_END_HELP_RETURN_TO_LIVING_ROOM] = "结束帮助，返回客厅",
 
     // 02d_talk_to_mom_normal.md
     [TEXT_TALK_TO_MOM_NORMAL_DESC1] = "你走进厨房，妈妈停下了手中的活，转过身来，脸上带着温柔的微笑。",
-    [TEXT_TALK_TO_MOM_NORMAL_MOM_QUOTE1] = "妈妈: “lain，回来啦。在学校过得怎么样？”",
+    [TEXT_TALK_TO_MOM_NORMAL_MOM_QUOTE1] = "“lain，回来啦。在学校过得怎么样？”",
     [TEXT_TALK_TO_MOM_NORMAL_DESC2] = "她的关心很真切，就像一个普通的母亲。",
     [TEXT_CHOICE_MOM_REPLY_FINE] = "“还好。”",
     [TEXT_CHOICE_MOM_REPLY_SILENT] = "“……” (沉默)",
 
     // 02e_talk_to_mom_vision.md
     [TEXT_TALK_TO_MOM_VISION_DESC1] = "你走进厨房，妈妈似乎感觉到了什么，她停下手中的活，转过身来，脸上的表情有些担忧。",
-    [TEXT_TALK_TO_MOM_VISION_MOM_QUOTE1] = "妈妈: “lain……你那个幻觉还在吗？要不要……去再见见冬子老师？”",
+    [TEXT_TALK_TO_MOM_VISION_MOM_QUOTE1] = "“lain……你那个幻觉还在吗？要不要……去再见见冬子老师？”",
     [TEXT_TALK_TO_MOM_VISION_DESC2] = "她小心翼翼地措辞，眼神里充满了关切。",
     [TEXT_CHOICE_MOM_DENY_VISION] = "“我没有幻觉。”",
     [TEXT_CHOICE_MOM_AGREE_DOCTOR] = "“也许我该去。”",
@@ -155,20 +155,20 @@ const char* g_string_table[TEXT_COUNT] = {
     // 02f_mom_reply_fine_endprologue.md
     [TEXT_MOM_REPLY_FINE_TITLE] = "序章结束（结局A：日常）",
     [TEXT_MOM_REPLY_FINE_DESC1] = "听到你的回答，妈妈点了点头，似乎有些心不在焉。",
-    [TEXT_MOM_REPLY_FINE_MOM_QUOTE1] = "妈妈: “哦……时候不早了，早点休息吧。”",
+    [TEXT_MOM_REPLY_FINE_MOM_QUOTE1] = "“哦……时候不早了，早点休息吧。”",
     [TEXT_MOM_REPLY_FINE_DESC2] = "她说完，便转过身去继续洗碗，不再说话。客厅里只剩下爸爸翻动报纸的沙沙声，和姐姐电话里传来的模糊不清的笑声。",
     [TEXT_MOM_REPLY_FINE_DESC3] = "一切都和往常一样。",
 
     // 02g_mom_reply_silent_endprologue.md
     [TEXT_MOM_REPLY_SILENT_TITLE] = "序章结束（结局B：沉默）",
     [TEXT_MOM_REPLY_SILENT_DESC1] = "你没有回答，只是静静地站着。妈妈脸上的微笑僵了一下，但很快又恢复了自然。她解下围裙，擦了擦手说道：",
-    [TEXT_MOM_REPLY_SILENT_MOM_QUOTE1] = "妈妈: “时候不早了。去冰箱拿瓶牛奶喝完，早点睡吧。”",
+    [TEXT_MOM_REPLY_SILENT_MOM_QUOTE1] = "“时候不早了。去冰箱拿瓶牛奶喝完，早点睡吧。”",
     [TEXT_MOM_REPLY_SILENT_DESC2] = "她没有再追问，也没有再看你，而是开始收拾厨房的台面，似乎已经认定了对话的结束。",
 
     // 02h_mom_deny_vision_endprologue.md
     [TEXT_MOM_DENY_VISION_TITLE] = "序章结束（结局C：回避）",
     [TEXT_MOM_DENY_VISION_DESC1] = "你试图否认：“我没有……”",
-    [TEXT_MOM_DENY_VISION_MOM_QUOTE1] = "妈妈: “那明天准时登校。”",
+    [TEXT_MOM_DENY_VISION_MOM_QUOTE1] = "“那明天准时登校。”",
     [TEXT_MOM_DENY_VISION_DESC2] = "你还想再说些什么：“我……”",
     [TEXT_MOM_DENY_VISION_YOU_QUOTE1] = "你: “我……”",
     [TEXT_MOM_DENY_VISION_DESC3] = "但客厅另一边的爸爸突然开口，他的声音不大，却不容置疑。他已经放下了报纸。",
@@ -180,7 +180,7 @@ const char* g_string_table[TEXT_COUNT] = {
     [TEXT_MOM_AGREE_DOCTOR_DESC1] = "你低声回应：“也许……我应该去。”",
     [TEXT_MOM_AGREE_DOCTOR_DAD_QUOTE1] = "爸爸: “别勉强，lain。你母亲也是在关心你。”",
     [TEXT_MOM_AGREE_DOCTOR_DESC2] = "妈妈则沉默着从厨房的一个抽屉里拿出一个东西，递给你。",
-    [TEXT_MOM_AGREE_DOCTOR_MOM_QUOTE1] = "妈妈: “给。这个是冬子老师给你的……日记本。”",
+    [TEXT_MOM_AGREE_DOCTOR_MOM_QUOTE1] = "“给。这个是冬子老师给你的……日记本。”",
     [TEXT_MOM_AGREE_DOCTOR_DESC3] = "你接过它——一个崭新的笔记本，还附带一支笔。",
 
     // 02j_get_milk_endprologue.md
@@ -198,10 +198,10 @@ const char* g_string_table[TEXT_COUNT] = {
 
     // 03_chapter_one_intro.md
     [TEXT_CH1_INTRO_DESC1] = "刺耳的闹钟声将你从混沌的睡眠中拽醒。",
-    [TEXT_CH1_INTRO_YOU_QUOTE1] = "你： “……闹钟？”",
+    [TEXT_CH1_INTRO_YOU_QUOTE1] = "“……闹钟？”",
     [TEXT_CH1_INTRO_DESC2] = "你喃喃自语，伸手在床头柜上摸索着。",
-    [TEXT_CH1_INTRO_YOU_QUOTE2] = "你： “我的手机呢？”",
-    [TEXT_CH1_INTRO_NAVI_QUOTE1] = "Navi： 【你昨天把手机借给姐姐了。】",
+    [TEXT_CH1_INTRO_YOU_QUOTE2] = "“我的手机呢？”",
+    [TEXT_CH1_INTRO_NAVI_QUOTE1] = "【你昨天把手机借给姐姐了。】",
     [TEXT_CH1_INTRO_DESC3] = "你顾不上太多，慌乱地冲下楼。餐桌上放着牛奶和一袋面包，你抓起它们，算是解决了早餐。你看着手中的面包，心里闪过一个念头：“看样子，他们今晚又不在家了。”",
     [TEXT_CH1_INTRO_DESC4] = "正当你准备出门时，你看到姐姐正站在门口，似乎在等你。",
     [TEXT_CHOICE_TALK_TO_SISTER] = "和姐姐说话",
@@ -210,24 +210,24 @@ const char* g_string_table[TEXT_COUNT] = {
     // Fixed part of the scene
     [TEXT_SISTER_FIXED_DESC1] = "你走到门口，姐姐 Mika 看着你。",
     [TEXT_SISTER_FIXED_DESC2] = "她把手机塞到你手里，不等你反应，就自顾自地开门走了出去。",
-    [TEXT_SISTER_FIXED_DESC3] = "Mika: “我先下楼了，你快点。”",
+    [TEXT_SISTER_FIXED_DESC3] = "“我先下楼了，你快点。”",
     [TEXT_SISTER_FIXED_DESC4] = "你现在手里拿着你的手机。这封神秘的邮件，你看还是不看？",
 
     // Cold mood specific
-    [TEXT_SISTER_COLD_QUOTE1] = "Mika: “给。”",
-    [TEXT_SISTER_COLD_QUOTE2] = "Mika: “记得带好。今天父母不在，我今晚也出去。晚餐你可以和朋友一起去吃。”",
+    [TEXT_SISTER_COLD_QUOTE1] = "“给。”",
+    [TEXT_SISTER_COLD_QUOTE2] = "“记得带好。今天父母不在，我今晚也出去。晚餐你可以和朋友一起去吃。”",
 
     // Curious mood specific
-    [TEXT_SISTER_CURIOUS_QUOTE1] = "Mika: “哟，今天知道下楼了？昨天一天都把自己关在房间里。”",
-    [TEXT_SISTER_CURIOUS_QUOTE2] = "Mika: “给，你的手机。你昨天晚上有封邮件，一个叫‘千砂(Chisa)’的人发来的。”",
-    [TEXT_SISTER_CURIOUS_QUOTE3] = "Mika: “我不小心瞄到主题了……说什么‘连接世界’，让你和她一起去个地方……网吧还是游戏厅之类的。”",
-    [TEXT_SISTER_CURIOUS_QUOTE4] = "Mika: “父母今天有事，早餐是我准备的，不知道你喜欢什么就拿了面包。”",
+    [TEXT_SISTER_CURIOUS_QUOTE1] = "“哟，今天知道下楼了？昨天一天都把自己关在房间里。”",
+    [TEXT_SISTER_CURIOUS_QUOTE2] = "“给，你的手机。你昨天晚上有封邮件，一个叫‘千砂(Chisa)’的人发来的。”",
+    [TEXT_SISTER_CURIOUS_QUOTE3] = "“我不小心瞄到主题了……说什么‘连接世界’，让你和她一起去个地方……网吧还是游戏厅之类的。”",
+    [TEXT_SISTER_CURIOUS_QUOTE4] = "“父母今天有事，早餐是我准备的，不知道你喜欢什么就拿了面包。”",
 
     // Default mood specific
-    [TEXT_SISTER_DEFAULT_QUOTE1] = "Mika: “你昨天下楼，是因为手机吧？刚刚听你的脚步声，感觉你很急。”",
-    [TEXT_SISTER_DEFAULT_QUOTE2] = "Mika: “话说回来，‘千砂(Chisa)’是你男朋友吗？还是普通同学？”",
-    [TEXT_SISTER_DEFAULT_YOU_QUOTE1] = "你： “？”",
-    [TEXT_SISTER_DEFAULT_QUOTE3] = "Mika: “看样子你昨天下楼不是为了这个啊……行了，父母今天晚上很晚回来，你可以考虑在外面吃饭。再见。”",
+    [TEXT_SISTER_DEFAULT_QUOTE1] = "“你昨天下楼，是因为手机吧？刚刚听你的脚步声，感觉你很急。”",
+    [TEXT_SISTER_DEFAULT_QUOTE2] = "“话说回来，‘千砂(Chisa)’是你男朋友吗？还是普通同学？”",
+    [TEXT_SISTER_DEFAULT_YOU_QUOTE1] = "“？”",
+    [TEXT_SISTER_DEFAULT_QUOTE3] = "“看样子你昨天下楼不是为了这个啊……行了，父母今天晚上很晚回来，你可以考虑在外面吃饭。再见。”",
 
     // Shared Choices
     [TEXT_CHOICE_READ_EMAIL_FROM_CHISA] = "查看那封邮件",

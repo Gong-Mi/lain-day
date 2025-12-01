@@ -27,7 +27,8 @@
     "inventory",
     "inv",
     "arls",
-    "examine"
+    "examine",
+    "time"
   ],
   "current_story_file": "story/00_entry.md",
   "return_to_story_file": null,

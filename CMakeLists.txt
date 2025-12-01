@@ -97,41 +97,93 @@ include_directories(scenes) # Add scenes directory to include path
 include_directories(sequences) # Add sequences directory to include path
 include_directories("${PROJECT_BINARY_DIR}/include") # For generated headers
 
+# --- Auto-generate character.json data header ---
+set(CHARACTER_JSON_FILE "${PROJECT_SOURCE_DIR}/character.json")
+set(GENERATED_CHARACTER_DATA_H "${PROJECT_BINARY_DIR}/include/character_data.h")
+
+# Add custom command to generate the header file
+add_custom_command(
+    OUTPUT ${GENERATED_CHARACTER_DATA_H}
+    COMMAND ${CMAKE_COMMAND} -DINPUT_FILE=${CHARACTER_JSON_FILE} -DOUTPUT_FILE=${GENERATED_CHARACTER_DATA_H} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_json_header.cmake
+    DEPENDS ${CHARACTER_JSON_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_json_header.cmake
+    COMMENT "Generating C header from character.json"
+)
+
+# Create a target for the generated header to ensure it's built
+add_custom_target(generate_character_header ALL DEPENDS ${GENERATED_CHARACTER_DATA_H})
+
 # Find all scene source files automatically.
-# This allows new scenes to be added simply by creating a new directory
-# under /scenes/ with a scene.c file, without needing to modify this file.
-file(GLOB_RECURSE SCENE_SOURCES "scenes/*/scene.c")
+
+file(GLOB_RECURSE SCENE_SUBDIR_SOURCES "scenes/*/scene.c")
+
+file(GLOB SCENE_ROOT_SOURCES "scenes/*.c")
+
+
 
 # Find all plot sequence source files automatically.
+
 file(GLOB_RECURSE SEQUENCE_SOURCES "sequences/*/scene.c")
 
 
 
 # --- Define common source files for the game engine ---
+
 set(GAME_ENGINE_SOURCES
+
     src/cJSON.c
+
     src/data_loader.c
+
     src/map_loader.c
+
     src/executor.c
+
     src/flag_system.c
+
     src/string_table.c
+
     src/scenes.c
+
     src/cmap.c
+
     src/compression_util.c
+
     src/render_utils.c
-    ${SCENE_SOURCES}
+
+    ${SCENE_SUBDIR_SOURCES}
+
+    ${SCENE_ROOT_SOURCES}
+
     ${SEQUENCE_SOURCES}
+
 )
 
 # --- Define Executables ---
 
 # Main game executable
 add_executable(lain_day_c src/main.c ${GAME_ENGINE_SOURCES})
-target_link_libraries(lain_day_c PUBLIC zlibstatic)
+target_link_libraries(lain_day_c PUBLIC zlibstatic pthread)
 
 # Scene debugger tool
 add_executable(scene_debugger tools/scene_debugger.c ${GAME_ENGINE_SOURCES})
-target_link_libraries(scene_debugger PUBLIC zlibstatic)
+target_link_libraries(scene_debugger PUBLIC zlibstatic pthread)
+
+# Add dependency to ensure header is generated before compiling executables
+add_dependencies(lain_day_c generate_character_header)
+add_dependencies(scene_debugger generate_character_header)
+
+# Add feature toggle definitions
+# The following compile definitions (USE_TYPEWRITER_EFFECT, USE_DEBUG_LOGGING, etc.)
+# are enabled based on their respective CMake options, but are also dependent
+# on MASTER_DEBUG_SWITCH being ON. This means if MASTER_DEBUG_SWITCH is OFF,
+# none of these features will be enabled, regardless of their individual settings.
+target_compile_definitions(scene_debugger PUBLIC
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>>:USE_TYPEWRITER_EFFECT>
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_DEBUG_LOGGING}>>:USE_DEBUG_LOGGING>
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_STRING_DEBUG_LOGGING}>>:USE_STRING_DEBUG_LOGGING>
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_MAP_DEBUG_LOGGING}>>:USE_MAP_DEBUG_LOGGING>
+    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_CLEAR_SCREEN}>>:USE_CLEAR_SCREEN>
+)
 
 
 # Add compile definitions for character life/death options

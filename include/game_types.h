@@ -55,8 +55,6 @@ typedef struct {
 // Forward declarations
 struct GameState; // Forward declaration
 
-void print_colored_line(const char* line, const struct GameState* game_state);
-
 // Represents a Point of Interest within a Location (from poi.json)
 typedef struct {
     char id[MAX_NAME_LENGTH];
@@ -99,17 +97,37 @@ typedef struct {
     ChoiceCondition condition;        // Condition for this choice to be visible/selectable
 } StoryChoice;
 
-// A single story scene loaded from a Markdown file
+// Enum to identify speakers
+typedef enum {
+    SPEAKER_NONE,     // For narrative text, descriptions, etc.
+    SPEAKER_LAIN,     // The player character
+    SPEAKER_MOM,
+    SPEAKER_DAD,
+    SPEAKER_ALICE,
+    SPEAKER_CHISA,
+    SPEAKER_MIRA,     // Lain's sister
+    SPEAKER_GHOST,
+    SPEAKER_DOCTOR,   // Fuyuko Mira
+    SPEAKER_NAVI,     // The computer
+    SPEAKER_PARENT,   // For ambiguous parent lines
+    SPEAKER_COUNT     // Keep this last for array sizing
+} SpeakerID;
+
+// Represents a single line of dialogue or text, tying a speaker to a string.
+typedef struct {
+    SpeakerID speaker_id;
+    StringID text_id;
+} DialogueLine;
+
+// A single story scene
 typedef struct {
     char scene_id[MAX_NAME_LENGTH]; // Unique ID for the scene
     char name[MAX_NAME_LENGTH];     // The official display name for the scene
-    // FrontMatter front_matter; // Can be integrated or kept for legacy if needed
     char location_id[MAX_NAME_LENGTH]; // Direct location ID for this scene
-    StringID text_content_ids[MAX_TEXT_LINES_PER_SCENE]; // Array of StringIDs for text lines
-    int text_line_count;
+    DialogueLine dialogue_lines[MAX_TEXT_LINES_PER_SCENE]; // Array of dialogue lines
+    int dialogue_line_count;
     StoryChoice choices[MAX_CHOICES_PER_SCENE];
     int choice_count;
-    // Add other scene-specific data like character sprites, background art, etc.
 } StoryScene;
 
 

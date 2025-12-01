@@ -17,19 +17,21 @@
 #include "01_lain_room/scene.h"
 #include "02_downstairs/scene.h"
 #include "02a_talk_to_dad/scene.h"
-#include "02d_talk_to_mom_normal/scene.h"
+#include "02_mom_arc/scene.h"
 #include "01a_examine_navi/scene.h"
 #include "01b_navi_shutdown/scene.h"
 #include "01d_navi_reboot_endprologue/scene.h"
 #include "01e_navi_connect_endprologue/scene.h"
 #include "00a_wait_one_minute_endprologue/scene.h"
 #include "01c_talk_to_figure_endprologue/scene.h"
-#include "02g_mom_reply_silent_endprologue/scene.h"
-#include "02f_mom_reply_fine_endprologue/scene.h"
+
 #include "02b_dad_reply_no/scene.h"
 #include "02c_dad_ask_help/scene.h"
 #include "02j_get_milk_endprologue/scene.h"
 #include "03_chapter_one_intro/scene.h"
+#include "04c_talk_to_sister_default/scene.h"
+#include "04a_talk_to_sister_cold/scene.h"
+#include "04b_talk_to_sister_curious/scene.h"
 // NOTE: As more scenes are converted, their headers should be included here.
 // For now, we are only including the prologue scenes we have created.
 // To keep the game runnable, we will temporarily keep the old if-else for non-converted scenes.
@@ -61,6 +63,9 @@ static const SceneRegistration scene_registrations[] = {
     {"story/02c_dad_ask_help.md", init_scene_02c_dad_ask_help},
     {"story/02j_get_milk_endprologue.md", init_scene_02j_get_milk_endprologue},
     {"story/03_chapter_one_intro.md", init_scene_03_chapter_one_intro},
+    {"story/04c_talk_to_sister_default.md", init_scene_04c_talk_to_sister_default},
+    {"story/04a_talk_to_sister_cold.md", init_scene_04a_talk_to_sister_cold},
+    {"story/04b_talk_to_sister_curious.md", init_scene_04b_talk_to_sister_curious},
     // NOTE: Add new scenes here as they are created.
 };
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(SceneRegistration);

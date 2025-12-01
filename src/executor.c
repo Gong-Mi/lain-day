@@ -66,6 +66,9 @@ static void acquire_item_logic(GameState* game_state, const char* item_id) {
 
 // Returns 1 if scene changed, 0 otherwise
 int execute_action(const char* action_id, GameState* game_state) {
+#ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: execute_action received action_id: '%s'\n", action_id);
+#endif
     if (action_id == NULL || game_state == NULL) {
         return 0;
     }
@@ -414,11 +417,11 @@ void execute_command(const char* input, GameState* game_state) {
 #ifdef USE_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: Arls: Retrieved location '%s', pois_count: %d\n", current_loc->id, current_loc->pois_count);
 #endif
-            print_colored_line(current_loc->name, (const struct GameState*)game_state);
-            print_colored_line(current_loc->description, (const struct GameState*)game_state);
+            print_raw_text(current_loc->name);
+            print_raw_text(current_loc->description);
             printf("\nPoints of Interest:\n");
             if (current_loc->pois_count == 0) {
-                print_colored_line("  (none)", (const struct GameState*)game_state);
+                print_raw_text("  (none)");
             }
             for (int i = 0; i < current_loc->pois_count; i++) {
 #ifdef USE_DEBUG_LOGGING
@@ -426,16 +429,16 @@ void execute_command(const char* input, GameState* game_state) {
 #endif
                 char poi_buf[MAX_LINE_LENGTH];
                 snprintf(poi_buf, MAX_LINE_LENGTH, "  - %s", current_loc->pois[i].name);
-                print_colored_line(poi_buf, (const struct GameState*)game_state);
+                print_raw_text(poi_buf);
             }
             printf("\nConnections:\n");
             if (current_loc->connection_count == 0) {
-                print_colored_line("  (none)", (const struct GameState*)game_state);
+                print_raw_text("  (none)");
             }
             for (int i = 0; i < current_loc->connection_count; i++) {
                 char conn_buf[MAX_LINE_LENGTH];
                 snprintf(conn_buf, MAX_LINE_LENGTH, "  - %s", current_loc->connections[i]);
-                print_colored_line(conn_buf, (const struct GameState*)game_state);
+                print_raw_text(conn_buf);
             }
         } else {
             printf("Error: Current location '%s' not found in map data.\n", game_state->player_state.location);
@@ -450,6 +453,11 @@ void execute_command(const char* input, GameState* game_state) {
         }
         printf("  - quit\n");
         printf("-------------\n");
+    }
+    else if (strcmp(input, "time") == 0) {
+        printf("\n--- Time ---\n");
+        print_game_time(game_state->time_of_day);
+        printf("-----------\n");
     }
     else {
         printf("Command not recognized: %s\n", input);

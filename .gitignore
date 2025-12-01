@@ -10,3 +10,6 @@ session/
 # Commit message drafts
 commit_message.txt
 assets/images//dist
+
+.gemini/
+gha-creds-*.json

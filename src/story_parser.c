@@ -4,6 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#define USE_DEBUG_LOGGING // FORCING DEBUG FOR DIAGNOSIS
+
 // Helper function to trim whitespace from a string in-place
 static void trim_whitespace(char *str) {
     if (str == NULL) return;
@@ -55,6 +57,10 @@ int load_story_scene(const char* story_file_path, StoryScene* scene) {
         // Remove trailing newline
         line_start[strcspn(line_start, "\n\r")] = 0;
 
+#ifdef USE_DEBUG_LOGGING
+        printf("DEBUG: Parser: Processing line: '%s'\n", line_start);
+#endif
+
         if (strcmp(line_start, "---") == 0) {
             front_matter_delimiter_count++;
             if (front_matter_delimiter_count == 1) {
@@ -80,6 +86,10 @@ int load_story_scene(const char* story_file_path, StoryScene* scene) {
                 char *action_id_end = strstr(action_start ? action_start + 7 : NULL, ")");
 
                 if (text_end && action_start && action_id_end) {
+#ifdef USE_DEBUG_LOGGING
+                    fprintf(stderr, "DEBUG: Parser: Successfully identified choice line: '%s'\n", line_start);
+                    fprintf(stderr, "DEBUG: Parser: text_end found, action_start found, action_id_end found.\n");
+#endif
                     StoryChoice *choice = &scene->choices[scene->choice_count];
 
                     *text_end = '\0';

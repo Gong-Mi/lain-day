@@ -51,6 +51,23 @@ static void print_usage(const char* prog_name) {
     printf("Example: %s \"story/00_entry.md\"\n", prog_name);
 }
 
+static const char* get_speaker_name_str(SpeakerID id) {
+    switch (id) {
+        case SPEAKER_NONE: return "NONE";
+        case SPEAKER_LAIN: return "Lain (你)";
+        case SPEAKER_MOM: return "妈妈";
+        case SPEAKER_DAD: return "爸爸";
+        case SPEAKER_ALICE: return "Alice";
+        case SPEAKER_CHISA: return "Chisa";
+        case SPEAKER_MIRA: return "Mika (姐姐)";
+        case SPEAKER_GHOST: return "幽灵";
+        case SPEAKER_DOCTOR: return "冬子老师";
+        case SPEAKER_NAVI: return "Navi";
+        case SPEAKER_PARENT: return "父母";
+        default: return "UNKNOWN";
+    }
+}
+
 static void debug_print_scene(const StoryScene* scene, const GameState* game_state) {
     if (scene == NULL) {
         printf("Scene is NULL.\n");
@@ -61,10 +78,12 @@ static void debug_print_scene(const StoryScene* scene, const GameState* game_sta
     printf("Scene Name:       %s\n", scene->name);
     printf("Location ID:      %s\n\n", scene->location_id);
 
-    printf("--- Text Content (%d lines) ---\n", scene->text_line_count);
-    for (int i = 0; i < scene->text_line_count; i++) {
-        StringID id = scene->text_content_ids[i];
-        printf("  [%d]: \"%s\"\n", id, get_string_by_id(id));
+    printf("--- Text Content (%d lines) ---\n", scene->dialogue_line_count);
+    for (int i = 0; i < scene->dialogue_line_count; i++) {
+        const DialogueLine* line = &scene->dialogue_lines[i];
+        printf("  [Line %d]: SpeakerID=%d (%s), StringID=%d, Text=\"%s\"\n",
+               i, line->speaker_id, get_speaker_name_str(line->speaker_id),
+               line->text_id, get_string_by_id(line->text_id));
     }
     printf("\n");
 

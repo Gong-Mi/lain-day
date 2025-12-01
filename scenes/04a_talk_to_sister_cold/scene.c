@@ -10,13 +10,13 @@ void init_scene_04a_talk_to_sister_cold(StoryScene* scene) {
     strncpy(scene->location_id, "kurani_residence/living_room", MAX_NAME_LENGTH - 1);
 
     // Scene Text - Fixed parts
-    scene->text_line_count = 6;
-    scene->text_content_ids[0] = TEXT_SISTER_FIXED_DESC1;
-    scene->text_content_ids[1] = TEXT_SISTER_COLD_QUOTE1; // Conditional part
-    scene->text_content_ids[2] = TEXT_SISTER_COLD_QUOTE2; // Conditional part
-    scene->text_content_ids[3] = TEXT_SISTER_FIXED_DESC2;
-    scene->text_content_ids[4] = TEXT_SISTER_FIXED_DESC3;
-    scene->text_content_ids[5] = TEXT_SISTER_FIXED_DESC4;
+    scene->dialogue_line_count = 6;
+    scene->dialogue_lines[0] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_SISTER_FIXED_DESC1};
+    scene->dialogue_lines[1] = (DialogueLine){.speaker_id = SPEAKER_MIRA, .text_id = TEXT_SISTER_COLD_QUOTE1};
+    scene->dialogue_lines[2] = (DialogueLine){.speaker_id = SPEAKER_MIRA, .text_id = TEXT_SISTER_COLD_QUOTE2};
+    scene->dialogue_lines[3] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_SISTER_FIXED_DESC2};
+    scene->dialogue_lines[4] = (DialogueLine){.speaker_id = SPEAKER_MIRA, .text_id = TEXT_SISTER_FIXED_DESC3};
+    scene->dialogue_lines[5] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_SISTER_FIXED_DESC4};
 
     // Scene Choices
     scene->choice_count = 3;

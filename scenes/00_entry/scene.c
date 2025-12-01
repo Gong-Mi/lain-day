@@ -9,16 +9,16 @@ void init_scene_00_entry(StoryScene* scene) {
             strcpy(scene->name, "初始空间");
             strcpy(scene->scene_id, "story/00_entry.md");        // The title "初始空间" is usually handled by a different UI element or omitted,
     // as it's not part of the sequential text content in the string table.
-    scene->text_content_ids[0] = TEXT_EMPTY_LINE;
-    scene->text_content_ids[1] = TEXT_ENTRY_DESC1;
-    scene->text_content_ids[2] = TEXT_ENTRY_DESC2;
-    scene->text_content_ids[3] = TEXT_EMPTY_LINE;
-    scene->text_content_ids[4] = TEXT_ENTRY_DESC3;
-    scene->text_content_ids[5] = TEXT_EMPTY_LINE;
-    scene->text_content_ids[6] = TEXT_ENTRY_DESC4;
-    scene->text_content_ids[7] = TEXT_EMPTY_LINE;
-    scene->text_content_ids[8] = TEXT_ENTRY_DESC5;
-    scene->text_line_count = 9;
+    scene->dialogue_lines[0] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_EMPTY_LINE};
+    scene->dialogue_lines[1] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_ENTRY_DESC1};
+    scene->dialogue_lines[2] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_ENTRY_DESC2};
+    scene->dialogue_lines[3] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_EMPTY_LINE};
+    scene->dialogue_lines[4] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_ENTRY_DESC3};
+    scene->dialogue_lines[5] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_EMPTY_LINE};
+    scene->dialogue_lines[6] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_ENTRY_DESC4};
+    scene->dialogue_lines[7] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_EMPTY_LINE};
+    scene->dialogue_lines[8] = (DialogueLine){.speaker_id = SPEAKER_NONE, .text_id = TEXT_ENTRY_DESC5};
+    scene->dialogue_line_count = 9;
 
     // Choices - Mapped directly to pre-defined StringIDs
     scene->choices[0] = (StoryChoice){.text_id = TEXT_CHOICE_OPEN_DOOR, .action_id = "enter_lain_room"};
