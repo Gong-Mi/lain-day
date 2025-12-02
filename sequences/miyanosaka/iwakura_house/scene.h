@@ -2,8 +2,12 @@
 #define IWAKURA_LAYOUT_H
 
 #include "game_types.h"
+#include <stdbool.h> // Include for bool type
 
 #define IWAKURA_HOUSE_ROOM_COUNT 8
+
+// Function prototypes
+bool is_mikas_room_accessible(struct GameState* game_state, const struct Connection* connection);
 
 /**
  * @brief Populates a given array with the Location data for the Iwakura house.

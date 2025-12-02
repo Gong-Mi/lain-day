@@ -233,6 +233,21 @@ const char* g_string_table[TEXT_COUNT] = {
     [TEXT_CHOICE_READ_EMAIL_FROM_CHISA] = "查看那封邮件",
     [TEXT_CHOICE_GO_TO_SCHOOL] = "无视邮件，直接去学校",
     [TEXT_CHOICE_DELETE_EMAIL_UNREAD] = "不看，直接删除邮件",
+
+    // Mika's Room Locked Scene
+    [TEXT_MIKA_ROOM_LOCKED_DESC1] = "姐姐的房间门紧闭着。你试着转动门把手，但它纹丝不动，显然是从里面锁住了。",
+    [TEXT_CHOICE_RETURN_TO_UPPER_HALLWAY] = "转身回到上层走廊",
+
+    // Mika's Room Unlocked Scene
+    [TEXT_MIKA_ROOM_UNLOCKED_DESC1] = "你打开了姐姐美香的房门。房间里很整洁，与你自己的房间完全不同。美香正坐在书桌前，回头看了你一眼。",
+    [TEXT_MIKA_ROOM_UNLOCKED_MIRA_QUOTE1] = "“什么事？”",
+    [TEXT_CHOICE_MIKA_ROOM_JUST_LOOKING] = "没什么，只是看看。",
+    [TEXT_CHOICE_MIKA_ROOM_TALK] = "想和美香聊聊。",
+    // Iwakura Upper Hallway Scene
+    [TEXT_UPPER_HALLWAY_DESC1] = "连接着房子二楼的房间。",
+    [TEXT_CHOICE_ENTER_LAINS_ROOM] = "进入Lain的房间",
+    [TEXT_CHOICE_ENTER_MIKAS_ROOM] = "进入美香的房间",
+    [TEXT_CHOICE_GO_DOWNSTAIRS_FROM_UPPER_HALLWAY] = "走下楼梯",
 };
 
 const char* get_string_by_id(StringID id) {

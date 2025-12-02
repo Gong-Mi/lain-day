@@ -8,6 +8,6 @@
 int execute_action(const char* action_id, GameState* game_state);
 
 // Executes a text-based command
-void execute_command(const char* input, GameState* game_state);
+bool execute_command(const char* input, GameState* game_state);
 
 #endif // EXECUTOR_H

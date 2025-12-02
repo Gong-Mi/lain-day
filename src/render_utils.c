@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h> // For usleep
 
-void print_colored_line(SpeakerID speaker_id, StringID text_id, const struct GameState* game_state) {
+void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState* game_state) {
 
     const char* line_text = get_string_by_id(text_id);
 

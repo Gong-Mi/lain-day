@@ -35,3 +35,13 @@ The game will prompt for a session name. You can enter a new name to start a new
 *   **Data-Driven Design:** Game content is separated from the engine and is defined in `.md` and `.json` files. This allows for easy modification and expansion of the game's story and content.
 *   **Feature Toggles:** The `CMakeLists.txt` file includes several feature toggles for enabling and disabling characters and debug features. This is useful for creating different builds and for testing specific parts of the game.
 *   **Testing:** The game can be run in an automated mode by providing input as command-line arguments. This is useful for testing specific scenarios and for debugging.
+
+## Scene Management Refactoring Strategy
+
+It has been identified that the game's scene management is in a hybrid state. While some scenes are defined programmatically in C code, the `transition_to_scene` function still uses `.md` file paths (e.g., `"story/01_lain_room.md"`) as string identifiers in a dispatch table to map to C-based scene initialization functions. This is a legacy of a previous, incomplete refactoring.
+
+To improve clarity and maintainability without undertaking a massive, immediate refactoring:
+*   **Incremental Approach:** We will adopt an incremental refactoring strategy for scene naming.
+*   **New Scenes:** New scenes and scene states (e.g., for Mika's Room access) will use clear, C-style identifiers (e.g., `SCENE_MIKA_ROOM_UNLOCKED`, `SCENE_MIKA_ROOM_LOCKED`) as their keys in the `scene_registrations` dispatch table, instead of `.md` file path strings.
+*   **Story Content:** The actual story content (dialogue, choices, actions) for these new scenes will be defined directly in their corresponding C source files, replacing the need for separate `.md` files.
+*   **Goal:** This approach aims to gradually transition the entire story system to a more robust, C-code-based structure, reducing reliance on string parsing of file paths for scene identification.

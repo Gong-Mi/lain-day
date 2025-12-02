@@ -1,13 +1,15 @@
 #include "executor.h"
+#include "scenes.h"
 #include "render_utils.h"
 #include "flag_system.h"
 #include "cmap.h" // Use the new CMap module
+#include "game_types.h" // For struct GameState definition
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> // For atoi
 
 // Helper to find an item by its ID
-static const Item* find_item_by_id(const char* item_id, const GameState* game_state) {
+static const Item* find_item_by_id(const char* item_id, const struct GameState* game_state) {
     for (int i = 0; i < game_state->item_count; i++) {
         if (strcmp(game_state->all_items[i].id, item_id) == 0) {
             return &game_state->all_items[i];
@@ -17,12 +19,12 @@ static const Item* find_item_by_id(const char* item_id, const GameState* game_st
 }
 
 // Helper to set flags
-static void set_flag(GameState* game_state, const char* name, const char* value) {
+static void set_flag(struct GameState* game_state, const char* name, const char* value) {
     hash_table_set(game_state->flags, name, value);
 }
 
 // Helper to unlock commands
-static void unlock_command(GameState* game_state, const char* command) {
+static void unlock_command(struct GameState* game_state, const char* command) {
     int found = 0;
     for (int i = 0; i < game_state->player_state.unlocked_commands_count; i++) {
         if (strcmp(game_state->player_state.unlocked_commands[i], command) == 0) {
@@ -37,7 +39,7 @@ static void unlock_command(GameState* game_state, const char* command) {
 }
 
 // Helper to acquire item
-static void acquire_item_logic(GameState* game_state, const char* item_id) {
+static void acquire_item_logic(struct GameState* game_state, const char* item_id) {
     const Item* item_def = find_item_by_id(item_id, game_state);
     if (item_def != NULL) {
         if (game_state->player_state.credit_level >= item_def->required_credit) {
@@ -65,7 +67,7 @@ static void acquire_item_logic(GameState* game_state, const char* item_id) {
 
 
 // Returns 1 if scene changed, 0 otherwise
-int execute_action(const char* action_id, GameState* game_state) {
+int execute_action(const char* action_id, struct GameState* game_state) {
 #ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: execute_action received action_id: '%s'\n", action_id);
 #endif
@@ -74,6 +76,27 @@ int execute_action(const char* action_id, GameState* game_state) {
     }
 
     int scene_changed = 0;
+
+
+    // --- Refactored: Generic Connection Handling ---
+    const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+    if (current_loc != NULL) {
+        for (int i = 0; i < current_loc->connection_count; i++) {
+            const Connection* conn = &current_loc->connections[i];
+            if (strcmp(conn->action_id, action_id) == 0) {
+                // This action corresponds to a map connection. Check for conditions.
+                if (conn->is_accessible != NULL) {
+                    if (!conn->is_accessible(game_state, conn)) {
+                        // Access is denied.
+                        strncpy(game_state->current_story_file, conn->access_denied_scene_id, MAX_PATH_LENGTH - 1);
+                        return 1; // Scene changed to "access denied" scene.
+                    }
+                }
+                // If we are here, access is granted. Fall through to the specific action logic below.
+                break; // Found our connection, no need to loop further.
+            }
+        }
+    }
     
     // --- LOCATION CHANGE ACTIONS ---
     if (strcmp(action_id, "enter_lain_room") == 0) {
@@ -90,13 +113,27 @@ int execute_action(const char* action_id, GameState* game_state) {
         strncpy(game_state->player_state.location, "entry", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/00_entry.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
-    } else if (strcmp(action_id, "return_to_upstairs") == 0) { // Example for returning from dynamic maps
-        strncpy(game_state->player_state.location, "lain_room", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1);
+    } else if (strcmp(action_id, "return_to_upstairs") == 0) {
+        strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
+        strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1); // Point to Lain's room scene for now, as it's the closest to Upper Hallway
+        scene_changed = 1;
+    } else if (strcmp(action_id, "go_to_upper_hallway") == 0) {
+        strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
+        strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1); // Point to Lain's room scene for now
+        scene_changed = 1;
+    } else if (strcmp(action_id, "exit_room") == 0) {
+        strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
+        strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1); // Point to Lain's room scene for now
         scene_changed = 1;
     } else if (strcmp(action_id, "return_to_living_room") == 0) {
         strncpy(game_state->player_state.location, "kurani_residence/living_room", MAX_NAME_LENGTH - 1); // This location needs to exist programmatically
         strncpy(game_state->current_story_file, "story/02_downstairs.md", MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
+    } else if (strcmp(action_id, "enter_mikas_room") == 0) {
+        // The conditional logic is now handled by the generic connection handler above.
+        // If we reach here, it means access was granted.
+        strncpy(game_state->player_state.location, "iwakura_mikas_room", MAX_NAME_LENGTH - 1);
+        strncpy(game_state->current_story_file, "SCENE_MIKA_ROOM_UNLOCKED", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     }
 
@@ -394,9 +431,9 @@ int execute_action(const char* action_id, GameState* game_state) {
     return scene_changed;
 }
 
-void execute_command(const char* input, GameState* game_state) {
+bool execute_command(const char* input, GameState* game_state) {
     if (input == NULL || game_state == NULL) {
-        return;
+        return false; // No re-render for invalid input
     }
 
     if (strcmp(input, "inventory") == 0 || strcmp(input, "inv") == 0) {
@@ -408,6 +445,7 @@ void execute_command(const char* input, GameState* game_state) {
             printf("  - %s: %d\n", game_state->player_state.inventory[i].name, game_state->player_state.inventory[i].quantity);
         }
         printf("-----------------\n");
+        return false; // No re-render needed for inventory
     }
     else if (strcmp(input, "arls") == 0) {
         printf("\n--- Area List Scan ---\n");
@@ -437,13 +475,15 @@ void execute_command(const char* input, GameState* game_state) {
             }
             for (int i = 0; i < current_loc->connection_count; i++) {
                 char conn_buf[MAX_LINE_LENGTH];
-                snprintf(conn_buf, MAX_LINE_LENGTH, "  - %s", current_loc->connections[i]);
+                const Connection* conn = &current_loc->connections[i];
+                snprintf(conn_buf, MAX_LINE_LENGTH, "  - %s -> %s", conn->action_id, conn->target_location_id);
                 print_raw_text(conn_buf);
             }
         } else {
             printf("Error: Current location '%s' not found in map data.\n", game_state->player_state.location);
         }
         printf("----------------------\n");
+        return false; // No re-render needed for arls
     }
     else if (strcmp(input, "help") == 0) {
         printf("\n--- Help ---\n");
@@ -453,13 +493,16 @@ void execute_command(const char* input, GameState* game_state) {
         }
         printf("  - quit\n");
         printf("-------------\n");
+        return false; // No re-render needed for help
     }
     else if (strcmp(input, "time") == 0) {
         printf("\n--- Time ---\n");
         print_game_time(game_state->time_of_day);
         printf("-----------\n");
+        return false; // No re-render needed for time
     }
     else {
         printf("Command not recognized: %s\n", input);
+        return false; // No re-render needed for unrecognized command
     }
 }

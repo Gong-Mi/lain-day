@@ -6,7 +6,7 @@
 void print_game_time(int time_of_day);
 
 // Prints a line of dialogue, handling speaker names and colors.
-void print_colored_line(SpeakerID speaker_id, StringID text_id, const struct GameState* game_state);
+void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState* game_state);
 
 // Prints a raw, unformatted line of text.
 void print_raw_text(const char* text);

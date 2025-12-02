@@ -32,6 +32,9 @@
 #include "04c_talk_to_sister_default/scene.h"
 #include "04a_talk_to_sister_cold/scene.h"
 #include "04b_talk_to_sister_curious/scene.h"
+#include "mika_room_locked/scene.h"
+#include "mika_room_unlocked/scene.h"
+#include "iwakura_upper_hallway/scene.h"
 // NOTE: As more scenes are converted, their headers should be included here.
 // For now, we are only including the prologue scenes we have created.
 // To keep the game runnable, we will temporarily keep the old if-else for non-converted scenes.
@@ -66,6 +69,9 @@ static const SceneRegistration scene_registrations[] = {
     {"story/04c_talk_to_sister_default.md", init_scene_04c_talk_to_sister_default},
     {"story/04a_talk_to_sister_cold.md", init_scene_04a_talk_to_sister_cold},
     {"story/04b_talk_to_sister_curious.md", init_scene_04b_talk_to_sister_curious},
+    {"SCENE_MIKA_ROOM_LOCKED", init_scene_mika_room_locked},
+    {"SCENE_MIKA_ROOM_UNLOCKED", init_scene_mika_room_unlocked},
+    {"SCENE_IWAKURA_UPPER_HALLWAY", init_scene_iwakura_upper_hallway},
     // NOTE: Add new scenes here as they are created.
 };
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(SceneRegistration);

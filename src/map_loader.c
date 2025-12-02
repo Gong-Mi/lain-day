@@ -38,13 +38,16 @@ void add_poi_to_location(Location* loc, const char* id, const char* name, const 
     loc->pois_count++;
 }
 
-void add_connection_to_location(Location* loc, const char* target_id) {
+void add_connection_to_location(Location* loc, const char* action_id, const char* target_location_id, is_accessible_func is_accessible, const char* access_denied_scene_id) {
     if (loc->connection_count >= MAX_CONNECTIONS) {
-        fprintf(stderr, "WARNING: Max connections reached for location %s. Cannot add connection to %s.\n", loc->id, target_id);
+        fprintf(stderr, "WARNING: Max connections reached for location %s. Cannot add connection to %s.\n", loc->id, target_location_id);
         return;
     }
-    strncpy(loc->connections[loc->connection_count], target_id, MAX_NAME_LENGTH - 1);
-    loc->connections[loc->connection_count][MAX_NAME_LENGTH - 1] = '\0';
+    Connection* conn = &loc->connections[loc->connection_count];
+    conn->action_id = action_id;
+    conn->target_location_id = target_location_id;
+    conn->is_accessible = is_accessible;
+    conn->access_denied_scene_id = access_denied_scene_id;
     loc->connection_count++;
 }
 
@@ -61,7 +64,7 @@ static int load_programmatic_map_data(GameState* game_state) {
     init_location(lain_room, "lain_room", "Lain's Room", "A messy room filled with wires and humming electronics. The air hums with the presence of your NAVI.");
     add_poi_to_location(lain_room, "navi", "NAVI", "Your trusty personal computer, covered in strange symbols.");
     add_poi_to_location(lain_room, "bed", "Bed", "A simple, unmade bed.");
-    add_connection_to_location(lain_room, "downstairs");
+    add_connection_to_location(lain_room, "go_downstairs", "downstairs", NULL, NULL);
     cmap_insert(game_state->location_map, lain_room);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", lain_room->id);
@@ -74,8 +77,8 @@ static int load_programmatic_map_data(GameState* game_state) {
     init_location(downstairs, "downstairs", "Downstairs", "The living room and kitchen area of your home. It feels quiet, almost too quiet.");
     add_poi_to_location(downstairs, "kitchen", "Kitchen", "A functional but sparsely used kitchen.");
     add_poi_to_location(downstairs, "tv", "Television", "A large, old-fashioned television set.");
-    add_connection_to_location(downstairs, "lain_room");
-    add_connection_to_location(downstairs, "outside_house"); // Example new connection
+    add_connection_to_location(downstairs, "enter_lain_room", "lain_room", NULL, NULL);
+    add_connection_to_location(downstairs, "go_outside", "outside_house", NULL, NULL);
     cmap_insert(game_state->location_map, downstairs);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", downstairs->id);
@@ -87,8 +90,8 @@ static int load_programmatic_map_data(GameState* game_state) {
     Location* outside_house = &game_state->all_locations[game_state->location_count];
     init_location(outside_house, "outside_house", "Outside the House", "The quiet suburban street where you live. The air is surprisingly crisp.");
     add_poi_to_location(outside_house, "mailbox", "Mailbox", "A standard mailbox, mostly empty.");
-    add_connection_to_location(outside_house, "downstairs");
-    add_connection_to_location(outside_house, "shibuya_street"); // Example new connection
+    add_connection_to_location(outside_house, "go_downstairs", "downstairs", NULL, NULL); // Action leads back
+    add_connection_to_location(outside_house, "go_to_shibuya", "shibuya_street", NULL, NULL);
     cmap_insert(game_state->location_map, outside_house);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", outside_house->id);
@@ -100,8 +103,8 @@ static int load_programmatic_map_data(GameState* game_state) {
     Location* shibuya_street = &game_state->all_locations[game_state->location_count];
     init_location(shibuya_street, "shibuya_street", "Shibuya Street", "The neon glow of Shibuya. Crowds move with an almost hypnotic rhythm.");
     add_poi_to_location(shibuya_street, "crosswalk", "Shibuya Crossing", "The famous scramble crosswalk, a river of humanity.");
-    add_connection_to_location(shibuya_street, "outside_house");
-    add_connection_to_location(shibuya_street, "cyberia_club"); // Example new connection
+    add_connection_to_location(shibuya_street, "go_home", "outside_house", NULL, NULL);
+    add_connection_to_location(shibuya_street, "enter_cyberia", "cyberia_club", NULL, NULL);
     cmap_insert(game_state->location_map, shibuya_street);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", shibuya_street->id);

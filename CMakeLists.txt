@@ -146,6 +146,10 @@ set(GAME_ENGINE_SOURCES
 
     src/cmap.c
 
+    src/conditions.c
+
+    src/time_utils.c
+
     src/compression_util.c
 
     src/render_utils.c
@@ -193,14 +197,6 @@ target_compile_definitions(lain_day_c PUBLIC
     $<$<BOOL:${CHARACTER_FATHER_ALIVE}>:CHARACTER_FATHER_ALIVE>
     $<$<BOOL:${CHARACTER_FUYUKO_MIRA_ALIVE}>:CHARACTER_FUYUKO_MIRA_ALIVE>
     $<$<BOOL:${CHARACTER_LAINS_SISTER_MIRA_ALIVE}>:CHARACTER_LAINS_SISTER_MIRA_ALIVE>
-)
-
-# Add feature toggle definitions
-# The following compile definitions (USE_TYPEWRITER_EFFECT, USE_DEBUG_LOGGING, etc.)
-# are enabled based on their respective CMake options, but are also dependent
-# on MASTER_DEBUG_SWITCH being ON. This means if MASTER_DEBUG_SWITCH is OFF,
-# none of these features will be enabled, regardless of their individual settings.
-target_compile_definitions(lain_day_c PUBLIC
     $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>>:USE_TYPEWRITER_EFFECT>
     $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_DEBUG_LOGGING}>>:USE_DEBUG_LOGGING>
     $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_STRING_DEBUG_LOGGING}>>:USE_STRING_DEBUG_LOGGING>

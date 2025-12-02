@@ -1,11 +1,13 @@
 #ifndef GAME_TYPES_H
 #define GAME_TYPES_H
 
-#include "cJSON.h" // Include cJSON.h for cJSON* type
-#include "string_ids.h" // Include StringID enum
+#include <stdbool.h>
+#include "cJSON.h"
+#include "string_ids.h"
 #include "flag_system.h"
-#include "cmap.h" // Include the new CMap header
+#include "cmap.h"
 
+// --- Defines ---
 #define MAX_NAME_LENGTH 64
 #define MAX_DESC_LENGTH 256
 #define MAX_PATH_LENGTH 128
@@ -13,20 +15,26 @@
 #define MAX_POIS 16
 #define MAX_CONNECTIONS 8
 #define MAX_COMMANDS 32
-#define MAX_FLAGS 8 // Max number of flags for an action
-
-// Story parsing limits - now reference StringID for text content
+#define MAX_FLAGS 8
 #define MAX_TEXT_LINES_PER_SCENE 256
 #define MAX_CHOICES_PER_SCENE 8
-#define MAX_LINE_LENGTH 512 // Max length of a single text line or choice text
+#define MAX_LINE_LENGTH 512
+#define MAX_LOCATIONS 64
+#define MAX_ITEMS 64
+#define MAX_ACTIONS 128
 
-// A single item in the player's inventory (used in PlayerState)
+// --- Forward Declarations for Circular Dependencies ---
+struct GameState;
+struct Connection;
+struct Location_struct;
+
+// --- Primitive Structs (no major dependencies) ---
+
 typedef struct {
     char name[MAX_NAME_LENGTH];
     int quantity;
 } InventoryItem;
 
-// Represents the player's state
 typedef struct {
     char location[MAX_NAME_LENGTH];
     int credit_level;
@@ -36,7 +44,6 @@ typedef struct {
     int unlocked_commands_count;
 } PlayerState;
 
-// Represents an item in the game world (from items.json)
 typedef struct {
     char id[MAX_NAME_LENGTH];
     char name[MAX_NAME_LENGTH];
@@ -44,117 +51,85 @@ typedef struct {
     int required_credit;
 } Item;
 
-// Main Action struct (from actions.json) - REMOVED
-// Stores payload as a raw cJSON object for flexibility - REMOVED
-// typedef struct {
-//     char id[MAX_NAME_LENGTH]; // e.g., "default_story_change_action"
-//     char type_str[MAX_NAME_LENGTH]; // Action type as string (e.g., "story_change")
-//     cJSON *payload_json; // Store the raw payload as a cJSON object, to be parsed at execution
-// } Action;
-
-// Forward declarations
-struct GameState; // Forward declaration
-
-// Represents a Point of Interest within a Location (from poi.json)
 typedef struct {
     char id[MAX_NAME_LENGTH];
     char name[MAX_NAME_LENGTH];
-    char description[MAX_DESC_LENGTH * 2]; // Can be longer for full descriptions
-    // Add other fields from poi.json as needed (status, action, details, sub_items)
-    // For now, let's keep it simple with main ID, name, description.
-    // We can add more complex fields later if needed, potentially using cJSON* again for sub_items
+    char description[MAX_DESC_LENGTH * 2];
 } POI;
 
-// Represents a single location in the game world
-typedef struct Location_struct {
-    char id[MAX_NAME_LENGTH];
-    char name[MAX_NAME_LENGTH];
-    char description[MAX_DESC_LENGTH * 4]; // Longer for full descriptions
-    POI pois[MAX_POIS]; // Array of POI structs
-    int pois_count;
-    char connections[MAX_CONNECTIONS][MAX_NAME_LENGTH]; // List of location IDs
-    int connection_count;
-} Location;
-
-// Condition for a choice or scene element
 typedef struct {
-    char flag_name[MAX_NAME_LENGTH]; // Name of the flag to check
-    int required_value;             // Value the flag must have
-    // Add other condition types as needed (e.g., item in inventory, game time)
+    char flag_name[MAX_NAME_LENGTH];
+    int required_value;
 } ChoiceCondition;
 
-
-// Front matter for a story scene (YAML-like block at top of MD file) - now primarily for context
 typedef struct {
-    char location_id[MAX_NAME_LENGTH]; // Location where this scene takes place
-    // Add other front matter fields as needed (e.g., flags to set)
+    char location_id[MAX_NAME_LENGTH];
 } FrontMatter;
 
-// A single choice presented to the player
-typedef struct {
-    StringID text_id;                 // The choice text (using StringID)
-    char action_id[MAX_NAME_LENGTH];  // The ID of the action to trigger (e.g., "talk_to_figure")
-    ChoiceCondition condition;        // Condition for this choice to be visible/selectable
-} StoryChoice;
-
-// Enum to identify speakers
 typedef enum {
-    SPEAKER_NONE,     // For narrative text, descriptions, etc.
-    SPEAKER_LAIN,     // The player character
-    SPEAKER_MOM,
-    SPEAKER_DAD,
-    SPEAKER_ALICE,
-    SPEAKER_CHISA,
-    SPEAKER_MIRA,     // Lain's sister
-    SPEAKER_GHOST,
-    SPEAKER_DOCTOR,   // Fuyuko Mira
-    SPEAKER_NAVI,     // The computer
-    SPEAKER_PARENT,   // For ambiguous parent lines
-    SPEAKER_COUNT     // Keep this last for array sizing
+    SPEAKER_NONE, SPEAKER_LAIN, SPEAKER_MOM, SPEAKER_DAD, SPEAKER_ALICE,
+    SPEAKER_CHISA, SPEAKER_MIRA, SPEAKER_GHOST, SPEAKER_DOCTOR, SPEAKER_NAVI,
+    SPEAKER_PARENT, SPEAKER_COUNT
 } SpeakerID;
 
-// Represents a single line of dialogue or text, tying a speaker to a string.
 typedef struct {
     SpeakerID speaker_id;
     StringID text_id;
 } DialogueLine;
 
-// A single story scene
 typedef struct {
-    char scene_id[MAX_NAME_LENGTH]; // Unique ID for the scene
-    char name[MAX_NAME_LENGTH];     // The official display name for the scene
-    char location_id[MAX_NAME_LENGTH]; // Direct location ID for this scene
-    DialogueLine dialogue_lines[MAX_TEXT_LINES_PER_SCENE]; // Array of dialogue lines
+    StringID text_id;
+    char action_id[MAX_NAME_LENGTH];
+    ChoiceCondition condition;
+} StoryChoice;
+
+typedef struct {
+    char scene_id[MAX_NAME_LENGTH];
+    char name[MAX_NAME_LENGTH];
+    char location_id[MAX_NAME_LENGTH];
+    DialogueLine dialogue_lines[MAX_TEXT_LINES_PER_SCENE];
     int dialogue_line_count;
     StoryChoice choices[MAX_CHOICES_PER_SCENE];
     int choice_count;
 } StoryScene;
 
 
-// Represents the overall state of the game
-#define MAX_LOCATIONS 64 // Assuming a max number of locations
-#define MAX_ITEMS 64     // Assuming a max number of distinct items
-#define MAX_ACTIONS 128  // Assuming a max number of distinct actions
+// --- Main Structs with Interdependencies ---
 
-typedef struct {
+// Typedef for the accessibility check function pointer
+// Uses forward-declared types, which is why we use 'struct GameState'
+typedef bool (*is_accessible_func)(struct GameState*, const struct Connection*);
+
+// Connection Struct
+typedef struct Connection {
+    const char* target_location_id;
+    const char* action_id;
+    is_accessible_func is_accessible;
+    const char* access_denied_scene_id;
+} Connection;
+
+// Location Struct (depends on POI and Connection)
+typedef struct Location_struct {
+    char id[MAX_NAME_LENGTH];
+    char name[MAX_NAME_LENGTH];
+    char description[MAX_DESC_LENGTH * 4];
+    POI pois[MAX_POIS];
+    int pois_count;
+    Connection connections[MAX_CONNECTIONS];
+    int connection_count;
+} Location;
+
+// GameState Struct (depends on PlayerState, Location, Item)
+typedef struct GameState {
     PlayerState player_state;
     char current_story_file[MAX_PATH_LENGTH];
-    int time_of_day; // Minutes past midnight (0-1439)
-    
-    // Game data loaded at startup
+    int time_of_day;
     Location all_locations[MAX_LOCATIONS];
     int location_count;
-    CMap* location_map; // Hash map for fast location lookup
-    
+    CMap* location_map;
     Item all_items[MAX_ITEMS];
     int item_count;
-    // Action all_actions[MAX_ACTIONS]; // Actions are now programmatic
-    // int action_count; // Actions are now programmatic
-
-    // Generic game flags, managed by the flag system
     HashTable* flags;
-
-    // UI/Rendering state
     float typewriter_delay;
 } GameState;
 
