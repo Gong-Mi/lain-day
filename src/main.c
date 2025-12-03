@@ -28,14 +28,7 @@
 #include "character_data.h"
 
 
-// --- Path Management Struct ---
-typedef struct {
-    char base_path[MAX_PATH_LENGTH];
-    char items_file[MAX_PATH_LENGTH];
-    char actions_file[MAX_PATH_LENGTH];
-    char map_dir[MAX_PATH_LENGTH];
-    char session_root_dir[MAX_PATH_LENGTH];
-} GamePaths;
+
 
 // --- Function Prototypes ---
 

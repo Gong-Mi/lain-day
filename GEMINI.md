@@ -45,3 +45,32 @@ To improve clarity and maintainability without undertaking a massive, immediate 
 *   **New Scenes:** New scenes and scene states (e.g., for Mika's Room access) will use clear, C-style identifiers (e.g., `SCENE_MIKA_ROOM_UNLOCKED`, `SCENE_MIKA_ROOM_LOCKED`) as their keys in the `scene_registrations` dispatch table, instead of `.md` file path strings.
 *   **Story Content:** The actual story content (dialogue, choices, actions) for these new scenes will be defined directly in their corresponding C source files, replacing the need for separate `.md` files.
 *   **Goal:** This approach aims to gradually transition the entire story system to a more robust, C-code-based structure, reducing reliance on string parsing of file paths for scene identification.
+
+## Millennium Crisis Integration Design Considerations
+
+To integrate the 'Millennium crisis' (Y2K crisis and Millennium Digital Act) feeling into the game, leveraging its C-based, data-driven interactive fiction nature, the following approaches are being considered:
+
+### 1. Narrative Integration
+*   **New Story Scenes:** Create programmatic story scenes (similar to C-based scenes) that describe Y2K-related events, such as news reports, character discussions, or Lain's experiences with glitches/system failures in the Wired.
+*   **Existing Scene Modification:** Conditionally inject Y2K-related dialogue or descriptions into existing scenes based on game flags.
+
+### 2. Flag System for Game State
+*   **Crisis Flags:** Introduce new game flags (e.g., `Y2K_ACTIVE`, `MILLENNIUM_ACT_IMPACT`, `WIRED_GLITCH_LEVEL`) to track the state and severity of the crisis.
+*   **Conditional Events:** Use these flags to trigger different story branches, dialogue, or affect gameplay mechanics (e.g., `NAVI` unreliability, network surveillance, content restrictions).
+
+### 3. Time System Interaction
+*   **Event Triggers:** Trigger Y2K-related events on specific in-game dates or times.
+*   **Time Advancement:** Player choices related to the crisis could fast-forward time to critical moments.
+
+### 4. Action System
+*   **Crisis-Specific Actions:** Introduce new actions (e.g., `check_news_feeds`, `secure_navi`, `bypass_restrictions`) that become available during the crisis.
+*   **Consequences:** Outcomes of these actions would be influenced by the crisis flags.
+
+### 5. Data Integrity and Thematic Corruption
+The discussion explored preventing save file manipulation and integrating the millennium crisis theme:
+
+*   **Player Save File Manipulation:** Players can potentially modify `character.json` to bypass in-game protection.
+*   **Proposed Solutions:**
+    *   **Save File Checksum/Hashing:** Implement a checksum/hash for `character.json` to detect any tampering upon loading. This provides general save file integrity.
+    *   **Thematic Time Corruption (14-bit ECC):** For the `time_of_day` variable specifically, a 14-bit integer with ECC (Error-Correcting Code) could be used. If the time value from the save file shows an uncorrectable ECC error (either from player tampering or a simulated Y2K event), this could trigger a *specific in-game event* (e.g., a 'time glitch' narrative sequence, a unique challenge) that aligns with the Y2K theme, rather than just rejecting the save. This allows for both general save file integrity and specific thematic corruption.
+

@@ -3,6 +3,15 @@
 
 #include "game_types.h" // For GameState and other game types
 
+// --- Path Management Struct ---
+typedef struct {
+    char base_path[MAX_PATH_LENGTH];
+    char items_file[MAX_PATH_LENGTH];
+    char actions_file[MAX_PATH_LENGTH];
+    char map_dir[MAX_PATH_LENGTH];
+    char session_root_dir[MAX_PATH_LENGTH];
+} GamePaths;
+
 // Loads the player state from the character.json file.
 // Returns 1 on success, 0 on failure.
 int load_player_state(const char* path, GameState* game_state);

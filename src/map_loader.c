@@ -9,6 +9,8 @@
 // #include <ctype.h> // No longer directly used for map loading
 
 #include "../sequences/miyanosaka/iwakura_house/scene.h" // For dynamic layout
+#include "../sequences/shibuya/cyberia_club/scene.h" // For dynamic layout
+#include "../sequences/shinjuku/chisa_home/scene.h" // For dynamic layout
 
 // --- Helper Functions for Programmatic Map Definition ---
 
@@ -161,6 +163,54 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
         // DEBUG: Verify POI counts for newly added locations
 #ifdef USE_MAP_DEBUG_LOGGING
         fprintf(stderr, "DEBUG: Verifying POIs for dynamically added locations:\n");
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* loc = &game_state->all_locations[game_state->location_count - rooms_added + i];
+            fprintf(stderr, "DEBUG:   Location '%s' (pois_count: %d)\n", loc->id, loc->pois_count);
+            if (loc->pois_count > 0) {
+                fprintf(stderr, "DEBUG:     First POI: '%s' ('%s')\n", loc->pois[0].id, loc->pois[0].name);
+            }
+        }
+#endif
+    }
+
+    // --- Dynamically add Cyberia Club layout ---
+    rooms_added = create_cyberia_club_layout(game_state->all_locations, game_state->location_count);
+    if (rooms_added > 0) {
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* new_loc = &game_state->all_locations[game_state->location_count + i];
+            cmap_insert(game_state->location_map, new_loc);
+#ifdef USE_MAP_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
+#endif
+        }
+        game_state->location_count += rooms_added;
+
+#ifdef USE_MAP_DEBUG_LOGGING
+        fprintf(stderr, "DEBUG: Verifying POIs for dynamically added Cyberia Club locations:\n");
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* loc = &game_state->all_locations[game_state->location_count - rooms_added + i];
+            fprintf(stderr, "DEBUG:   Location '%s' (pois_count: %d)\n", loc->id, loc->pois_count);
+            if (loc->pois_count > 0) {
+                fprintf(stderr, "DEBUG:     First POI: '%s' ('%s')\n", loc->pois[0].id, loc->pois[0].name);
+            }
+        }
+#endif
+    }
+
+    // --- Dynamically add Chisa Home layout ---
+    rooms_added = create_chisa_home_layout(game_state->all_locations, game_state->location_count);
+    if (rooms_added > 0) {
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* new_loc = &game_state->all_locations[game_state->location_count + i];
+            cmap_insert(game_state->location_map, new_loc);
+#ifdef USE_MAP_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
+#endif
+        }
+        game_state->location_count += rooms_added;
+
+#ifdef USE_MAP_DEBUG_LOGGING
+        fprintf(stderr, "DEBUG: Verifying POIs for dynamically added Chisa Home locations:\n");
         for (int i = 0; i < rooms_added; ++i) {
             Location* loc = &game_state->all_locations[game_state->location_count - rooms_added + i];
             fprintf(stderr, "DEBUG:   Location '%s' (pois_count: %d)\n", loc->id, loc->pois_count);

@@ -1,54 +1,106 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h> // For atoi, exit
 #include "game_types.h"
 #include "scenes.h"
 #include "data_loader.h"
 #include "string_table.h"
+#include "map_loader.h" // Required for map loading
+#include "cmap.h" // Required for cmap_destroy
 
 // --- Forward Declarations ---
 static void print_usage(const char* prog_name);
 static void debug_print_scene(const StoryScene* scene, const GameState* game_state);
+static void debug_print_location(const Location* loc);
 
 // --- Main Function ---
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
+    if (argc < 2) {
         print_usage(argv[0]);
         return 1;
     }
 
-    const char* scene_id_to_debug = argv[1];
-    printf("--- Debugging Scene: %s ---\n\n", scene_id_to_debug);
+    const char* target_id = NULL;
+    bool debug_location = false;
+    int arg_offset = 1; // Used to track current argument position
+
+#ifdef USE_MAP_DEBUG_LOGGING
+    if (argc >= 3 && strcmp(argv[1], "-l") == 0) {
+        debug_location = true;
+        target_id = argv[2];
+        arg_offset = 3;
+    } else {
+        target_id = argv[1];
+    }
+#else
+    target_id = argv[1];
+#endif
+
+    // Basic argument count check based on mode
+    if (debug_location && argc != 3) {
+        print_usage(argv[0]);
+        return 1;
+    }
+    if (!debug_location && argc != 2) {
+        print_usage(argv[0]);
+        return 1;
+    }
 
     // 1. Initialize a minimal GameState
     GameState game_state;
     memset(&game_state, 0, sizeof(GameState));
 
-    // 2. Game data is linked at compile time, no loading needed.
-    // We just need a valid GameState object to pass to functions.
-    // NOTE: A real game would load string tables here if they weren't hardcoded.
+    // 2. Load game data
+    // For locations, we need to load the full map data.
+    // For scenes, only string tables are generally needed, but loading map data provides context.
+    // We mock player_state.location as "start" for map loading to proceed.
+    strncpy(game_state.player_state.location, "start", MAX_NAME_LENGTH - 1); // Mock location ID
+    game_state.player_state.location[MAX_NAME_LENGTH - 1] = '\0';
 
-    // 3. Initialize a StoryScene struct and transition to the target scene
-    StoryScene scene;
-    if (!transition_to_scene(scene_id_to_debug, &scene, &game_state)) {
-        fprintf(stderr, "ERROR: Failed to transition to scene '%s'. Is it registered in scenes.c?\n", scene_id_to_debug);
-        // cleanup_game_state is not strictly necessary here as GameState is simple, but good practice
-        return 1;
+
+    if (debug_location) {
+        printf("--- Debugging Location: %s ---\n\n", target_id);
+
+        GamePaths paths;
+        // Mock path for map_dir, since load_map_data ignores it anyway for programmatic loading
+        strncpy(paths.map_dir, ".", MAX_PATH_LENGTH - 1); 
+
+        if (!load_map_data(paths.map_dir, &game_state)) {
+            fprintf(stderr, "ERROR: Failed to load map data for location debugging.\n");
+            return 1;
+        }
+
+        const Location* loc = (const Location*)cmap_get(game_state.location_map, target_id);
+        if (loc == NULL) {
+            fprintf(stderr, "ERROR: Location '%s' not found in map data.\n", target_id);
+            cmap_destroy(game_state.location_map);
+            return 1;
+        }
+        debug_print_location(loc);
+        cmap_destroy(game_state.location_map); // Clean up map
+    } else { // Debugging a scene
+        printf("--- Debugging Scene: %s ---\n\n", target_id);
+        StoryScene scene;
+        if (!transition_to_scene(target_id, &scene, &game_state)) {
+            fprintf(stderr, "ERROR: Failed to transition to scene '%s'. Is it registered in scenes.c?\n", target_id);
+            return 1;
+        }
+        debug_print_scene(&scene, &game_state);
     }
-
-    // 4. Print the parsed scene data
-    debug_print_scene(&scene, &game_state);
-
-    // 5. Clean up (currently does nothing, but good practice)
-    // cleanup_game_state(&game_state);
-
+    
     return 0;
 }
 
 // --- Function Implementations ---
 
 static void print_usage(const char* prog_name) {
-    printf("Usage: %s <scene_id>\n", prog_name);
-    printf("Example: %s \"story/00_entry.md\"\n", prog_name);
+    printf("Usage:\n");
+    printf("  Scene Debugger: %s <scene_id>\n", prog_name);
+    printf("    Example: %s \"story/00_entry.md\"\n", prog_name);
+#ifdef USE_MAP_DEBUG_LOGGING
+    printf("  Location Debugger: %s -l <location_id>\n", prog_name);
+    printf("    Example: %s -l \"cyberia_club\"\n", prog_name);
+#endif
 }
 
 static const char* get_speaker_name_str(SpeakerID id) {
@@ -95,6 +147,46 @@ static void debug_print_scene(const StoryScene* scene, const GameState* game_sta
         printf("    Action:   %s\n", choice->action_id);
         if (choice->condition.flag_name[0] != '\0') {
             printf("    Condition: %s == %d\n", choice->condition.flag_name, choice->condition.required_value);
+        }
+    }
+    printf("-------------------------------\n");
+}
+
+static void debug_print_location(const Location* loc) {
+    if (loc == NULL) {
+        printf("Location is NULL.\n");
+        return;
+    }
+
+    printf("Location ID:   %s\n", loc->id);
+    printf("Location Name: %s\n", loc->name);
+    printf("Description:   %s\n", loc->description);
+
+    printf("\n--- Points of Interest (%d POIs) ---\n", loc->pois_count);
+    if (loc->pois_count == 0) {
+        printf("  (none)\n");
+    } else {
+        for (int i = 0; i < loc->pois_count; i++) {
+            printf("  POI %d ID:          %s\n", i + 1, loc->pois[i].id);
+            printf("    Name:        %s\n", loc->pois[i].name);
+            printf("    Description: %s\n", loc->pois[i].description);
+        }
+    }
+
+    printf("\n--- Connections (%d connections) ---\n", loc->connection_count);
+    if (loc->connection_count == 0) {
+        printf("  (none)\n");
+    } else {
+        for (int i = 0; i < loc->connection_count; i++) {
+            const Connection* conn = &loc->connections[i];
+            printf("  Connection %d Action: %s\n", i + 1, conn->action_id);
+            printf("    Target:    %s\n", conn->target_location_id);
+            if (conn->is_accessible != NULL) {
+                printf("    Access Check: (function pointer)\n");
+            }
+            if (conn->access_denied_scene_id != NULL) {
+                printf("    Access Denied Scene: %s\n", conn->access_denied_scene_id);
+            }
         }
     }
     printf("-------------------------------\n");
