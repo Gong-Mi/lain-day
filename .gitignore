@@ -13,3 +13,4 @@ assets/images//dist
 
 .gemini/
 gha-creds-*.json
+ecc_challenge

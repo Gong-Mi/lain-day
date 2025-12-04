@@ -150,6 +150,8 @@ set(GAME_ENGINE_SOURCES
 
     src/time_utils.c
 
+    src/ecc_time.c
+
     src/compression_util.c
 
     src/render_utils.c
@@ -159,6 +161,8 @@ set(GAME_ENGINE_SOURCES
     ${SCENE_ROOT_SOURCES}
 
     ${SEQUENCE_SOURCES}
+
+    src/characters/mika.c
 
 )
 

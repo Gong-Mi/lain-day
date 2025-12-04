@@ -4,6 +4,8 @@
 #include "flag_system.h"
 #include "cmap.h" // Use the new CMap module
 #include "game_types.h" // For struct GameState definition
+#include "ecc_time.h"
+#include "characters/mika.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> // For atoi
@@ -102,7 +104,13 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     if (strcmp(action_id, "enter_lain_room") == 0) {
         strncpy(game_state->player_state.location, "lain_room", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1);
-        game_state->time_of_day += 10; // Example time cost
+        
+        // ECC-aware time cost calculation for 10 minutes
+        const uint32_t time_cost_units = 10 * 60 * 16; // 10 minutes * 60s/min * 16 units/s
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+        uint32_t new_time = decoded_result.data + time_cost_units;
+        game_state->time_of_day = encode_time_with_ecc(new_time);
+
         scene_changed = 1;
     } else if (strcmp(action_id, "go_downstairs") == 0) {
         strncpy(game_state->player_state.location, "downstairs", MAX_NAME_LENGTH - 1);
@@ -320,6 +328,12 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     } else if (strcmp(action_id, "gunshot_exit") == 0) {
         strncpy(game_state->current_story_file, "story/singing_result_gunshot.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
+    } else if (strcmp(action_id, "reset_from_glitch") == 0) {
+        strncpy(game_state->current_story_file, "story/00_entry.md", MAX_PATH_LENGTH - 1);
+        const uint32_t default_start_time_units = 8 * 60 * 60 * 16;
+        game_state->time_of_day = encode_time_with_ecc(default_start_time_units);
+        hash_table_set(game_state->flags, "TIME_GLITCH_ACTIVE", "0");
+        scene_changed = 1;
     } else if (strcmp(action_id, "end_chapter_two") == 0) {
         strncpy(game_state->current_story_file, "story/chapter_three_intro.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
@@ -365,20 +379,14 @@ int execute_action(const char* action_id, struct GameState* game_state) {
 
 
     // --- CONDITIONAL ACTIONS ---
-    // Example of conditional_action_by_flag (simplified)
+    // The logic for talking to the sister is now encapsulated in the Mika module.
     else if (strcmp(action_id, "talk_to_sister") == 0) {
-        const char* sister_mood = hash_table_get(game_state->flags, "sister_mood");
-        if (sister_mood != NULL) {
-            if (strcmp(sister_mood, "cold") == 0) {
-                scene_changed = execute_action("talk_to_sister_cold", game_state);
-            } else if (strcmp(sister_mood, "curious") == 0) {
-                scene_changed = execute_action("talk_to_sister_curious", game_state);
-            } else { // default
-                scene_changed = execute_action("talk_to_sister_default", game_state);
-            }
-        } else { // If flag not set, use default
-            scene_changed = execute_action("talk_to_sister_default", game_state);
-        }
+        get_mika_module()->on_talk(game_state);
+        // Note: The on_talk function itself calls execute_action internally,
+        // which will set scene_changed. We assume we don't need to capture the return
+        // value here, as the recursive call will handle the scene change.
+        // This is a slight awkwardness of the current hybrid design.
+        scene_changed = 1; // Mark scene as changed to ensure re-rendering.
     }
     // Example of conditional_story_change (simplified for enter_chatroom)
     else if (strcmp(action_id, "enter_chatroom") == 0) {

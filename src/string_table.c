@@ -248,6 +248,13 @@ const char* g_string_table[TEXT_COUNT] = {
     [TEXT_CHOICE_ENTER_LAINS_ROOM] = "进入Lain的房间",
     [TEXT_CHOICE_ENTER_MIKAS_ROOM] = "进入美香的房间",
     [TEXT_CHOICE_GO_DOWNSTAIRS_FROM_UPPER_HALLWAY] = "走下楼梯",
+
+    // Time Glitch Scene
+    [SID_TIME_GLITCH_1] = "你的NAVI屏幕閃爍著無法辨認的亂碼。時間顯示變成了刺眼的 `[##:##]`。",
+    [SID_TIME_GLITCH_2] = "數據流在你眼前扭曲、崩潰。一瞬間，你彷彿看到了无数个自己，在不同的时间线上重复着相同的动作。",
+    [SID_TIME_GLITCH_3] = "記憶正在失去同步...",
+    [SID_TIME_GLITCH_4] = "存档数据似乎已损坏。时间被重置了。",
+    [SID_TIME_GLITCH_CHOICE_1] = "...继续...",
 };
 
 const char* get_string_by_id(StringID id) {

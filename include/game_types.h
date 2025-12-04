@@ -7,6 +7,8 @@
 #include "flag_system.h"
 #include "cmap.h"
 
+#include "ecc_time.h"
+
 // --- Defines ---
 #define MAX_NAME_LENGTH 64
 #define MAX_DESC_LENGTH 256
@@ -123,7 +125,7 @@ typedef struct Location_struct {
 typedef struct GameState {
     PlayerState player_state;
     char current_story_file[MAX_PATH_LENGTH];
-    int time_of_day;
+    uint32_t time_of_day;
     Location all_locations[MAX_LOCATIONS];
     int location_count;
     CMap* location_map;

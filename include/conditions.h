@@ -7,7 +7,4 @@
 struct GameState;
 struct Connection;
 
-// Condition function for Mika's room
-bool is_mikas_room_accessible(struct GameState* game_state, const struct Connection* connection);
-
 #endif // CONDITIONS_H

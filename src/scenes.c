@@ -40,6 +40,25 @@
 // To keep the game runnable, we will temporarily keep the old if-else for non-converted scenes.
 
 
+// --- Scene Initializers ---
+
+// New Time Glitch Scene
+void init_scene_time_glitch(StoryScene* scene) {
+    strcpy(scene->scene_id, "SCENE_TIME_GLITCH");
+    strcpy(scene->name, "Time Glitch");
+    strcpy(scene->location_id, "the_wired");
+
+    scene->dialogue_line_count = 4;
+    scene->dialogue_lines[0] = (DialogueLine){SPEAKER_NONE, SID_TIME_GLITCH_1};
+    scene->dialogue_lines[1] = (DialogueLine){SPEAKER_NONE, SID_TIME_GLITCH_2};
+    scene->dialogue_lines[2] = (DialogueLine){SPEAKER_NONE, SID_TIME_GLITCH_3};
+    scene->dialogue_lines[3] = (DialogueLine){SPEAKER_NONE, SID_TIME_GLITCH_4};
+
+    scene->choice_count = 1;
+    scene->choices[0] = (StoryChoice){SID_TIME_GLITCH_CHOICE_1, "reset_from_glitch", {}};
+}
+
+
 // --- Dispatch Table ---
 // A struct to map a scene ID (story file path) to its init function.
 typedef struct {
@@ -72,6 +91,7 @@ static const SceneRegistration scene_registrations[] = {
     {"SCENE_MIKA_ROOM_LOCKED", init_scene_mika_room_locked},
     {"SCENE_MIKA_ROOM_UNLOCKED", init_scene_mika_room_unlocked},
     {"SCENE_IWAKURA_UPPER_HALLWAY", init_scene_iwakura_upper_hallway},
+    {"SCENE_TIME_GLITCH", init_scene_time_glitch},
     // NOTE: Add new scenes here as they are created.
 };
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(SceneRegistration);

@@ -1,6 +1,7 @@
 #include "data_loader.h"
 #include "cJSON.h"
 #include "flag_system.h"
+#include "ecc_time.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -124,6 +125,27 @@ int load_player_state(const char* path, GameState* game_state) {
     if (cJSON_IsString(story_file)) strncpy(game_state->current_story_file, story_file->valuestring, MAX_PATH_LENGTH - 1);
     else strncpy(game_state->current_story_file, "story/00_entry.md", MAX_PATH_LENGTH - 1);
 
+    const cJSON *time_json = cJSON_GetObjectItemCaseSensitive(root, "time_of_day");
+    if (cJSON_IsNumber(time_json)) {
+        game_state->time_of_day = (uint32_t)time_json->valuedouble;
+    } else {
+        // Initialize with a default start time (Day 3, 20:00) if not found
+        const uint32_t default_start_time_units = (2 * 24 * 60 * 60 * 16) + (20 * 60 * 60 * 16); // Day 3, 8 PM
+        game_state->time_of_day = encode_time_with_ecc(default_start_time_units);
+    }
+
+    // Immediately check the loaded time for corruption
+    DecodedTimeResult time_check = decode_time_with_ecc(game_state->time_of_day);
+    if (time_check.status == DOUBLE_BIT_ERROR_DETECTED) {
+        hash_table_set(game_state->flags, "TIME_GLITCH_ACTIVE", "1");
+        #ifdef USE_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: Corrupted time detected! TIME_GLITCH_ACTIVE flag set.\n");
+        #endif
+    } else {
+        // Ensure the flag is not set if time is okay
+        hash_table_set(game_state->flags, "TIME_GLITCH_ACTIVE", "0");
+    }
+
     cJSON_Delete(root);
     return 1;
 }
@@ -180,6 +202,7 @@ int save_game_state(const char* path, const GameState* game_state) {
     cJSON_AddStringToObject(root, "location", p_state->location);
     cJSON_AddNumberToObject(root, "credit_level", p_state->credit_level);
     cJSON_AddStringToObject(root, "current_story_file", game_state->current_story_file);
+    cJSON_AddNumberToObject(root, "time_of_day", game_state->time_of_day);
 
     cJSON *inv = cJSON_CreateObject();
     if (inv) {

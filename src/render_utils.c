@@ -1,6 +1,7 @@
 #include "render_utils.h"
 #include "ansi_colors.h"
 #include "string_table.h" // Needed for get_string_by_id
+#include "ecc_time.h"
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h> // For usleep
@@ -145,9 +146,22 @@ void clear_screen() {
     printf("\033[2J\033[H");
 }
 
-void print_game_time(int time_of_day) {
-    int hours = time_of_day / 60;
-    int minutes = time_of_day % 60;
+void print_game_time(uint32_t time_of_day) {
+    DecodedTimeResult decoded_result = decode_time_with_ecc(time_of_day);
+    
+    // Handle uncorrectable errors by showing a glitchy time
+    if (decoded_result.status == DOUBLE_BIT_ERROR_DETECTED) {
+        printf(ANSI_COLOR_RED "[##:##]" ANSI_COLOR_RESET "\n");
+        return;
+    }
+
+    uint32_t raw_units = decoded_result.data;
+    uint32_t total_seconds = raw_units / 16;
+    uint32_t total_minutes = total_seconds / 60;
+    
+    int hours = (total_minutes / 60) % 24;
+    int minutes = total_minutes % 60;
+
     printf(ANSI_COLOR_YELLOW "[%02d:%02d]" ANSI_COLOR_RESET "\n", hours, minutes);
 }
 

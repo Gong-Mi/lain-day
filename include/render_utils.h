@@ -3,7 +3,7 @@
 
 #include "game_types.h" // For GameState definition
 
-void print_game_time(int time_of_day);
+void print_game_time(uint32_t time_of_day);
 
 // Prints a line of dialogue, handling speaker names and colors.
 void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState* game_state);

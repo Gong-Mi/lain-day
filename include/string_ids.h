@@ -241,6 +241,13 @@ typedef enum {
     TEXT_CHOICE_ENTER_MIKAS_ROOM,
     TEXT_CHOICE_GO_DOWNSTAIRS_FROM_UPPER_HALLWAY, // Renamed to avoid clash with TEXT_CHOICE_GO_DOWNSTAIRS
 
+    // Time Glitch Scene
+    SID_TIME_GLITCH_1,
+    SID_TIME_GLITCH_2,
+    SID_TIME_GLITCH_3,
+    SID_TIME_GLITCH_4,
+    SID_TIME_GLITCH_CHOICE_1,
+
     TEXT_COUNT // Always last, gives a count of total strings
 } StringID;
 

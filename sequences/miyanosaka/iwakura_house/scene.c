@@ -4,6 +4,7 @@
 #include "conditions.h"
 #include "scenes.h" // For SCENE_MIKA_ROOM_LOCKED etc.
 #include "flag_system.h" // For hash_table_get
+#include "characters/mika.h"
 
 // Helper function to safely add a connection to a location
 static void add_connection(Location* loc, const char* action_id, const char* target_id, is_accessible_func is_accessible, const char* access_denied_scene_id) {
@@ -101,7 +102,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(upper_hallway->description, "连接着房子二楼的房间。");
     add_connection(upper_hallway, "go_downstairs", "iwakura_lower_hallway", NULL, NULL);
     add_connection(upper_hallway, "enter_lains_room", "iwakura_lains_room", NULL, NULL);
-    add_connection(upper_hallway, "enter_mikas_room", "iwakura_mikas_room", is_mikas_room_accessible, "SCENE_MIKA_ROOM_LOCKED");
+    add_connection(upper_hallway, "enter_mikas_room", "iwakura_mikas_room", get_mika_module()->is_room_accessible, "SCENE_MIKA_ROOM_LOCKED");
     add_poi(upper_hallway, "painting", "装饰画", "墙上挂着一幅抽象画。");
 
     // --- 6. Lain's Room (Lain的房间) ---
