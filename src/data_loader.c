@@ -2,6 +2,9 @@
 #include "cJSON.h"
 #include "flag_system.h"
 #include "ecc_time.h"
+#include "string_ids.h"      // Include generated string IDs
+#include "string_id_names.h" // Include generated string ID names
+#include "string_table.h"    // Include string table functions
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +27,74 @@ static char* read_file_to_buffer(const char* path) {
     buffer[length] = '\0';
     fclose(file);
     return buffer;
+}
+
+int load_string_table(const char* path) {
+    char *json_string = read_file_to_buffer(path);
+    if (json_string == NULL) {
+        fprintf(stderr, "ERROR: Failed to read strings.json from %s\n", path);
+        return 0;
+    }
+
+    cJSON *root = cJSON_Parse(json_string);
+    free(json_string); 
+    if (root == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            fprintf(stderr, "ERROR: Malformed JSON in %s: %s\n", path, error_ptr);
+        } else {
+            fprintf(stderr, "ERROR: Failed to parse JSON from %s\n", path);
+        }
+        return 0;
+    }
+
+    // Allocate temporary storage for strings in the correct order
+    const char** temp_strings = (const char**)malloc(sizeof(const char*) * TEXT_COUNT);
+    if (temp_strings == NULL) {
+        fprintf(stderr, "ERROR: Failed to allocate memory for temporary string table.\n");
+        cJSON_Delete(root);
+        return 0;
+    }
+
+    // Populate temp_strings using generated g_string_id_names and JSON data
+    for (int i = 0; i < TEXT_COUNT; ++i) {
+        const char* id_name = g_string_id_names[i];
+        const cJSON *json_string_item = cJSON_GetObjectItemCaseSensitive(root, id_name);
+        
+        if (cJSON_IsString(json_string_item)) {
+            temp_strings[i] = strdup(json_string_item->valuestring);
+        } else {
+            // Handle missing string in JSON or non-string value
+            // TEXT_INVALID and TEXT_EMPTY_LINE are special cases
+            if (i == TEXT_INVALID) {
+                temp_strings[i] = strdup("ERROR: Invalid Text ID (Fallback)");
+            } else if (i == TEXT_EMPTY_LINE) {
+                temp_strings[i] = strdup("");
+            } else {
+                fprintf(stderr, "WARNING: Missing or invalid string for ID '%s' in %s. Using fallback.\n", id_name, path);
+                temp_strings[i] = strdup("ERROR: Missing String");
+            }
+        }
+        if (temp_strings[i] == NULL) {
+            fprintf(stderr, "FATAL: strdup failed for ID '%s'. Out of memory?\n", id_name);
+            // Clean up already allocated temp_strings before exiting
+            for (int j = 0; j < i; ++j) free((void*)temp_strings[j]);
+            free(temp_strings);
+            cJSON_Delete(root);
+            return 0;
+        }
+    }
+
+    // Initialize the main string table in string_table.c
+    init_string_table(temp_strings, TEXT_COUNT);
+
+    // Free temporary strings, as init_string_table makes its own copies
+    for (int i = 0; i < TEXT_COUNT; ++i) {
+        free((void*)temp_strings[i]);
+    }
+    free(temp_strings);
+    cJSON_Delete(root);
+    return 1;
 }
 
 int load_player_state(const char* path, GameState* game_state) {
@@ -176,6 +247,8 @@ void cleanup_game_state(GameState* game_state) {
     if (game_state->flags != NULL) {
         free_hash_table(game_state->flags);
     }
+    // Clean up the string table
+    cleanup_string_table();
 }
 
 int save_game_state(const char* path, const GameState* game_state) {

@@ -12,4 +12,9 @@ typedef struct {
     char session_root_dir[MAX_PATH_LENGTH];
 } GamePaths;
 
+void init_paths(char* argv0, GamePaths* paths);
+void get_base_path(char* exe_path, char* base_path, size_t size);
+int copy_file(const char *src_path, const char *dest_path);
+int write_string_to_file(const char* str, const char* dest_path);
+
 #endif // GAME_PATHS_H

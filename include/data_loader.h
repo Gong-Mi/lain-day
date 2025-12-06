@@ -2,15 +2,7 @@
 #define DATA_LOADER_H
 
 #include "game_types.h" // For GameState and other game types
-
-// --- Path Management Struct ---
-typedef struct {
-    char base_path[MAX_PATH_LENGTH];
-    char items_file[MAX_PATH_LENGTH];
-    char actions_file[MAX_PATH_LENGTH];
-    char map_dir[MAX_PATH_LENGTH];
-    char session_root_dir[MAX_PATH_LENGTH];
-} GamePaths;
+#include "game_paths.h" // For GamePaths struct
 
 // Loads the player state from the character.json file.
 // Returns 1 on success, 0 on failure.
@@ -19,6 +11,10 @@ int load_player_state(const char* path, GameState* game_state);
 // Loads all item data from the items.json file.
 // Returns 1 on success, 0 on failure.
 int load_items_data(const char* path, GameState* game_state);
+
+// Loads the string table from strings.json.
+// Returns 1 on success, 0 on failure.
+int load_string_table(const char* path);
 
 // Loads all action data from the actions.json file.
 // Returns 1 on success, 0 on failure.

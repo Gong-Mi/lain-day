@@ -15,6 +15,7 @@
 #include "story_parser.h"
 #include "executor.h"
 #include "string_table.h"
+#include "string_id_names.h" // Include generated string ID names
 #include "scenes.h"
 #include "ansi_colors.h"
 #include "project_status.h"
@@ -38,8 +39,8 @@
 // System Helpers
 
 // Path Management
-void get_base_path(char* exe_path, char* base_path, size_t size);
-void init_paths(char* argv0, GamePaths* paths);
+// void get_base_path(char* exe_path, char* base_path, size_t size); // No longer needed, as init_paths is moved
+// void init_paths(char* argv0, GamePaths* paths); // Moved to game_paths.c
 
 // Game Loop Components
 int copy_file(const char *src_path, const char *dest_path);
@@ -61,6 +62,15 @@ int main(int argc, char *argv[]) {
 
     GamePaths paths;
     init_paths(argv[0], &paths);
+
+    // Load string table first
+    char strings_json_path[MAX_PATH_LENGTH];
+    snprintf(strings_json_path, MAX_PATH_LENGTH, "%s/data/strings.json", paths.base_path);
+    if (!load_string_table(strings_json_path)) {
+        fprintf(stderr, "Error: Failed to load string table.\n");
+        return 1;
+    }
+    printf("String table loaded.\n");
 
     char session_name[MAX_NAME_LENGTH];
     char session_dir_path[MAX_PATH_LENGTH];
@@ -273,7 +283,7 @@ int main(int argc, char *argv[]) {
         printf("\nTest mode: Skipping game state saving.\n");
     }
     
-    cleanup_game_state((GameState*)&game_state); // Cast to GameState*
+    cleanup_game_state(&game_state); 
     pthread_mutex_destroy(&time_mutex);
 
     printf("\nLain-day C version exiting.\n");
@@ -282,92 +292,6 @@ int main(int argc, char *argv[]) {
 
 
 // --- Function Definitions ---
-
-void get_base_path(char* exe_path, char* base_path, size_t size) {
-    char* exe_dir = dirname(exe_path);
-    snprintf(base_path, size, "%s/../..", exe_dir);
-}
-
-void init_paths(char* argv0, GamePaths* paths) {
-    char exe_path[MAX_PATH_LENGTH];
-    char* resolved_path = realpath(argv0, exe_path);
-    if (resolved_path == NULL) {
-        fprintf(stderr, "Error: Could not resolve executable path for '%s'. %s\n", argv0, strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
-    char current_path[MAX_PATH_LENGTH];
-    strncpy(current_path, dirname(resolved_path), MAX_PATH_LENGTH - 1);
-
-    // Search upwards for a directory containing a ".git" folder
-    for (int i = 0; i < 10; ++i) { // Limit search depth to 10 levels
-        char git_path[MAX_PATH_LENGTH];
-        snprintf(git_path, sizeof(git_path), "%s/.git", current_path);
-        
-        struct stat st;
-        if (stat(git_path, &st) == 0 && S_ISDIR(st.st_mode)) {
-            // Found the root directory
-            snprintf(paths->base_path, sizeof(paths->base_path), "%s", current_path);
-            snprintf(paths->items_file, sizeof(paths->items_file), "%s/items.json", paths->base_path);
-            snprintf(paths->map_dir, sizeof(paths->map_dir), "%s/map", paths->base_path);
-            snprintf(paths->session_root_dir, sizeof(paths->session_root_dir), "%s/session", paths->base_path);
-            return;
-        }
-
-        // Move up one directory
-        char temp_path[MAX_PATH_LENGTH];
-        snprintf(temp_path, sizeof(temp_path), "%s/..", current_path);
-        if (realpath(temp_path, current_path) == NULL) {
-            break; // Could not move up further
-        }
-    }
-
-    fprintf(stderr, "Error: Could not find project root directory (containing .git folder).\n");
-    exit(EXIT_FAILURE);
-}
-
-int copy_file(const char *src_path, const char *dest_path) {
-    FILE *src = fopen(src_path, "rb");
-    if (src == NULL) {
-        fprintf(stderr, "Error: Could not open source file %s\n", src_path);
-        return 0;
-    }
-
-    FILE *dest = fopen(dest_path, "wb");
-    if (dest == NULL) {
-        fprintf(stderr, "Error: Could not open destination file %s\n", dest_path);
-        fclose(src);
-        return 0;
-    }
-
-    char buffer[4096];
-    size_t bytes_read;
-    while ((bytes_read = fread(buffer, 1, sizeof(buffer), src)) > 0) {
-        fwrite(buffer, 1, bytes_read, dest);
-    }
-
-    fclose(src);
-    fclose(dest);
-    return 1;
-}
-
-int write_string_to_file(const char* str, const char* dest_path) {
-    FILE* dest = fopen(dest_path, "wb");
-    if (dest == NULL) {
-        fprintf(stderr, "Error: Could not open destination file %s\n", dest_path);
-        return 0;
-    }
-    size_t len = strlen(str);
-    if (fwrite(str, 1, len, dest) != len) {
-        fprintf(stderr, "Error: Failed to write entire string to %s\n", dest_path);
-        fclose(dest);
-        return 0;
-    }
-    fclose(dest);
-    return 1;
-}
-
-
 
 void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index) {
     if (argc > 1 && *arg_index < argc) {

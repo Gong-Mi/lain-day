@@ -1,10 +1,10 @@
 # Project Overview
 
-This project is an interactive fiction game named `lain-day`, inspired by the anime *Serial Experiments Lain*. The game is written in C and uses a data-driven approach, with game content defined in `.md` and `.json` files. The project is built using CMake and has dependencies on `cJSON` and `zlib`.
+This project is an interactive fiction game named `lain-day`, inspired by the anime *Serial Experiments Lain*. The game is written in C and uses a hybrid data-driven and code-driven approach. The project is built using CMake and has dependencies on `cJSON`, `zlib`, and `linenoise`.
 
 The game is played in a terminal and simulates the experience of connecting to and exploring a mysterious network called "the Wired." The gameplay involves making choices, navigating different "layers" of the Wired, and uncovering a branching narrative with multiple endings.
 
-The project has a strong design vision, with plans for advanced features like a CPU simulation for puzzle-solving, a hybrid media narrative system, and a dynamic network ecosystem.
+A detailed, real-time list of completed and planned features is maintained in the `include/project_status.h` file.
 
 ## Building and Running
 
@@ -22,19 +22,22 @@ cmake ..
 make
 
 # 4. Run the game
-./lain-day
+./lain_day_c
 ```
 
 The game will prompt for a session name. You can enter a new name to start a new game or an existing name to resume a previous game. Game sessions are saved in the `session/` directory.
 
-## Development Conventions
+## Development Status & Conventions
 
 *   **Language:** The project is written in C (C11 standard).
 *   **Build System:** CMake is used for building the project.
-*   **Coding Style:** The code follows a consistent style, with clear and well-documented functions.
-*   **Data-Driven Design:** Game content is separated from the engine and is defined in `.md` and `.json` files. This allows for easy modification and expansion of the game's story and content.
-*   **Feature Toggles:** The `CMakeLists.txt` file includes several feature toggles for enabling and disabling characters and debug features. This is useful for creating different builds and for testing specific parts of the game.
-*   **Testing:** The game can be run in an automated mode by providing input as command-line arguments. This is useful for testing specific scenarios and for debugging.
+*   **Design:** The project has evolved from a purely data-driven model to a **hybrid data-driven and code-driven design**. While some content is still loaded from `.json` files, narrative sequences and complex logic are increasingly being implemented directly in C for more control and robustness.
+*   **Source of Truth:** For a detailed breakdown of what is implemented, what is in progress, and what is planned, please refer to **`include/project_status.h`**.
+*   **Key Changes:**
+    *   The `actions.json` file has been **deprecated**. All action logic is now part of the C engine.
+    *   The original `map/` directory has been replaced by the `world/` directory system.
+*   **Feature Toggles:** The `CMakeLists.txt` file includes several feature toggles for enabling and disabling characters and debug features. This is useful for creating different builds and for testing.
+*   **Testing:** The game can be run in an automated mode by providing input as command-line arguments. A `scene_debugger` tool is also available.
 
 ## Scene Management Refactoring Strategy
 
@@ -47,6 +50,8 @@ To improve clarity and maintainability without undertaking a massive, immediate 
 *   **Goal:** This approach aims to gradually transition the entire story system to a more robust, C-code-based structure, reducing reliance on string parsing of file paths for scene identification.
 
 ## Millennium Crisis Integration Design Considerations
+
+**NOTE: The following section describes a design concept for a potential future feature. It has NOT been implemented.**
 
 To integrate the 'Millennium crisis' (Y2K crisis and Millennium Digital Act) feeling into the game, leveraging its C-based, data-driven interactive fiction nature, the following approaches are being considered:
 
@@ -72,5 +77,4 @@ The discussion explored preventing save file manipulation and integrating the mi
 *   **Player Save File Manipulation:** Players can potentially modify `character.json` to bypass in-game protection.
 *   **Proposed Solutions:**
     *   **Save File Checksum/Hashing:** Implement a checksum/hash for `character.json` to detect any tampering upon loading. This provides general save file integrity.
-    *   **Thematic Time Corruption (14-bit ECC):** For the `time_of_day` variable specifically, a 14-bit integer with ECC (Error-Correcting Code) could be used. If the time value from the save file shows an uncorrectable ECC error (either from player tampering or a simulated Y2K event), this could trigger a *specific in-game event* (e.g., a 'time glitch' narrative sequence, a unique challenge) that aligns with the Y2K theme, rather than just rejecting the save. This allows for both general save file integrity and specific thematic corruption.
-
+    *   **Thematic Time Corruption (24-bit + 8-bit ECC):** For the `time_of_day` variable specifically, a 24-bit integer with 8-bit ECC (Error-Correcting Code) could be used. If the time value from the save file shows an uncorrectable ECC error (either from player tampering or a simulated Y2K event), this could trigger a *specific in-game event* (e.g., a 'time glitch' narrative sequence, a unique challenge) that aligns with the Y2K theme, rather than just rejecting the save. This allows for both general save file integrity and specific thematic corruption.

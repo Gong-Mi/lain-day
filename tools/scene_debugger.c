@@ -51,6 +51,18 @@ int main(int argc, char* argv[]) {
     memset(&game_state, 0, sizeof(GameState));
     g_game_state_ptr = &game_state; // Set the global pointer for the debugger instance
 
+    // Initialize paths
+    GamePaths paths;
+    init_paths(argv[0], &paths);
+
+    // Load string table
+    char strings_json_path[MAX_PATH_LENGTH];
+    snprintf(strings_json_path, MAX_PATH_LENGTH, "%s/data/strings.json", paths.base_path);
+    if (!load_string_table(strings_json_path)) {
+        fprintf(stderr, "ERROR: Failed to load string table for scene debugger.\n");
+        return 1;
+    }
+
     // 2. Load game data
     // For locations, we need to load the full map data.
     // For scenes, only string tables are generally needed, but loading map data provides context.
@@ -89,6 +101,7 @@ int main(int argc, char* argv[]) {
         debug_print_scene(&scene, &game_state);
     }
     
+    cleanup_string_table(); // Clean up string table
     return 0;
 }
 

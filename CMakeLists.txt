@@ -93,6 +93,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
 
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+
 # Include directories
 include_directories(include)
 include_directories(scenes) # Add scenes directory to include path
@@ -100,6 +102,7 @@ include_directories(sequences) # Add sequences directory to include path
 include_directories("${PROJECT_BINARY_DIR}/include") # For generated headers
 include_directories(external/linenoise) # Add linenoise include path
 include_directories(external/cJSON) # Add cJSON include path
+
 
 # --- Auto-generate character.json data header ---
 set(CHARACTER_JSON_FILE "${PROJECT_SOURCE_DIR}/character.json")
@@ -115,6 +118,21 @@ add_custom_command(
 
 # Create a target for the generated header to ensure it's built
 add_custom_target(generate_character_header ALL DEPENDS ${GENERATED_CHARACTER_DATA_H})
+
+# --- Auto-generate string_ids.h from strings.json ---
+set(STRINGS_JSON_FILE "${PROJECT_SOURCE_DIR}/data/strings.json")
+set(GENERATED_STRINGS_H "${PROJECT_BINARY_DIR}/include/string_ids.h")
+set(GENERATED_STRINGS_NAMES_H "${PROJECT_BINARY_DIR}/include/string_id_names.h")
+set(GENERATED_STRINGS_NAMES_C "${PROJECT_BINARY_DIR}/src/generated_string_id_names.c")
+
+add_custom_command(
+    OUTPUT ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C}
+    COMMAND /data/data/com.termux/files/usr/bin/python3.12 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py ${STRINGS_JSON_FILE} ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C}
+    DEPENDS ${STRINGS_JSON_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py
+    COMMENT "Generating C headers and source from strings.json"
+)
+
+add_custom_target(generate_string_ids_header ALL DEPENDS ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C})
 
 # Find all scene source files automatically.
 
@@ -140,29 +158,31 @@ set(GAME_ENGINE_SOURCES
 
     src/map_loader.c
 
-    src/game_state_global.c
+        src/game_state_global.c
 
-    src/executor.c
+        src/executor.c
 
-    src/flag_system.c
+        src/flag_system.c
 
-    src/string_table.c
+        src/string_table.c
 
-    src/scenes.c
+        src/scenes.c
 
-    src/cmap.c
+        src/cmap.c
 
-    src/conditions.c
+        src/conditions.c
 
-    src/time_utils.c
+        src/time_utils.c
 
-    src/ecc_time.c
+        src/ecc_time.c
 
-    src/compression_util.c
+        src/compression_util.c
 
-    src/render_utils.c
+        src/render_utils.c
 
-    external/linenoise/linenoise.c
+        src/game_paths.c
+
+        external/linenoise/linenoise.c
     external/linenoise/stringbuf.c
 
     ${SCENE_SUBDIR_SOURCES}
@@ -174,6 +194,7 @@ set(GAME_ENGINE_SOURCES
         scenes/examine_fridge/scene.c
 
         src/characters/mika.c
+        ${GENERATED_STRINGS_NAMES_C}
 
     )
 
@@ -188,8 +209,8 @@ add_executable(scene_debugger tools/scene_debugger.c ${GAME_ENGINE_SOURCES})
 target_link_libraries(scene_debugger PUBLIC zlibstatic pthread)
 
 # Add dependency to ensure header is generated before compiling executables
-add_dependencies(lain_day_c generate_character_header)
-add_dependencies(scene_debugger generate_character_header)
+add_dependencies(lain_day_c generate_character_header generate_string_ids_header)
+add_dependencies(scene_debugger generate_character_header generate_string_ids_header)
 
 # Add feature toggle definitions
 # The following compile definitions (USE_TYPEWRITER_EFFECT, USE_DEBUG_LOGGING, etc.)
