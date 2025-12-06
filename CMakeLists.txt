@@ -98,6 +98,7 @@ include_directories(include)
 include_directories(scenes) # Add scenes directory to include path
 include_directories(sequences) # Add sequences directory to include path
 include_directories("${PROJECT_BINARY_DIR}/include") # For generated headers
+include_directories(external/linenoise) # Add linenoise include path
 
 # --- Auto-generate character.json data header ---
 set(CHARACTER_JSON_FILE "${PROJECT_SOURCE_DIR}/character.json")
@@ -138,6 +139,8 @@ set(GAME_ENGINE_SOURCES
 
     src/map_loader.c
 
+    src/game_state_global.c
+
     src/executor.c
 
     src/flag_system.c
@@ -157,6 +160,9 @@ set(GAME_ENGINE_SOURCES
     src/compression_util.c
 
     src/render_utils.c
+
+    external/linenoise/linenoise.c
+    external/linenoise/stringbuf.c
 
     ${SCENE_SUBDIR_SOURCES}
 

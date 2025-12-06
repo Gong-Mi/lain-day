@@ -27,7 +27,7 @@ void init_scene_01_lain_room(StoryScene* scene) {
     scene->dialogue_line_count = 10;
     scene->choices[0] = (StoryChoice){.text_id = TEXT_CHOICE_TALK_TO_FIGURE, .action_id = "talk_to_figure"};
     scene->choices[1] = (StoryChoice){.text_id = TEXT_CHOICE_EXAMINE_NAVI, .action_id = "examine_navi"};
-    scene->choices[2] = (StoryChoice){.text_id = TEXT_CHOICE_LEAVE_ROOM, .action_id = "return_to_entry"};
+    scene->choices[2] = (StoryChoice){.text_id = TEXT_CHOICE_LEAVE_ROOM, .action_id = "exit_room"};
     scene->choice_count = 3;
 #ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: init_scene_01_lain_room: scene->dialogue_lines[0].text_id after assignment: %d\n", scene->dialogue_lines[0].text_id);

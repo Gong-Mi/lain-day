@@ -68,6 +68,32 @@ static void acquire_item_logic(struct GameState* game_state, const char* item_id
 }
 
 
+// Helper to get time cost for an action (in minutes)
+static int get_action_time_cost(const char* action_id) {
+    if (strcmp(action_id, "enter_lain_room") == 0) return 10;
+    if (strcmp(action_id, "go_downstairs") == 0) return 1;
+    if (strcmp(action_id, "enter_house") == 0) return 1;
+    if (strcmp(action_id, "go_outside") == 0) return 1;
+    if (strcmp(action_id, "examine_navi") == 0) return 2;
+    if (strcmp(action_id, "talk_to_dad") == 0) return 5;
+    if (strcmp(action_id, "get_milk") == 0) return 3;
+    if (strcmp(action_id, "take_milk_from_fridge") == 0) return 1;
+    // Default time cost for actions not explicitly listed
+    return 0;
+}
+
+// Helper to apply time cost
+static void apply_time_cost(struct GameState* game_state, const char* action_id) {
+    int minutes = get_action_time_cost(action_id);
+    if (minutes > 0) {
+        const uint32_t time_cost_units = minutes * 60 * 16;
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+        uint32_t new_time = decoded_result.data + time_cost_units;
+        
+        game_state->time_of_day = encode_time_with_ecc(new_time);
+    }
+}
+
 // Returns 1 if scene changed, 0 otherwise
 int execute_action(const char* action_id, struct GameState* game_state) {
 #ifdef USE_DEBUG_LOGGING
@@ -78,6 +104,9 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     }
 
     int scene_changed = 0;
+
+    // Apply time cost for the action
+    apply_time_cost(game_state, action_id);
 
 
     // --- Refactored: Generic Connection Handling ---
@@ -101,24 +130,13 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     }
     
     // --- LOCATION CHANGE ACTIONS ---
-    if (strcmp(action_id, "enter_lain_room") == 0) {
+    if (strcmp(action_id, "enter_lains_room") == 0) {
         mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_lains_room", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1);
         
-        // ECC-aware time cost calculation for 10 minutes
-        const uint32_t time_cost_units = 10 * 60 * 16; // 10 minutes * 60s/min * 16 units/s
-        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-        uint32_t new_time = decoded_result.data + time_cost_units;
-        game_state->time_of_day = encode_time_with_ecc(new_time);
-
         scene_changed = 1;
     } else if (strcmp(action_id, "go_downstairs") == 0) {
-        const uint32_t time_cost_units = 1 * 60 * 16; // 1 minute
-        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-        uint32_t new_time = decoded_result.data + time_cost_units;
-        game_state->time_of_day = encode_time_with_ecc(new_time);
-
         mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_living_dining_kitchen", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/02_downstairs.md", MAX_PATH_LENGTH - 1);
@@ -132,17 +150,17 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     } else if (strcmp(action_id, "return_to_upstairs") == 0) {
         mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1); // Point to Lain's room scene for now, as it's the closest to Upper Hallway
+        strncpy(game_state->current_story_file, "SCENE_IWAKURA_UPPER_HALLWAY", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "go_to_upper_hallway") == 0) {
         mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1); // Point to Lain's room scene for now
+        strncpy(game_state->current_story_file, "SCENE_IWAKURA_UPPER_HALLWAY", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "exit_room") == 0) {
         mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1); // Point to Lain's room scene for now
+        strncpy(game_state->current_story_file, "SCENE_IWAKURA_UPPER_HALLWAY", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "return_to_living_room") == 0) {
         mika_return_to_schedule();
@@ -161,33 +179,18 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         strncpy(game_state->player_state.location, "iwakura_lower_hallway", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/02_downstairs.md", MAX_PATH_LENGTH - 1); // Placeholder for a hallway scene
         
-        const uint32_t time_cost_units = 1 * 60 * 16; // 1 minute
-        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-        uint32_t new_time = decoded_result.data + time_cost_units;
-        game_state->time_of_day = encode_time_with_ecc(new_time);
-
         scene_changed = 1;
     } else if (strcmp(action_id, "go_outside") == 0) {
         mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_front_yard", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/00_entry.md", MAX_PATH_LENGTH - 1); // Point to entry scene as outside placeholder
         
-        const uint32_t time_cost_units = 1 * 60 * 16; // 1 minute
-        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-        uint32_t new_time = decoded_result.data + time_cost_units;
-        game_state->time_of_day = encode_time_with_ecc(new_time);
-
         scene_changed = 1;
     }
 
 
     // --- STORY CHANGE ACTIONS ---
     else if (strcmp(action_id, "examine_navi") == 0) {
-        const uint32_t time_cost_units = 2 * 60 * 16; // 2 minutes
-        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-        uint32_t new_time = decoded_result.data + time_cost_units;
-        game_state->time_of_day = encode_time_with_ecc(new_time);
-
         strncpy(game_state->current_story_file, "story/01a_examine_navi.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "wait_one_minute") == 0) {
@@ -225,11 +228,6 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         strncpy(game_state->current_story_file, "story/03_chapter_one_intro.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "talk_to_dad") == 0) {
-        const uint32_t time_cost_units = 5 * 60 * 16; // 5 minutes
-        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-        uint32_t new_time = decoded_result.data + time_cost_units;
-        game_state->time_of_day = encode_time_with_ecc(new_time);
-
         strncpy(game_state->current_story_file, "story/02a_talk_to_dad.md", MAX_PATH_LENGTH - 1);
         set_flag(game_state, "sister_mood", "normal");
         scene_changed = 1;
@@ -238,11 +236,6 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         set_flag(game_state, "sister_mood", "normal");
         scene_changed = 1;
     } else if (strcmp(action_id, "get_milk") == 0) {
-        const uint32_t time_cost_units = 3 * 60 * 16; // 3 minutes
-        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-        uint32_t new_time = decoded_result.data + time_cost_units;
-        game_state->time_of_day = encode_time_with_ecc(new_time);
-
         strncpy(game_state->current_story_file, "story/02j_get_milk_endprologue.md", MAX_PATH_LENGTH - 1);
         set_flag(game_state, "sister_mood", "normal");
         scene_changed = 1;
@@ -403,11 +396,6 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         set_flag(game_state, "sand_bottle_taken", "true");
     } else if (strcmp(action_id, "take_milk_from_fridge") == 0) {
         acquire_item_logic(game_state, "milk");
-
-        const uint32_t time_cost_units = 1 * 60 * 16; // 1 minute
-        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-        uint32_t new_time = decoded_result.data + time_cost_units;
-        game_state->time_of_day = encode_time_with_ecc(new_time);
 
         // Re-render the same scene, in case we want to make the choice conditional later
         strncpy(game_state->current_story_file, "SCENE_EXAMINE_FRIDGE", MAX_PATH_LENGTH - 1);
@@ -603,8 +591,42 @@ bool execute_command(const char* input, GameState* game_state) {
         printf("-----------\n");
         return false; // No re-render needed for time
     }
-    // Command: Unrecognized
+    // Command: debug_time (Hidden)
+    else if (strncmp(input, "debug_time", 10) == 0) {
+        int minutes_to_add = 0;
+        if (sscanf(input, "debug_time add %d", &minutes_to_add) == 1) {
+            if (minutes_to_add > 0) {
+                DecodedTimeResult res = decode_time_with_ecc(game_state->time_of_day);
+                // 16 units per second * 60 seconds = 960 units per minute
+                uint32_t units_to_add = (uint32_t)minutes_to_add * 60 * 16;
+                uint32_t new_total = res.data + units_to_add;
+                game_state->time_of_day = encode_time_with_ecc(new_total);
+                printf("Debug: Added %d minutes.\n", minutes_to_add);
+            } else {
+                printf("Debug: Please specify a positive number of minutes.\n");
+            }
+        } else {
+            DecodedTimeResult res = decode_time_with_ecc(game_state->time_of_day);
+            uint32_t total_minutes = res.data / (60 * 16);
+            printf("\n--- Debug Time ---\n");
+            printf("Raw Units: %u\n", res.data);
+            printf("Total Accumulated Minutes: %u\n", total_minutes);
+            printf("Day Cycle Position: %02d:%02d\n", (total_minutes / 60) % 24, total_minutes % 60);
+            printf("------------------\n");
+        }
+        return false;
+    }
+    // Command: Try to match with current location's connections
     else {
+        const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+        if (current_loc != NULL) {
+            for (int i = 0; i < current_loc->connection_count; i++) {
+                if (strcmp(current_loc->connections[i].action_id, input) == 0) {
+                    return execute_action(input, game_state) == 1;
+                }
+            }
+        }
+        
         printf("Command not recognized: %s\n", input);
         return false; // No re-render needed for unrecognized command
     }

@@ -20,8 +20,16 @@ volatile bool game_is_running = true;
 // Function run by the time thread to update game time
 void* time_thread_func(void* arg) {
     GameState* game_state = (GameState*)arg;
+    static int tick_count = 0;
     while (game_is_running) {
-        sleep(1);
+        usleep(100000); // Sleep for 100ms
+        
+        tick_count++;
+        if (tick_count < 10) {
+            continue; // Skip time update until 1 second has passed
+        }
+        tick_count = 0; // Reset counter
+
         pthread_mutex_lock(&time_mutex);
 
         // Decode the current time

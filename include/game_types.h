@@ -136,4 +136,7 @@ typedef struct GameState {
     float typewriter_delay;
 } GameState;
 
+// Global pointer to the GameState instance
+extern GameState* g_game_state_ptr;
+
 #endif // GAME_TYPES_H

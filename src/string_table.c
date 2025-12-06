@@ -241,6 +241,7 @@ const char* g_string_table[TEXT_COUNT] = {
     // Mika's Room Unlocked Scene
     [TEXT_MIKA_ROOM_UNLOCKED_DESC1] = "你打开了姐姐美香的房门。房间里很整洁，与你自己的房间完全不同。美香正坐在书桌前，回头看了你一眼。",
     [TEXT_MIKA_ROOM_UNLOCKED_MIRA_QUOTE1] = "“什么事？”",
+    [TEXT_MIKA_ROOM_UNLOCKED_EMPTY_DESC1] = "你打开了姐姐美香的房门。房间很整洁，但美香不在。",
     [TEXT_CHOICE_MIKA_ROOM_JUST_LOOKING] = "没什么，只是看看。",
     [TEXT_CHOICE_MIKA_ROOM_TALK] = "想和美香聊聊。",
     // Iwakura Upper Hallway Scene

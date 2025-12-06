@@ -49,6 +49,7 @@ int main(int argc, char* argv[]) {
     // 1. Initialize a minimal GameState
     GameState game_state;
     memset(&game_state, 0, sizeof(GameState));
+    g_game_state_ptr = &game_state; // Set the global pointer for the debugger instance
 
     // 2. Load game data
     // For locations, we need to load the full map data.
