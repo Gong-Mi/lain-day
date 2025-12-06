@@ -99,6 +99,7 @@ include_directories(scenes) # Add scenes directory to include path
 include_directories(sequences) # Add sequences directory to include path
 include_directories("${PROJECT_BINARY_DIR}/include") # For generated headers
 include_directories(external/linenoise) # Add linenoise include path
+include_directories(external/cJSON) # Add cJSON include path
 
 # --- Auto-generate character.json data header ---
 set(CHARACTER_JSON_FILE "${PROJECT_SOURCE_DIR}/character.json")
@@ -133,7 +134,7 @@ file(GLOB_RECURSE SEQUENCE_SOURCES "sequences/*/scene.c")
 
 set(GAME_ENGINE_SOURCES
 
-    src/cJSON.c
+    external/cJSON/cJSON.c
 
     src/data_loader.c
 
