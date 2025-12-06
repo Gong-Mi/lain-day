@@ -32,7 +32,7 @@
     "examine",
     "time"
   ],
-  "current_story_file": "story/00_entry.md",
+  "current_story_file": "SCENE_00_ENTRY",
   "return_to_story_file": null,
   "drivers": {
     "kwsk_ver3.1": "loaded",

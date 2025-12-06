@@ -140,7 +140,39 @@ file(GLOB_RECURSE SCENE_SUBDIR_SOURCES "scenes/*/scene.c")
 
 file(GLOB SCENE_ROOT_SOURCES "scenes/*.c")
 
+# --- Auto-generate scene C headers and sources from SSL files ---
+file(GLOB_RECURSE SSL_SOURCE_FILES "${PROJECT_SOURCE_DIR}/data/scenes/*.ssl")
 
+set(GENERATED_SSL_SCENE_HEADERS "")
+set(GENERATED_SSL_SCENE_SOURCES "")
+
+foreach(ssl_file ${SSL_SOURCE_FILES})
+    get_filename_component(file_name ${ssl_file} NAME_WE) # e.g., "00_entry"
+    string(TOUPPER ${file_name} SCENE_ID_UPPER) # e.g., "00_ENTRY"
+    string(REPLACE "-" "_" SCENE_ID_UPPER ${SCENE_ID_UPPER}) # Replace hyphens for C identifier
+
+    # Generated header path (e.g., build/include/SCENE_00_ENTRY_data.h)
+    set(GENERATED_SCENE_H "${PROJECT_BINARY_DIR}/include/SCENE_${SCENE_ID_UPPER}_data.h")
+    # Generated C source path (e.g., build/src/SCENE_00_ENTRY_data.c)
+    set(GENERATED_SCENE_C "${PROJECT_BINARY_DIR}/src/SCENE_${SCENE_ID_UPPER}_data.c")
+
+    list(APPEND GENERATED_SSL_SCENE_HEADERS ${GENERATED_SCENE_H})
+    list(APPEND GENERATED_SSL_SCENE_SOURCES ${GENERATED_SCENE_C})
+
+    # Add custom command for each SSL file
+    add_custom_command(
+        OUTPUT ${GENERATED_SCENE_H} ${GENERATED_SCENE_C}
+        COMMAND /data/data/com.termux/files/usr/bin/python3.12 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/parse_scenes.py
+            ${ssl_file}
+            ${PROJECT_BINARY_DIR}/include/string_ids.h # Pass string_ids.h for validation
+            ${GENERATED_SCENE_H}
+            ${GENERATED_SCENE_C}
+        DEPENDS ${ssl_file} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/parse_scenes.py ${PROJECT_BINARY_DIR}/include/string_ids.h
+        COMMENT "Generating C scene data from ${file_name}.ssl"
+    )
+endforeach()
+
+add_custom_target(generate_ssl_scenes ALL DEPENDS ${GENERATED_SSL_SCENE_HEADERS} ${GENERATED_SSL_SCENE_SOURCES})
 
 # Find all plot sequence source files automatically.
 
@@ -195,6 +227,7 @@ set(GAME_ENGINE_SOURCES
 
         src/characters/mika.c
         ${GENERATED_STRINGS_NAMES_C}
+        ${GENERATED_SSL_SCENE_SOURCES} # Add generated SSL scene sources
 
     )
 
@@ -209,8 +242,8 @@ add_executable(scene_debugger tools/scene_debugger.c ${GAME_ENGINE_SOURCES})
 target_link_libraries(scene_debugger PUBLIC zlibstatic pthread)
 
 # Add dependency to ensure header is generated before compiling executables
-add_dependencies(lain_day_c generate_character_header generate_string_ids_header)
-add_dependencies(scene_debugger generate_character_header generate_string_ids_header)
+add_dependencies(lain_day_c generate_character_header generate_string_ids_header generate_ssl_scenes)
+add_dependencies(scene_debugger generate_character_header generate_string_ids_header generate_ssl_scenes)
 
 # Add feature toggle definitions
 # The following compile definitions (USE_TYPEWRITER_EFFECT, USE_DEBUG_LOGGING, etc.)

@@ -180,7 +180,7 @@ int load_player_state(const char* path, GameState* game_state) {
 
     const cJSON *story_file = cJSON_GetObjectItemCaseSensitive(root, "current_story_file");
     if (cJSON_IsString(story_file)) strncpy(game_state->current_story_file, story_file->valuestring, MAX_PATH_LENGTH - 1);
-    else strncpy(game_state->current_story_file, "story/00_entry.md", MAX_PATH_LENGTH - 1);
+    else strncpy(game_state->current_story_file, "SCENE_00_ENTRY", MAX_PATH_LENGTH - 1);
 
     const cJSON *time_json = cJSON_GetObjectItemCaseSensitive(root, "time_of_day");
     if (cJSON_IsNumber(time_json)) {

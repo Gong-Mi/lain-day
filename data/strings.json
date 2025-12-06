@@ -16,6 +16,7 @@
   "TEXT_CHOICE_NAVI_CONNECT": "尝试打开网络链接",
   "TEXT_CHOICE_NAVI_REFRESH": "刷新",
 
+  "TEXT_ENTRY_SCENE_NAME": "起始房间",
   "TEXT_ENTRY_DESC1": "你站在一个空旷、安静的房间里。",
   "TEXT_ENTRY_DESC2": "房间里几乎没有东西，只有一扇朴素的门，以及通往楼下的楼梯。",
   "TEXT_ENTRY_DESC3": "门上用手写体刻着一个词：",

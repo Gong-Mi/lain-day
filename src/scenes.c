@@ -36,6 +36,7 @@
 #include "mika_room_unlocked/scene.h"
 #include "iwakura_upper_hallway/scene.h"
 #include "examine_fridge/scene.h"
+#include "SCENE_00_ENTRY_data.h" // Include the generated header for 00_entry scene
 // NOTE: As more scenes are converted, their headers should be included here.
 // For now, we are only including the prologue scenes we have created.
 // To keep the game runnable, we will temporarily keep the old if-else for non-converted scenes.
@@ -69,7 +70,7 @@ typedef struct {
 
 // The central table for all registered C-based scenes.
 static const SceneRegistration scene_registrations[] = {
-    {"story/00_entry.md", init_scene_00_entry},
+    {"SCENE_00_ENTRY", init_scene_scene_00_entry_from_data},
     {"story/01_lain_room.md", init_scene_01_lain_room},
     {"story/02_downstairs.md", init_scene_02_downstairs},
     {"story/02a_talk_to_dad.md", init_scene_02a_talk_to_dad},
