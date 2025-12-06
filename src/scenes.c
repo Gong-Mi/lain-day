@@ -35,6 +35,7 @@
 #include "mika_room_locked/scene.h"
 #include "mika_room_unlocked/scene.h"
 #include "iwakura_upper_hallway/scene.h"
+#include "examine_fridge/scene.h"
 // NOTE: As more scenes are converted, their headers should be included here.
 // For now, we are only including the prologue scenes we have created.
 // To keep the game runnable, we will temporarily keep the old if-else for non-converted scenes.
@@ -92,6 +93,7 @@ static const SceneRegistration scene_registrations[] = {
     {"SCENE_MIKA_ROOM_UNLOCKED", init_scene_mika_room_unlocked},
     {"SCENE_IWAKURA_UPPER_HALLWAY", init_scene_iwakura_upper_hallway},
     {"SCENE_TIME_GLITCH", init_scene_time_glitch},
+    {"SCENE_EXAMINE_FRIDGE", init_scene_examine_fridge},
     // NOTE: Add new scenes here as they are created.
 };
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(SceneRegistration);

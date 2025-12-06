@@ -248,6 +248,11 @@ typedef enum {
     SID_TIME_GLITCH_4,
     SID_TIME_GLITCH_CHOICE_1,
 
+    // Examine Fridge Scene
+    TEXT_EXAMINE_FRIDGE_DESC1,
+    TEXT_CHOICE_TAKE_MILK,
+    TEXT_CHOICE_CLOSE_FRIDGE,
+
     TEXT_COUNT // Always last, gives a count of total strings
 } StringID;
 

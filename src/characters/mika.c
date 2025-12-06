@@ -83,7 +83,8 @@ void init_mika_module() {
     g_mika_module.on_talk = mika_on_talk_impl;
     g_mika_module.is_room_accessible = mika_is_room_accessible_impl;
     // Initial location is null; it will be set by the first schedule update.
-    g_mika_module.current_location_id = NULL; 
+    g_mika_module.current_location_id = "UNKNOWN_LOCATION"; 
+    g_mika_module.is_manually_positioned = false;
 }
 
 const CharacterMika* get_mika_module() {
@@ -93,6 +94,7 @@ const CharacterMika* get_mika_module() {
 void mika_move_to(const char* location_id) {
     if (location_id) {
         g_mika_module.current_location_id = location_id;
+        g_mika_module.is_manually_positioned = true; // Mark that a script is controlling her position
 #ifdef USE_DEBUG_LOGGING
         fprintf(stderr, "DEBUG: Mika script-moved to location: %s\n", location_id);
 #endif
@@ -101,6 +103,11 @@ void mika_move_to(const char* location_id) {
 
 void mika_update_location_by_schedule(struct GameState* game_state) {
     if (!game_state) return;
+
+    // If Mika's position is being controlled by a script, don't update from schedule.
+    if (g_mika_module.is_manually_positioned) {
+        return;
+    }
 
     // Decode time to get absolute time units
     DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
@@ -131,4 +138,11 @@ void mika_update_location_by_schedule(struct GameState* game_state) {
         fprintf(stderr, "DEBUG: Mika location updated by schedule to: %s\n", new_location_id);
 #endif
     }
+}
+
+void mika_return_to_schedule(void) {
+    g_mika_module.is_manually_positioned = false;
+#ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Mika has been returned to schedule-based positioning.\n");
+#endif
 }

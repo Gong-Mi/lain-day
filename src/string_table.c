@@ -255,6 +255,11 @@ const char* g_string_table[TEXT_COUNT] = {
     [SID_TIME_GLITCH_3] = "記憶正在失去同步...",
     [SID_TIME_GLITCH_4] = "存档数据似乎已损坏。时间被重置了。",
     [SID_TIME_GLITCH_CHOICE_1] = "...继续...",
+
+    // Examine Fridge Scene
+    [TEXT_EXAMINE_FRIDGE_DESC1] = "你打开冰箱。里面有4盒未开封的1L牛奶，一些面包和罐头等食物。",
+    [TEXT_CHOICE_TAKE_MILK] = "拿一盒牛奶",
+    [TEXT_CHOICE_CLOSE_FRIDGE] = "关上冰箱门",
 };
 
 const char* get_string_by_id(StringID id) {

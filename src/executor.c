@@ -102,7 +102,8 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     
     // --- LOCATION CHANGE ACTIONS ---
     if (strcmp(action_id, "enter_lain_room") == 0) {
-        strncpy(game_state->player_state.location, "lain_room", MAX_NAME_LENGTH - 1);
+        mika_return_to_schedule();
+        strncpy(game_state->player_state.location, "iwakura_lains_room", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1);
         
         // ECC-aware time cost calculation for 10 minutes
@@ -113,41 +114,80 @@ int execute_action(const char* action_id, struct GameState* game_state) {
 
         scene_changed = 1;
     } else if (strcmp(action_id, "go_downstairs") == 0) {
-        strncpy(game_state->player_state.location, "downstairs", MAX_NAME_LENGTH - 1);
+        const uint32_t time_cost_units = 1 * 60 * 16; // 1 minute
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+        uint32_t new_time = decoded_result.data + time_cost_units;
+        game_state->time_of_day = encode_time_with_ecc(new_time);
+
+        mika_return_to_schedule();
+        strncpy(game_state->player_state.location, "iwakura_living_dining_kitchen", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/02_downstairs.md", MAX_PATH_LENGTH - 1);
         set_flag(game_state, "sister_mood", "normal");
         scene_changed = 1;
     } else if (strcmp(action_id, "return_to_entry") == 0) {
-        strncpy(game_state->player_state.location, "entry", MAX_NAME_LENGTH - 1);
+        mika_return_to_schedule();
+        strncpy(game_state->player_state.location, "iwakura_front_yard", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/00_entry.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "return_to_upstairs") == 0) {
+        mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1); // Point to Lain's room scene for now, as it's the closest to Upper Hallway
         scene_changed = 1;
     } else if (strcmp(action_id, "go_to_upper_hallway") == 0) {
+        mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1); // Point to Lain's room scene for now
         scene_changed = 1;
     } else if (strcmp(action_id, "exit_room") == 0) {
+        mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "story/01_lain_room.md", MAX_PATH_LENGTH - 1); // Point to Lain's room scene for now
         scene_changed = 1;
     } else if (strcmp(action_id, "return_to_living_room") == 0) {
-        strncpy(game_state->player_state.location, "kurani_residence/living_room", MAX_NAME_LENGTH - 1); // This location needs to exist programmatically
+        mika_return_to_schedule();
+        strncpy(game_state->player_state.location, "iwakura_living_dining_kitchen", MAX_NAME_LENGTH - 1); // This location needs to exist programmatically
         strncpy(game_state->current_story_file, "story/02_downstairs.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "enter_mikas_room") == 0) {
+        mika_return_to_schedule();
         // The conditional logic is now handled by the generic connection handler above.
         // If we reach here, it means access was granted.
         strncpy(game_state->player_state.location, "iwakura_mikas_room", MAX_NAME_LENGTH - 1);
         strncpy(game_state->current_story_file, "SCENE_MIKA_ROOM_UNLOCKED", MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
+    } else if (strcmp(action_id, "enter_house") == 0) {
+        mika_return_to_schedule();
+        strncpy(game_state->player_state.location, "iwakura_lower_hallway", MAX_NAME_LENGTH - 1);
+        strncpy(game_state->current_story_file, "story/02_downstairs.md", MAX_PATH_LENGTH - 1); // Placeholder for a hallway scene
+        
+        const uint32_t time_cost_units = 1 * 60 * 16; // 1 minute
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+        uint32_t new_time = decoded_result.data + time_cost_units;
+        game_state->time_of_day = encode_time_with_ecc(new_time);
+
+        scene_changed = 1;
+    } else if (strcmp(action_id, "go_outside") == 0) {
+        mika_return_to_schedule();
+        strncpy(game_state->player_state.location, "iwakura_front_yard", MAX_NAME_LENGTH - 1);
+        strncpy(game_state->current_story_file, "story/00_entry.md", MAX_PATH_LENGTH - 1); // Point to entry scene as outside placeholder
+        
+        const uint32_t time_cost_units = 1 * 60 * 16; // 1 minute
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+        uint32_t new_time = decoded_result.data + time_cost_units;
+        game_state->time_of_day = encode_time_with_ecc(new_time);
+
         scene_changed = 1;
     }
 
 
     // --- STORY CHANGE ACTIONS ---
     else if (strcmp(action_id, "examine_navi") == 0) {
+        const uint32_t time_cost_units = 2 * 60 * 16; // 2 minutes
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+        uint32_t new_time = decoded_result.data + time_cost_units;
+        game_state->time_of_day = encode_time_with_ecc(new_time);
+
         strncpy(game_state->current_story_file, "story/01a_examine_navi.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "wait_one_minute") == 0) {
@@ -185,6 +225,11 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         strncpy(game_state->current_story_file, "story/03_chapter_one_intro.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "talk_to_dad") == 0) {
+        const uint32_t time_cost_units = 5 * 60 * 16; // 5 minutes
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+        uint32_t new_time = decoded_result.data + time_cost_units;
+        game_state->time_of_day = encode_time_with_ecc(new_time);
+
         strncpy(game_state->current_story_file, "story/02a_talk_to_dad.md", MAX_PATH_LENGTH - 1);
         set_flag(game_state, "sister_mood", "normal");
         scene_changed = 1;
@@ -193,6 +238,11 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         set_flag(game_state, "sister_mood", "normal");
         scene_changed = 1;
     } else if (strcmp(action_id, "get_milk") == 0) {
+        const uint32_t time_cost_units = 3 * 60 * 16; // 3 minutes
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+        uint32_t new_time = decoded_result.data + time_cost_units;
+        game_state->time_of_day = encode_time_with_ecc(new_time);
+
         strncpy(game_state->current_story_file, "story/02j_get_milk_endprologue.md", MAX_PATH_LENGTH - 1);
         set_flag(game_state, "sister_mood", "normal");
         scene_changed = 1;
@@ -351,6 +401,17 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     } else if (strcmp(action_id, "take_sand_bottle") == 0) {
         acquire_item_logic(game_state, "sand_bottle");
         set_flag(game_state, "sand_bottle_taken", "true");
+    } else if (strcmp(action_id, "take_milk_from_fridge") == 0) {
+        acquire_item_logic(game_state, "milk");
+
+        const uint32_t time_cost_units = 1 * 60 * 16; // 1 minute
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+        uint32_t new_time = decoded_result.data + time_cost_units;
+        game_state->time_of_day = encode_time_with_ecc(new_time);
+
+        // Re-render the same scene, in case we want to make the choice conditional later
+        strncpy(game_state->current_story_file, "SCENE_EXAMINE_FRIDGE", MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
     }
     
     // --- TOGGLE PROTOCOL ACTIONS ---
@@ -444,6 +505,7 @@ bool execute_command(const char* input, GameState* game_state) {
         return false; // No re-render for invalid input
     }
 
+    // Command: inventory / inv
     if (strcmp(input, "inventory") == 0 || strcmp(input, "inv") == 0) {
         printf("\n--- Inventory ---\n");
         if (game_state->player_state.inventory_count == 0) {
@@ -455,44 +517,75 @@ bool execute_command(const char* input, GameState* game_state) {
         printf("-----------------\n");
         return false; // No re-render needed for inventory
     }
-    else if (strcmp(input, "arls") == 0) {
-        printf("\n--- Area List Scan ---\n");
-        // Refactored to use the CMap hash table for O(1) average lookup time
-        const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
-        if (current_loc) {
+    // Command: arls / arls <poi_id>
+    else if (strncmp(input, "arls", 4) == 0) {
+        char poi_id_buffer[MAX_NAME_LENGTH] = {0};
+        int scan_result = sscanf(input, "arls %s", poi_id_buffer);
+
+        if (scan_result == 1) { // Command is "arls <something>"
+            const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+            if (current_loc) {
+                for (int i = 0; i < current_loc->pois_count; i++) {
+                    if (strcmp(current_loc->pois[i].id, poi_id_buffer) == 0) {
 #ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Arls: Retrieved location '%s', pois_count: %d\n", current_loc->id, current_loc->pois_count);
+                        fprintf(stderr, "DEBUG: Arls: Found POI '%s'. examine_scene_id: '%s'\n", 
+                                current_loc->pois[i].id, 
+                                current_loc->pois[i].examine_scene_id ? current_loc->pois[i].examine_scene_id : "NULL");
 #endif
-            print_raw_text(current_loc->name);
-            print_raw_text(current_loc->description);
-            printf("\nPoints of Interest:\n");
-            if (current_loc->pois_count == 0) {
-                print_raw_text("  (none)");
+                        if (current_loc->pois[i].examine_scene_id != NULL) {
+                            strncpy(game_state->current_story_file, current_loc->pois[i].examine_scene_id, MAX_PATH_LENGTH - 1);
+                            return true; // Re-render needed for scene change
+                        } else {
+                            printf("You examine the %s, but there's nothing more to see.\n", current_loc->pois[i].name);
+                            return false;
+                        }
+                    }
+                }
             }
-            for (int i = 0; i < current_loc->pois_count; i++) {
+            printf("'%s' is not a valid point of interest here.\n", poi_id_buffer);
+            return false;
+
+        } else { // Command is just "arls" (no specific POI ID)
+            printf("\n--- Area List Scan ---\n");
+            const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+            if (current_loc) {
 #ifdef USE_DEBUG_LOGGING
-                fprintf(stderr, "DEBUG: Arls: Printing POI '%s'\n", current_loc->pois[i].name);
+                fprintf(stderr, "DEBUG: Arls: Retrieved location '%s', pois_count: %d\n", current_loc->id, current_loc->pois_count);
 #endif
-                char poi_buf[MAX_LINE_LENGTH];
-                snprintf(poi_buf, MAX_LINE_LENGTH, "  - %s", current_loc->pois[i].name);
-                print_raw_text(poi_buf);
+                print_raw_text(current_loc->name);
+                print_raw_text(current_loc->description);
+                printf("\nPoints of Interest:\n");
+                if (current_loc->pois_count == 0) {
+                    print_raw_text("  (none)");
+                }
+                for (int i = 0; i < current_loc->pois_count; i++) {
+#ifdef USE_DEBUG_LOGGING
+                    fprintf(stderr, "DEBUG: Arls: Printing POI '%s'\n", current_loc->pois[i].name);
+#endif
+                    char poi_buf[MAX_LINE_LENGTH];
+                    // Add an indicator if the POI is examinable
+                    const char* examinable_indicator = (current_loc->pois[i].examine_scene_id != NULL) ? " (*)" : "";
+                    snprintf(poi_buf, MAX_LINE_LENGTH, "  - %s%s", current_loc->pois[i].id, examinable_indicator);
+                    print_raw_text(poi_buf);
+                }
+                printf("\nConnections:\n");
+                if (current_loc->connection_count == 0) {
+                    print_raw_text("  (none)");
+                }
+                for (int i = 0; i < current_loc->connection_count; i++) {
+                    char conn_buf[MAX_LINE_LENGTH];
+                    const Connection* conn = &current_loc->connections[i];
+                    snprintf(conn_buf, MAX_LINE_LENGTH, "  - %s -> %s", conn->action_id, conn->target_location_id);
+                    print_raw_text(conn_buf);
+                }
+            } else {
+                printf("Error: Current location '%s' not found in map data.\n", game_state->player_state.location);
             }
-            printf("\nConnections:\n");
-            if (current_loc->connection_count == 0) {
-                print_raw_text("  (none)");
-            }
-            for (int i = 0; i < current_loc->connection_count; i++) {
-                char conn_buf[MAX_LINE_LENGTH];
-                const Connection* conn = &current_loc->connections[i];
-                snprintf(conn_buf, MAX_LINE_LENGTH, "  - %s -> %s", conn->action_id, conn->target_location_id);
-                print_raw_text(conn_buf);
-            }
-        } else {
-            printf("Error: Current location '%s' not found in map data.\n", game_state->player_state.location);
+            printf("----------------------\n");
+            return false;
         }
-        printf("----------------------\n");
-        return false; // No re-render needed for arls
     }
+    // Command: help
     else if (strcmp(input, "help") == 0) {
         printf("\n--- Help ---\n");
         printf("Available commands:\n");
@@ -503,12 +596,14 @@ bool execute_command(const char* input, GameState* game_state) {
         printf("-------------\n");
         return false; // No re-render needed for help
     }
+    // Command: time
     else if (strcmp(input, "time") == 0) {
         printf("\n--- Time ---\n");
         print_game_time(game_state->time_of_day);
         printf("-----------\n");
         return false; // No re-render needed for time
     }
+    // Command: Unrecognized
     else {
         printf("Command not recognized: %s\n", input);
         return false; // No re-render needed for unrecognized command

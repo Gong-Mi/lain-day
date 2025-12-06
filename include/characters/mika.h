@@ -11,6 +11,7 @@ struct GameState;
 typedef struct {
     // State
     const char* current_location_id;
+    bool is_manually_positioned;
 
     // Behaviors (function pointers)
     void (*on_talk)(struct GameState* game_state);
@@ -36,5 +37,8 @@ void mika_update_location_by_schedule(struct GameState* game_state);
 
 // Manually moves Mika to a specific location (for script-driven events).
 void mika_move_to(const char* location_id);
+
+// Resets Mika's positioning to be controlled by her schedule.
+void mika_return_to_schedule(void);
 
 #endif // CHARACTER_MIKA_H

@@ -1,13 +1,13 @@
 #ifndef GAME_TYPES_H
 #define GAME_TYPES_H
 
+#include <stdint.h>
 #include <stdbool.h>
+#include "string_ids.h" // For StringID
+#include "flag_system.h" // For HashTable
 #include "cJSON.h"
-#include "string_ids.h"
-#include "flag_system.h"
-#include "cmap.h"
-
-#include "ecc_time.h"
+#include "cmap.h" // For CMap*
+#include <pthread.h>
 
 // --- Defines ---
 #define MAX_NAME_LENGTH 64
@@ -57,6 +57,7 @@ typedef struct {
     char id[MAX_NAME_LENGTH];
     char name[MAX_NAME_LENGTH];
     char description[MAX_DESC_LENGTH * 2];
+    const char* examine_scene_id; // Scene to transition to when examined
 } POI;
 
 typedef struct {

@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#define USE_DEBUG_LOGGING // FORCING DEBUG FOR DIAGNOSIS
+// #define USE_DEBUG_LOGGING // FORCING DEBUG FOR DIAGNOSIS
 
 // Helper function to trim whitespace from a string in-place
 static void trim_whitespace(char *str) {

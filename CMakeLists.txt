@@ -20,7 +20,7 @@ option(CHARACTER_LAINS_SISTER_MIRA_ALIVE "Include Mira (Lain's Sister) in the ga
 # effectively disabling all debug output.
 # If set to ON, the individual debug toggles (ENABLE_DEBUG_LOGGING, etc.) will be respected.
 # Default: ON (allowing individual toggles to be used or providing a quick way to disable all debugs).
-option(MASTER_DEBUG_SWITCH "Master switch for all debug logging" ON)
+option(MASTER_DEBUG_SWITCH "Master switch for all debug logging" OFF)
 # ENABLE_TYPEWRITER_EFFECT:
 # Controls the typewriter text rendering effect.
 # When MASTER_DEBUG_SWITCH is ON, this toggle determines if text is printed character by character.
@@ -31,7 +31,7 @@ option(ENABLE_TYPEWRITER_EFFECT "Enable typewriter text rendering effect" OFF)
 # These messages provide insight into core game logic and data loading.
 # Only effective if MASTER_DEBUG_SWITCH is ON.
 # Default: ON (useful for general development tracking).
-option(ENABLE_DEBUG_LOGGING "Enable debug logging to stderr" ON)
+# option(ENABLE_DEBUG_LOGGING "Enable debug logging to stderr" ON)
 # ENABLE_STRING_DEBUG_LOGGING:
 # Controls detailed debug messages related to String IDs and their content during scene rendering.
 # Useful for debugging text display and internationalization issues.
@@ -90,6 +90,8 @@ configure_file(
 # Set C standard
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
 
 # Include directories
 include_directories(include)
@@ -160,11 +162,13 @@ set(GAME_ENGINE_SOURCES
 
     ${SCENE_ROOT_SOURCES}
 
-    ${SEQUENCE_SOURCES}
+        ${SEQUENCE_SOURCES}
 
-    src/characters/mika.c
+        scenes/examine_fridge/scene.c
 
-)
+        src/characters/mika.c
+
+    )
 
 # --- Define Executables ---
 
@@ -186,11 +190,6 @@ add_dependencies(scene_debugger generate_character_header)
 # on MASTER_DEBUG_SWITCH being ON. This means if MASTER_DEBUG_SWITCH is OFF,
 # none of these features will be enabled, regardless of their individual settings.
 target_compile_definitions(scene_debugger PUBLIC
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>>:USE_TYPEWRITER_EFFECT>
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_DEBUG_LOGGING}>>:USE_DEBUG_LOGGING>
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_STRING_DEBUG_LOGGING}>>:USE_STRING_DEBUG_LOGGING>
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_MAP_DEBUG_LOGGING}>>:USE_MAP_DEBUG_LOGGING>
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_CLEAR_SCREEN}>>:USE_CLEAR_SCREEN>
 )
 
 
@@ -201,11 +200,6 @@ target_compile_definitions(lain_day_c PUBLIC
     $<$<BOOL:${CHARACTER_FATHER_ALIVE}>:CHARACTER_FATHER_ALIVE>
     $<$<BOOL:${CHARACTER_FUYUKO_MIRA_ALIVE}>:CHARACTER_FUYUKO_MIRA_ALIVE>
     $<$<BOOL:${CHARACTER_LAINS_SISTER_MIRA_ALIVE}>:CHARACTER_LAINS_SISTER_MIRA_ALIVE>
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_TYPEWRITER_EFFECT}>>:USE_TYPEWRITER_EFFECT>
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_DEBUG_LOGGING}>>:USE_DEBUG_LOGGING>
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_STRING_DEBUG_LOGGING}>>:USE_STRING_DEBUG_LOGGING>
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_MAP_DEBUG_LOGGING}>>:USE_MAP_DEBUG_LOGGING>
-    $<$<AND:$<BOOL:${MASTER_DEBUG_SWITCH}>,$<BOOL:${ENABLE_CLEAR_SCREEN}>>:USE_CLEAR_SCREEN>
 )
 
 # --- Installation Rules ---
