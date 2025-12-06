@@ -266,7 +266,6 @@ const char* g_string_table[TEXT_COUNT] = {
     [TEXT_CHOICE_TAKE_MILK] = "拿一盒牛奶",
     [TEXT_CHOICE_CLOSE_FRIDGE] = "关上冰箱门",
 
-    // Wait Nothing Scene
     [TEXT_WAIT_NOTHING_DESC1] = "时间静静地流逝，但这一次，什么都没有发生。门依然紧闭着。",
 };
 

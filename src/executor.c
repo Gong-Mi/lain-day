@@ -6,6 +6,7 @@
 #include "game_types.h" // For struct GameState definition
 #include "ecc_time.h"
 #include "characters/mika.h"
+#include "string_table.h" // For get_string_by_id
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> // For atoi
@@ -204,11 +205,13 @@ int execute_action(const char* action_id, struct GameState* game_state) {
             strncpy(game_state->current_story_file, "story/00a_wait_one_minute_endprologue.md", MAX_PATH_LENGTH - 1);
             set_flag(game_state, "sister_mood", "cold");
             set_flag(game_state, "door_opened_by_ghost", "1"); // Set flag to prevent re-triggering
+            scene_changed = 1;
         } else {
-            // Event has already happened.
-            strncpy(game_state->current_story_file, "SCENE_WAIT_DOES_NOTHING", MAX_PATH_LENGTH - 1);
+            // Event has already happened. Display a transient message.
+            strncpy(game_state->transient_message, get_string_by_id(TEXT_WAIT_NOTHING_DESC1), MAX_LINE_LENGTH - 1);
+            game_state->has_transient_message = true;
+            scene_changed = 0; // Do not change scene, just re-render current scene with message
         }
-        scene_changed = 1;
     } else if (strcmp(action_id, "talk_to_figure") == 0) {
         strncpy(game_state->current_story_file, "story/01c_talk_to_figure_endprologue.md", MAX_PATH_LENGTH - 1);
         set_flag(game_state, "sister_mood", "cold");

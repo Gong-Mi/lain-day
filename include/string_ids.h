@@ -258,7 +258,6 @@ typedef enum {
     TEXT_CHOICE_TAKE_MILK,
     TEXT_CHOICE_CLOSE_FRIDGE,
 
-    // Wait Nothing Scene
     TEXT_WAIT_NOTHING_DESC1,
 
     TEXT_COUNT // Always last, gives a count of total strings

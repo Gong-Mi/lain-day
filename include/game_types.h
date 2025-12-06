@@ -135,6 +135,8 @@ typedef struct GameState {
     HashTable* flags;
     float typewriter_delay;
     int navi_progress_style;
+    char transient_message[MAX_LINE_LENGTH];
+    bool has_transient_message;
 } GameState;
 
 // Global pointer to the GameState instance

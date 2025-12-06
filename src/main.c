@@ -71,6 +71,7 @@ int main(int argc, char *argv[]) {
 
     struct GameState game_state; // Use struct GameState as the full type is now available
     memset(&game_state, 0, sizeof(struct GameState)); // Use struct GameState here too
+    game_state.has_transient_message = false; // Initialize transient message flag
     g_game_state_ptr = &game_state; // Set the global pointer here
 
     while (arg_index < argc && argv[arg_index][0] == '-') {
@@ -366,79 +367,7 @@ int write_string_to_file(const char* str, const char* dest_path) {
     return 1;
 }
 
-void render_current_scene(const StoryScene* scene, const struct GameState* game_state) {
-    #ifdef USE_CLEAR_SCREEN
-    clear_screen(); // Clear screen for each scene render
-    #endif
-    print_game_time(game_state->time_of_day); // Print time at the top-left
-    #ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Entering render_current_scene.\n");
-    fprintf(stderr, "DEBUG: render_current_scene: scene ptr: %p\n", (void*)scene);
-    fprintf(stderr, "DEBUG: Rendering scene: %s (ID: %s)\n", scene->name, scene->scene_id);
-    #endif
-    if (scene == NULL) {
-        printf("Error: Scene is NULL.\n");
-        return;
-    }
 
-    printf("\n========================================\n");
-    if (scene->location_id[0] != '\0') {
-        // This part doesn't need typewriter effect
-        printf("Location: %s\n", scene->location_id);
-    }
-    printf("========================================\n");
-
-    for (int i = 0; i < scene->dialogue_line_count; i++) {
-    #ifdef USE_STRING_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG:   Printing DialogueLine: speaker=%d, text_id=%d (%s)\n",
-                scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id,
-                get_string_by_id(scene->dialogue_lines[i].text_id));
-    #endif
-        print_colored_line(scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id, (GameState*)game_state); // Cast to GameState*
-    }
-
-    // --- Check for character presence ---
-    const CharacterMika* mika = get_mika_module();
-    // Don't print this if the current scene is about Mika's room, as it would be redundant.
-    if (strcmp(mika->current_location_id, game_state->player_state.location) == 0 &&
-        strcmp(scene->scene_id, "SCENE_MIKA_ROOM_UNLOCKED") != 0) 
-    {
-        printf(ANSI_COLOR_YELLOW "\n你看到姐姐美香也在这里。\n" ANSI_COLOR_RESET);
-    }
-    // --- End check for character presence ---
-
-    if (scene->choice_count > 0) {
-        printf("\n--- Choices ---\n");
-        int visible_choice_index = 1;
-        for (int i = 0; i < scene->choice_count; i++) {
-            const StoryChoice* choice = &scene->choices[i];
-            int is_selectable = 0;
-
-            // Check if there is a condition
-            if (choice->condition.flag_name[0] == '\0') {
-                is_selectable = 1; // No condition, always selectable
-            } else {
-                const char* flag_value_str = hash_table_get(game_state->flags, choice->condition.flag_name);
-                if (flag_value_str != NULL) {
-                    // Flag exists, compare its value
-                    int current_value = atoi(flag_value_str);
-                    if (current_value == choice->condition.required_value) {
-                        is_selectable = 1;
-                    }
-                }
-                // If flag is not set, is_selectable remains 0.
-            }
-
-            if (is_selectable) {
-                printf("%d. %s\n", visible_choice_index++, get_string_by_id(choice->text_id));
-            } else {
-                // Print disabled choice in gray and without a number
-                printf("   %s%s%s\n", ANSI_COLOR_BRIGHT_BLACK, get_string_by_id(choice->text_id), ANSI_COLOR_RESET);
-            }
-        }
-        printf("---------------\n");
-    }
-}
 
 void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index) {
     if (argc > 1 && *arg_index < argc) {
