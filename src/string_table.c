@@ -11,13 +11,17 @@ const char* g_string_table[TEXT_COUNT] = {
     [TEXT_NAVI_STATE_TITLE] = "Navi的状态",
     [TEXT_NAVI_STATE_DESC1] = "你凑近了那台老旧的Navi。屏幕上没有图形界面，只有一个闪烁的光标和一个正在缓慢增长的进度条。",
     [TEXT_NAVI_STATE_DESC2] = "任务描述写着： `DATA ASSIMILATION`",
-    [TEXT_NAVI_STATE_DESC3] = "进度： `[==>...................] 3%`",
+    [TEXT_NAVI_PROGRESS_1] = "进度： [|=>..................] 3%",
+    [TEXT_NAVI_PROGRESS_2] = "进度： [/=>..................] 3%",
+    [TEXT_NAVI_PROGRESS_3] = "进度： [-=>..................] 3%",
+    [TEXT_NAVI_PROGRESS_4] = "进度： [\\=>.................] 3%",
     [TEXT_NAVI_STATE_DESC4] = "这台机器似乎正在执行某种深刻而底层的任务。在屏幕下方，有几个可用的指令选项。",
 
     // Navi Scene Choices
     [TEXT_CHOICE_NAVI_SHUTDOWN] = "强制关闭Navi",
     [TEXT_CHOICE_NAVI_REBOOT] = "重启Navi",
     [TEXT_CHOICE_NAVI_CONNECT] = "尝试打开网络链接",
+    [TEXT_CHOICE_NAVI_REFRESH] = "刷新",
 
     // Entry Scene (00_entry) Text
     [TEXT_ENTRY_DESC1] = "你站在一个空旷、安静的房间里。",
@@ -261,6 +265,9 @@ const char* g_string_table[TEXT_COUNT] = {
     [TEXT_EXAMINE_FRIDGE_DESC1] = "你打开冰箱。里面有4盒未开封的1L牛奶，一些面包和罐头等食物。",
     [TEXT_CHOICE_TAKE_MILK] = "拿一盒牛奶",
     [TEXT_CHOICE_CLOSE_FRIDGE] = "关上冰箱门",
+
+    // Wait Nothing Scene
+    [TEXT_WAIT_NOTHING_DESC1] = "时间静静地流逝，但这一次，什么都没有发生。门依然紧闭着。",
 };
 
 const char* get_string_by_id(StringID id) {

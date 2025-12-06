@@ -8,12 +8,16 @@ typedef enum {
     TEXT_NAVI_STATE_TITLE,
     TEXT_NAVI_STATE_DESC1,
     TEXT_NAVI_STATE_DESC2,
-    TEXT_NAVI_STATE_DESC3,
+    TEXT_NAVI_PROGRESS_1,
+    TEXT_NAVI_PROGRESS_2,
+    TEXT_NAVI_PROGRESS_3,
+    TEXT_NAVI_PROGRESS_4,
     TEXT_NAVI_STATE_DESC4,
     // Navi Scene Choices
     TEXT_CHOICE_NAVI_SHUTDOWN,
     TEXT_CHOICE_NAVI_REBOOT,
     TEXT_CHOICE_NAVI_CONNECT,
+    TEXT_CHOICE_NAVI_REFRESH,
 
     // Entry Scene (00_entry)
     TEXT_ENTRY_DESC1,
@@ -253,6 +257,9 @@ typedef enum {
     TEXT_EXAMINE_FRIDGE_DESC1,
     TEXT_CHOICE_TAKE_MILK,
     TEXT_CHOICE_CLOSE_FRIDGE,
+
+    // Wait Nothing Scene
+    TEXT_WAIT_NOTHING_DESC1,
 
     TEXT_COUNT // Always last, gives a count of total strings
 } StringID;

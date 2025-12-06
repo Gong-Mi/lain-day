@@ -134,6 +134,7 @@ typedef struct GameState {
     int item_count;
     HashTable* flags;
     float typewriter_delay;
+    int navi_progress_style;
 } GameState;
 
 // Global pointer to the GameState instance

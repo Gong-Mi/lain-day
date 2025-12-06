@@ -70,6 +70,7 @@ static void acquire_item_logic(struct GameState* game_state, const char* item_id
 
 // Helper to get time cost for an action (in minutes)
 static int get_action_time_cost(const char* action_id) {
+    if (strcmp(action_id, "wait_one_minute") == 0) return 1;
     if (strcmp(action_id, "enter_lain_room") == 0) return 10;
     if (strcmp(action_id, "go_downstairs") == 0) return 1;
     if (strcmp(action_id, "enter_house") == 0) return 1;
@@ -193,9 +194,20 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     else if (strcmp(action_id, "examine_navi") == 0) {
         strncpy(game_state->current_story_file, "story/01a_examine_navi.md", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
+    } else if (strcmp(action_id, "refresh_navi_screen") == 0) {
+        strncpy(game_state->current_story_file, "story/01a_examine_navi.md", MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
     } else if (strcmp(action_id, "wait_one_minute") == 0) {
-        strncpy(game_state->current_story_file, "story/00a_wait_one_minute_endprologue.md", MAX_PATH_LENGTH - 1);
-        set_flag(game_state, "sister_mood", "cold");
+        const char* flag_val = hash_table_get(game_state->flags, "door_opened_by_ghost");
+        if (flag_val == NULL || strcmp(flag_val, "1") != 0) {
+            // Event has not happened yet, trigger it.
+            strncpy(game_state->current_story_file, "story/00a_wait_one_minute_endprologue.md", MAX_PATH_LENGTH - 1);
+            set_flag(game_state, "sister_mood", "cold");
+            set_flag(game_state, "door_opened_by_ghost", "1"); // Set flag to prevent re-triggering
+        } else {
+            // Event has already happened.
+            strncpy(game_state->current_story_file, "SCENE_WAIT_DOES_NOTHING", MAX_PATH_LENGTH - 1);
+        }
         scene_changed = 1;
     } else if (strcmp(action_id, "talk_to_figure") == 0) {
         strncpy(game_state->current_story_file, "story/01c_talk_to_figure_endprologue.md", MAX_PATH_LENGTH - 1);
