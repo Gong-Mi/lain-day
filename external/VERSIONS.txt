@@ -1,0 +1,18 @@
+# External Dependency Versions
+
+This file lists the exact versions (Git commit SHAs) of external submodules used in this project.
+
+## zlib
+- Repository: https://github.com/madler/zlib
+- Commit SHA: 5a82f71ed1dfc0bec044d9702463dbdf84ea3b71
+- Version Tag: v1.3.1-201-g5a82f71
+
+## linenoise
+- Repository: https://github.com/msteveb/linenoise.git
+- Commit SHA: 8d89cf3ccbb05b4e1bb5d1e5661dcb360e0e967b
+- Version Tag: heads/master
+
+## cJSON
+- Repository: https://github.com/DaveGamble/cJSON.git
+- Commit SHA: c859b25da02955fef659d658b8f324b5cde87be3
+- Version Tag: v1.7.15-48-gc859b25
