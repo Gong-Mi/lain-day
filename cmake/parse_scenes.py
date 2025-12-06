@@ -31,7 +31,7 @@ def load_valid_string_ids(string_ids_header_path):
     
     # Filter out TEXT_COUNT, TEXT_INVALID, TEXT_EMPTY_LINE as they are special
     for match in matches:
-        if match not in ["TEXT_COUNT", "TEXT_INVALID", "TEXT_EMPTY_LINE"]:
+        if match not in ["TEXT_COUNT", "TEXT_INVALID"]:
             VALID_STRING_IDS.add(match.strip())
     
     print(f"Loaded {len(VALID_STRING_IDS)} valid string IDs.")

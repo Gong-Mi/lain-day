@@ -1,0 +1,27 @@
+choices:
+- action_id: navi_shutdown
+  text_id: TEXT_CHOICE_NAVI_SHUTDOWN
+- action_id: navi_reboot
+  text_id: TEXT_CHOICE_NAVI_REBOOT
+- action_id: navi_connect
+  text_id: TEXT_CHOICE_NAVI_CONNECT
+- action_id: refresh_navi_screen
+  text_id: TEXT_CHOICE_NAVI_REFRESH
+- action_id: exit_room
+  text_id: TEXT_CHOICE_LEAVE_ROOM
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_NAVI_STATE_TITLE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_NAVI_STATE_DESC1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_NAVI_STATE_DESC2
+- speaker: SPEAKER_NONE
+  text_id: TEXT_NAVI_PROGRESS_1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_NAVI_STATE_DESC4
+location_id: iwakura_lains_room
+name_text_id: TEXT_SCENE_NAME_01A_EXAMINE_NAVI
+scene_id: SCENE_01A_EXAMINE_NAVI

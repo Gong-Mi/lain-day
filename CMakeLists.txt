@@ -175,10 +175,7 @@ endforeach()
 add_custom_target(generate_ssl_scenes ALL DEPENDS ${GENERATED_SSL_SCENE_HEADERS} ${GENERATED_SSL_SCENE_SOURCES})
 
 # Find all plot sequence source files automatically.
-
 file(GLOB_RECURSE SEQUENCE_SOURCES "sequences/*/scene.c")
-
-
 
 # --- Define common source files for the game engine ---
 
@@ -217,13 +214,7 @@ set(GAME_ENGINE_SOURCES
         external/linenoise/linenoise.c
     external/linenoise/stringbuf.c
 
-    ${SCENE_SUBDIR_SOURCES}
-
-    ${SCENE_ROOT_SOURCES}
-
         ${SEQUENCE_SOURCES}
-
-        scenes/examine_fridge/scene.c
 
         src/characters/mika.c
         ${GENERATED_STRINGS_NAMES_C}

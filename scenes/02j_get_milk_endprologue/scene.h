@@ -1,9 +1,0 @@
-#ifndef SCENE_02J_GET_MILK_ENDPROLOGUE_H
-#define SCENE_02J_GET_MILK_ENDPROLOGUE_H
-
-#include "game_types.h"
-
-// Initializes the scene '02j_get_milk_endprologue'
-void init_scene_02j_get_milk_endprologue(StoryScene* scene);
-
-#endif // SCENE_02J_GET_MILK_ENDPROLOGUE_H

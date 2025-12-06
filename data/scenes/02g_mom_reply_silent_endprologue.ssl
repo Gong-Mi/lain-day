@@ -1,0 +1,49 @@
+choices:
+- action_id: mom_reply_fine
+  text_id: TEXT_CHOICE_MOM_REPLY_FINE
+- action_id: mom_reply_silent
+  text_id: TEXT_CHOICE_MOM_REPLY_SILENT
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_TALK_TO_MOM_NORMAL_DESC1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_MOM
+  text_id: TEXT_TALK_TO_MOM_NORMAL_MOM_QUOTE1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_TALK_TO_MOM_NORMAL_DESC2
+- speaker: SPEAKER_NONE
+  text_id: TEXT_MOM_REPLY_FINE_TITLE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_MOM_REPLY_FINE_DESC1
+- speaker: SPEAKER_MOM
+  text_id: TEXT_MOM_REPLY_FINE_MOM_QUOTE1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_MOM_REPLY_FINE_DESC2
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_MOM_REPLY_FINE_DESC3
+- speaker: SPEAKER_NONE
+  text_id: TEXT_MOM_REPLY_SILENT_TITLE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_MOM_REPLY_SILENT_DESC1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_MOM
+  text_id: TEXT_MOM_REPLY_SILENT_MOM_QUOTE1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_MOM_REPLY_SILENT_DESC2
+location_id: iwakura_living_dining_kitchen
+name_text_id: TEXT_SCENE_NAME_02G_MOM_REPLY_SILENT_ENDPROLOGUE
+scene_id: SCENE_02G_MOM_REPLY_SILENT_ENDPROLOGUE

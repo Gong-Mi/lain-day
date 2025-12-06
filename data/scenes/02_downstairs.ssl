@@ -1,0 +1,33 @@
+choices:
+- action_id: talk_to_dad
+  text_id: TEXT_CHOICE_TALK_TO_DAD
+- action_id: talk_to_mom
+  text_id: TEXT_CHOICE_TALK_TO_MOM
+- action_id: get_milk
+  text_id: TEXT_CHOICE_GET_MILK
+- action_id: return_to_upstairs
+  text_id: TEXT_CHOICE_RETURN_TO_UPSTAIRS
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_DOWNSTAIRS_DESC1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_DOWNSTAIRS_DESC2
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_DOWNSTAIRS_DESC3
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_DOWNSTAIRS_DESC4
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_DOWNSTAIRS_DESC5
+location_id: ''
+name_text_id: TEXT_SCENE_NAME_02_DOWNSTAIRS
+scene_id: SCENE_02_DOWNSTAIRS

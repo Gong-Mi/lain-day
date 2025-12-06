@@ -1,0 +1,23 @@
+choices:
+- action_id: return_to_living_room
+  text_id: TEXT_CHOICE_END_HELP_RETURN_TO_LIVING_ROOM
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_DAD_ASK_HELP_DESC1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_DAD
+  text_id: TEXT_DAD_ASK_HELP_DAD_QUOTE1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_DAD_ASK_HELP_DESC2
+- speaker: SPEAKER_DAD
+  text_id: TEXT_DAD_ASK_HELP_DAD_QUOTE2
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_DAD_ASK_HELP_DESC3
+location_id: iwakura_living_dining_kitchen
+name_text_id: TEXT_SCENE_NAME_02C_DAD_ASK_HELP
+scene_id: SCENE_02C_DAD_ASK_HELP

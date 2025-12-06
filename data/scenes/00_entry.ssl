@@ -1,26 +1,29 @@
-scene_id: SCENE_00_ENTRY
-name_text_id: TEXT_ENTRY_SCENE_NAME
-location_id: iwakura_upper_hallway
-
-dialogue:
-  - speaker: SPEAKER_NONE
-    text_id: TEXT_ENTRY_DESC1
-  - speaker: SPEAKER_NONE
-    text_id: TEXT_ENTRY_DESC2
-  - speaker: SPEAKER_NONE
-    text_id: TEXT_ENTRY_DESC3
-  - speaker: SPEAKER_NONE
-    text_id: TEXT_ENTRY_DESC4
-  - speaker: SPEAKER_NONE
-    text_id: TEXT_ENTRY_DESC5
-
 choices:
-  - text_id: TEXT_CHOICE_OPEN_DOOR
-    action_id: open_door
-    target_scene: SCENE_01_LAIN_ROOM
-  - text_id: TEXT_CHOICE_GO_DOWNSTAIRS
-    action_id: go_downstairs
-    target_scene: SCENE_02_DOWNSTAIRS
-  - text_id: TEXT_CHOICE_WAIT_ONE_MINUTE
-    action_id: wait_one_minute
-    target_scene: SCENE_00A_WAIT_ONE_MINUTE
+- action_id: enter_lains_room
+  text_id: TEXT_CHOICE_OPEN_DOOR
+- action_id: go_downstairs
+  text_id: TEXT_CHOICE_GO_DOWNSTAIRS
+- action_id: wait_one_minute
+  text_id: TEXT_CHOICE_WAIT_ONE_MINUTE
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_ENTRY_DESC1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_ENTRY_DESC2
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_ENTRY_DESC3
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_ENTRY_DESC4
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_ENTRY_DESC5
+location_id: iwakura_upper_hallway
+name_text_id: TEXT_SCENE_NAME_00_ENTRY
+scene_id: SCENE_00_ENTRY

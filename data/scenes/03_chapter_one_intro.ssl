@@ -1,0 +1,25 @@
+choices:
+- action_id: talk_to_sister
+  text_id: TEXT_CHOICE_TALK_TO_SISTER
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_CH1_INTRO_DESC1
+- speaker: SPEAKER_LAIN
+  text_id: TEXT_CH1_INTRO_YOU_QUOTE1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_CH1_INTRO_DESC2
+- speaker: SPEAKER_LAIN
+  text_id: TEXT_CH1_INTRO_YOU_QUOTE2
+- speaker: SPEAKER_NAVI
+  text_id: TEXT_CH1_INTRO_NAVI_QUOTE1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EMPTY_LINE
+- speaker: SPEAKER_NONE
+  text_id: TEXT_CH1_INTRO_DESC3
+- speaker: SPEAKER_NONE
+  text_id: TEXT_CH1_INTRO_DESC4
+location_id: iwakura_lains_room
+name_text_id: TEXT_SCENE_NAME_03_CHAPTER_ONE_INTRO
+scene_id: SCENE_03_CHAPTER_ONE_INTRO

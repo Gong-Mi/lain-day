@@ -1,0 +1,17 @@
+choices: []
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_SISTER_FIXED_DESC1
+- speaker: SPEAKER_MIRA
+  text_id: TEXT_SISTER_COLD_QUOTE1
+- speaker: SPEAKER_MIRA
+  text_id: TEXT_SISTER_COLD_QUOTE2
+- speaker: SPEAKER_NONE
+  text_id: TEXT_SISTER_FIXED_DESC2
+- speaker: SPEAKER_MIRA
+  text_id: TEXT_SISTER_FIXED_DESC3
+- speaker: SPEAKER_NONE
+  text_id: TEXT_SISTER_FIXED_DESC4
+location_id: ''
+name_text_id: TEXT_SCENE_NAME_04A_TALK_TO_SISTER_COLD
+scene_id: SCENE_04A_TALK_TO_SISTER_COLD

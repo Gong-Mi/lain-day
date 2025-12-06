@@ -13,34 +13,32 @@
 
 // --- Scene Headers ---
 // Include all individual scene headers.
-#include "00_entry/scene.h"
-#include "01_lain_room/scene.h"
-#include "02_downstairs/scene.h"
-#include "02a_talk_to_dad/scene.h"
-#include "02_mom_arc/scene.h"
-#include "01a_examine_navi/scene.h"
-#include "01b_navi_shutdown/scene.h"
-#include "01d_navi_reboot_endprologue/scene.h"
-#include "01e_navi_connect_endprologue/scene.h"
-#include "00a_wait_one_minute_endprologue/scene.h"
-#include "01c_talk_to_figure_endprologue/scene.h"
-
-#include "02b_dad_reply_no/scene.h"
-#include "02c_dad_ask_help/scene.h"
-#include "02j_get_milk_endprologue/scene.h"
-#include "03_chapter_one_intro/scene.h"
-#include "04c_talk_to_sister_default/scene.h"
-#include "04a_talk_to_sister_cold/scene.h"
-#include "04b_talk_to_sister_curious/scene.h"
-#include "mika_room_locked/scene.h"
-#include "mika_room_unlocked/scene.h"
-#include "iwakura_upper_hallway/scene.h"
-#include "examine_fridge/scene.h"
-#include "SCENE_00_ENTRY_data.h" // Include the generated header for 00_entry scene
+#include "SCENE_00_ENTRY_data.h"
+#include "SCENE_00A_WAIT_ONE_MINUTE_ENDPROLOGUE_data.h"
+#include "SCENE_01_LAIN_ROOM_data.h"
+#include "SCENE_01A_EXAMINE_NAVI_data.h"
+#include "SCENE_01B_NAVI_SHUTDOWN_data.h"
+#include "SCENE_01C_TALK_TO_FIGURE_ENDPROLOGUE_data.h"
+#include "SCENE_01D_NAVI_REBOOT_ENDPROLOGUE_data.h"
+#include "SCENE_01E_NAVI_CONNECT_ENDPROLOGUE_data.h"
+#include "SCENE_02_DOWNSTAIRS_data.h"
+#include "SCENE_02A_TALK_TO_DAD_data.h"
+#include "SCENE_02B_DAD_REPLY_NO_data.h"
+#include "SCENE_02C_DAD_ASK_HELP_data.h"
+#include "SCENE_02D_TALK_TO_MOM_NORMAL_data.h"
+#include "SCENE_02G_MOM_REPLY_SILENT_ENDPROLOGUE_data.h"
+#include "SCENE_02J_GET_MILK_ENDPROLOGUE_data.h"
+#include "SCENE_03_CHAPTER_ONE_INTRO_data.h"
+#include "SCENE_04A_TALK_TO_SISTER_COLD_data.h"
+#include "SCENE_04B_TALK_TO_SISTER_CURIOUS_data.h"
+#include "SCENE_04C_TALK_TO_SISTER_DEFAULT_data.h"
+#include "SCENE_EXAMINE_FRIDGE_data.h"
+#include "SCENE_IWAKURA_UPPER_HALLWAY_data.h"
+#include "SCENE_MIKA_ROOM_LOCKED_data.h"
+#include "SCENE_MIKA_ROOM_UNLOCKED_data.h"
 // NOTE: As more scenes are converted, their headers should be included here.
 // For now, we are only including the prologue scenes we have created.
 // To keep the game runnable, we will temporarily keep the old if-else for non-converted scenes.
-
 
 // --- Scene Initializers ---
 
@@ -71,31 +69,29 @@ typedef struct {
 // The central table for all registered C-based scenes.
 static const SceneRegistration scene_registrations[] = {
     {"SCENE_00_ENTRY", init_scene_scene_00_entry_from_data},
-    {"story/01_lain_room.md", init_scene_01_lain_room},
-    {"story/02_downstairs.md", init_scene_02_downstairs},
-    {"story/02a_talk_to_dad.md", init_scene_02a_talk_to_dad},
-    {"story/02d_talk_to_mom_normal.md", init_scene_02d_talk_to_mom_normal},
-    {"story/01a_examine_navi.md", init_scene_01a_examine_navi},
-    {"story/01b_navi_shutdown.md", init_scene_01b_navi_shutdown},
-    {"story/01d_navi_reboot_endprologue.md", init_scene_01d_navi_reboot_endprologue},
-    {"story/01e_navi_connect_endprologue.md", init_scene_01e_navi_connect_endprologue},
-    {"story/00a_wait_one_minute_endprologue.md", init_scene_00a_wait_one_minute_endprologue},
-    {"story/01c_talk_to_figure_endprologue.md", init_scene_01c_talk_to_figure_endprologue},
-    {"story/02g_mom_reply_silent_endprologue.md", init_scene_02g_mom_reply_silent_endprologue},
-    {"story/02f_mom_reply_fine_endprologue.md", init_scene_02f_mom_reply_fine_endprologue},
-    {"story/02b_dad_reply_no.md", init_scene_02b_dad_reply_no},
-    {"story/02c_dad_ask_help.md", init_scene_02c_dad_ask_help},
-    {"story/02j_get_milk_endprologue.md", init_scene_02j_get_milk_endprologue},
-    {"story/03_chapter_one_intro.md", init_scene_03_chapter_one_intro},
-    {"story/04c_talk_to_sister_default.md", init_scene_04c_talk_to_sister_default},
-    {"story/04a_talk_to_sister_cold.md", init_scene_04a_talk_to_sister_cold},
-    {"story/04b_talk_to_sister_curious.md", init_scene_04b_talk_to_sister_curious},
-    {"SCENE_MIKA_ROOM_LOCKED", init_scene_mika_room_locked},
-    {"SCENE_MIKA_ROOM_UNLOCKED", init_scene_mika_room_unlocked},
-    {"SCENE_IWAKURA_UPPER_HALLWAY", init_scene_iwakura_upper_hallway},
+    {"SCENE_00A_WAIT_ONE_MINUTE_ENDPROLOGUE", init_scene_scene_00a_wait_one_minute_endprologue_from_data},
+    {"SCENE_01_LAIN_ROOM", init_scene_scene_01_lain_room_from_data},
+    {"SCENE_01A_EXAMINE_NAVI", init_scene_scene_01a_examine_navi_from_data},
+    {"SCENE_01B_NAVI_SHUTDOWN", init_scene_scene_01b_navi_shutdown_from_data},
+    {"SCENE_01C_TALK_TO_FIGURE_ENDPROLOGUE", init_scene_scene_01c_talk_to_figure_endprologue_from_data},
+    {"SCENE_01D_NAVI_REBOOT_ENDPROLOGUE", init_scene_scene_01d_navi_reboot_endprologue_from_data},
+    {"SCENE_01E_NAVI_CONNECT_ENDPROLOGUE", init_scene_scene_01e_navi_connect_endprologue_from_data},
+    {"SCENE_02_DOWNSTAIRS", init_scene_scene_02_downstairs_from_data},
+    {"SCENE_02A_TALK_TO_DAD", init_scene_scene_02a_talk_to_dad_from_data},
+    {"SCENE_02B_DAD_REPLY_NO", init_scene_scene_02b_dad_reply_no_from_data},
+    {"SCENE_02C_DAD_ASK_HELP", init_scene_scene_02c_dad_ask_help_from_data},
+    {"SCENE_02D_TALK_TO_MOM_NORMAL", init_scene_scene_02d_talk_to_mom_normal_from_data},
+    {"SCENE_02G_MOM_REPLY_SILENT_ENDPROLOGUE", init_scene_scene_02g_mom_reply_silent_endprologue_from_data},
+    {"SCENE_02J_GET_MILK_ENDPROLOGUE", init_scene_scene_02j_get_milk_endprologue_from_data},
+    {"SCENE_03_CHAPTER_ONE_INTRO", init_scene_scene_03_chapter_one_intro_from_data},
+    {"SCENE_04A_TALK_TO_SISTER_COLD", init_scene_scene_04a_talk_to_sister_cold_from_data},
+    {"SCENE_04B_TALK_TO_SISTER_CURIOUS", init_scene_scene_04b_talk_to_sister_curious_from_data},
+    {"SCENE_04C_TALK_TO_SISTER_DEFAULT", init_scene_scene_04c_talk_to_sister_default_from_data},
+    {"SCENE_EXAMINE_FRIDGE", init_scene_scene_examine_fridge_from_data},
+    {"SCENE_IWAKURA_UPPER_HALLWAY", init_scene_scene_iwakura_upper_hallway_from_data},
+    {"SCENE_MIKA_ROOM_LOCKED", init_scene_scene_mika_room_locked_from_data},
+    {"SCENE_MIKA_ROOM_UNLOCKED", init_scene_scene_mika_room_unlocked_from_data},
     {"SCENE_TIME_GLITCH", init_scene_time_glitch},
-    {"SCENE_EXAMINE_FRIDGE", init_scene_examine_fridge},
-    // NOTE: Add new scenes here as they are created.
 };
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(SceneRegistration);
 
