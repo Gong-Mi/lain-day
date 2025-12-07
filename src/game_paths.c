@@ -23,7 +23,9 @@ void init_paths(char* argv0, GamePaths* paths) {
     char current_path[MAX_PATH_LENGTH];
     strncpy(current_path, dirname(resolved_path), MAX_PATH_LENGTH - 1);
 
-    // Search upwards for a directory containing a ".git" folder
+#if defined(USE_DEBUG_LOGGING)
+    // In Debug mode, search upwards for a directory containing a ".git" folder
+    // This is convenient for development, as it allows running the executable from the build directory
     for (int i = 0; i < 10; ++i) { // Limit search depth to 10 levels
         char git_path[MAX_PATH_LENGTH];
         snprintf(git_path, sizeof(git_path), "%s/.git", current_path);
@@ -48,6 +50,14 @@ void init_paths(char* argv0, GamePaths* paths) {
 
     fprintf(stderr, "Error: Could not find project root directory (containing .git folder).\n");
     exit(EXIT_FAILURE);
+#else
+    // In Non-Debug (Release) mode, use the executable's directory as the base path.
+    // This makes the application portable.
+    snprintf(paths->base_path, sizeof(paths->base_path), "%s", current_path);
+    snprintf(paths->items_file, sizeof(paths->items_file), "%s/items.json", paths->base_path);
+    snprintf(paths->map_dir, sizeof(paths->map_dir), "%s/map", paths->base_path);
+    snprintf(paths->session_root_dir, sizeof(paths->session_root_dir), "%s/session", paths->base_path);
+#endif
 }
 
 int copy_file(const char *src_path, const char *dest_path) {

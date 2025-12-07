@@ -8,13 +8,13 @@
 // Returns 1 on success, 0 on failure.
 int load_player_state(const char* path, GameState* game_state);
 
-// Loads all item data from the items.json file.
+// Loads all item data from the embedded items_data.h header.
 // Returns 1 on success, 0 on failure.
-int load_items_data(const char* path, GameState* game_state);
+int load_items_data(GameState* game_state);
 
-// Loads the string table from strings.json.
+// Loads the string table from the embedded data array.
 // Returns 1 on success, 0 on failure.
-int load_string_table(const char** paths, int path_count);
+int load_string_table(void);
 
 // Loads all action data from the actions.json file.
 // Returns 1 on success, 0 on failure.

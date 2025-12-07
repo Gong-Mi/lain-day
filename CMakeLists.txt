@@ -20,7 +20,7 @@ option(CHARACTER_LAINS_SISTER_MIRA_ALIVE "Include Mira (Lain's Sister) in the ga
 # effectively disabling all debug output.
 # If set to ON, the individual debug toggles (ENABLE_DEBUG_LOGGING, etc.) will be respected.
 # Default: ON (allowing individual toggles to be used or providing a quick way to disable all debugs).
-option(MASTER_DEBUG_SWITCH "Master switch for all debug logging" ON)
+option(MASTER_DEBUG_SWITCH "Master switch for all debug logging" OFF)
 # ENABLE_TYPEWRITER_EFFECT:
 # Controls the typewriter text rendering effect.
 # When MASTER_DEBUG_SWITCH is ON, this toggle determines if text is printed character by character.
@@ -31,19 +31,19 @@ option(ENABLE_TYPEWRITER_EFFECT "Enable typewriter text rendering effect" OFF)
 # These messages provide insight into core game logic and data loading.
 # Only effective if MASTER_DEBUG_SWITCH is ON.
 # Default: ON (useful for general development tracking).
-option(ENABLE_DEBUG_LOGGING "Enable debug logging to stderr" ON)
+option(ENABLE_DEBUG_LOGGING "Enable debug logging to stderr" OFF)
 # ENABLE_STRING_DEBUG_LOGGING:
 # Controls detailed debug messages related to String IDs and their content during scene rendering.
 # Useful for debugging text display and internationalization issues.
 # Only effective if MASTER_DEBUG_SWITCH is ON.
 # Default: OFF (to keep console output clean during normal development).
-option(ENABLE_STRING_DEBUG_LOGGING "Enable debug logging for string IDs to stderr" ON)
+option(ENABLE_STRING_DEBUG_LOGGING "Enable debug logging for string IDs to stderr" OFF)
 # ENABLE_MAP_DEBUG_LOGGING:
 # Controls detailed debug messages during map loading and processing (e.g., programmatic location additions, POI verification).
 # Useful for debugging world structure and navigation.
 # Only effective if MASTER_DEBUG_SWITCH is ON.
 # Default: OFF (to keep console output clean during normal development).
-option(ENABLE_MAP_DEBUG_LOGGING "Enable debug logging for map loading and processing to stderr" ON)
+option(ENABLE_MAP_DEBUG_LOGGING "Enable debug logging for map loading and processing to stderr" OFF)
 # ENABLE_CLEAR_SCREEN:
 # Controls whether the terminal screen is cleared on each scene render.
 # When MASTER_DEBUG_SWITCH is ON, this option functions as a game style toggle.
@@ -120,6 +120,23 @@ add_custom_command(
 # Create a target for the generated header to ensure it's built
 add_custom_target(generate_character_header ALL DEPENDS ${GENERATED_CHARACTER_DATA_H})
 
+# --- Auto-generate items.json data header ---
+set(ITEMS_JSON_FILE "${PROJECT_SOURCE_DIR}/data/items.json")
+set(GENERATED_ITEMS_DATA_H "${PROJECT_BINARY_DIR}/include/items_data.h")
+
+add_custom_command(
+    OUTPUT ${GENERATED_ITEMS_DATA_H}
+    COMMAND ${CMAKE_COMMAND} 
+        -DINPUT_FILE=${ITEMS_JSON_FILE} 
+        -DOUTPUT_FILE=${GENERATED_ITEMS_DATA_H} 
+        -DJSON_VAR_NAME=ITEMS_JSON_DATA
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_json_header.cmake
+    DEPENDS ${ITEMS_JSON_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_json_header.cmake
+    COMMENT "Generating C header from items.json"
+)
+
+add_custom_target(generate_items_header ALL DEPENDS ${GENERATED_ITEMS_DATA_H})
+
 # --- Auto-generate string_ids.h from strings.json and strings_extra/*.json ---
 set(STRINGS_JSON_FILE "${PROJECT_SOURCE_DIR}/data/strings.json")
 file(GLOB STRINGS_EXTRA_FILES "${PROJECT_SOURCE_DIR}/data/strings_extra/*.json")
@@ -127,20 +144,22 @@ file(GLOB STRINGS_EXTRA_FILES "${PROJECT_SOURCE_DIR}/data/strings_extra/*.json")
 set(GENERATED_STRINGS_H "${PROJECT_BINARY_DIR}/include/string_ids.h")
 set(GENERATED_STRINGS_NAMES_H "${PROJECT_BINARY_DIR}/include/string_id_names.h")
 set(GENERATED_STRINGS_NAMES_C "${PROJECT_BINARY_DIR}/src/generated_string_id_names.c")
+set(GENERATED_STRINGS_DATA_C "${PROJECT_BINARY_DIR}/src/generated_string_data.c")
 
 add_custom_command(
-    OUTPUT ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C}
+    OUTPUT ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C} ${GENERATED_STRINGS_DATA_C}
     COMMAND /data/data/com.termux/files/usr/bin/python3.12 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py 
         ${GENERATED_STRINGS_H} 
         ${GENERATED_STRINGS_NAMES_H} 
         ${GENERATED_STRINGS_NAMES_C} 
+        ${GENERATED_STRINGS_DATA_C}
         ${STRINGS_JSON_FILE} 
         ${STRINGS_EXTRA_FILES}
     DEPENDS ${STRINGS_JSON_FILE} ${STRINGS_EXTRA_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py
     COMMENT "Generating C headers and source from strings.json and extra modules"
 )
 
-add_custom_target(generate_string_ids_header ALL DEPENDS ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C})
+add_custom_target(generate_string_ids_header ALL DEPENDS ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C} ${GENERATED_STRINGS_DATA_C})
 
 # Find all scene source files automatically.
 
@@ -205,6 +224,8 @@ set(GAME_ENGINE_SOURCES
 
         src/scenes.c
 
+        src/event_system.c
+
         src/cmap.c
 
         src/conditions.c
@@ -228,6 +249,7 @@ set(GAME_ENGINE_SOURCES
 
         src/characters/mika.c
         ${GENERATED_STRINGS_NAMES_C}
+        ${GENERATED_STRINGS_DATA_C}
         ${GENERATED_SSL_SCENE_SOURCES} # Add generated SSL scene sources
 
     )
@@ -243,7 +265,7 @@ add_executable(scene_debugger tools/scene_debugger.c ${GAME_ENGINE_SOURCES})
 target_link_libraries(scene_debugger PUBLIC zlibstatic pthread)
 
 # Add dependency to ensure header is generated before compiling executables
-add_dependencies(lain_day_c generate_character_header generate_string_ids_header generate_ssl_scenes)
+add_dependencies(lain_day_c generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes)
 add_dependencies(scene_debugger generate_character_header generate_string_ids_header generate_ssl_scenes)
 
 # Add feature toggle definitions

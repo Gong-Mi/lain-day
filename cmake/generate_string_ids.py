@@ -2,7 +2,7 @@ import json
 import sys
 import os
 
-def generate_string_ids_h(json_paths, header_path, names_header_path, names_c_path):
+def generate_string_ids_h(json_paths, header_path, names_header_path, names_c_path, data_c_path):
     merged_data = {}
     
     print(f"Processing {len(json_paths)} string data files...")
@@ -11,8 +11,6 @@ def generate_string_ids_h(json_paths, header_path, names_header_path, names_c_pa
         try:
             with open(json_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                # Merge data, newer keys overwrite older keys
-                # We could add a check here for duplicates if strictness is required
                 for key, value in data.items():
                     if key in merged_data and merged_data[key] != value:
                         print(f"Warning: Duplicate string ID '{key}' found in {json_path}. Overwriting previous value.")
@@ -27,16 +25,15 @@ def generate_string_ids_h(json_paths, header_path, names_header_path, names_c_pa
 
     ids = sorted(merged_data.keys())
     
-    # Check for empty IDs or non-string IDs
     for _id in ids:
         if not _id or not isinstance(_id, str):
             print(f"Error: Invalid (empty or non-string) ID found.", file=sys.stderr)
             sys.exit(1)
 
-    # Ensure output directories exist
     os.makedirs(os.path.dirname(header_path), exist_ok=True)
     os.makedirs(os.path.dirname(names_header_path), exist_ok=True)
     os.makedirs(os.path.dirname(names_c_path), exist_ok=True)
+    os.makedirs(os.path.dirname(data_c_path), exist_ok=True)
 
 
     # Generate string_ids.h
@@ -86,24 +83,36 @@ def generate_string_ids_h(json_paths, header_path, names_header_path, names_c_pa
         f.write("};\n\n")
 
     print(f"Generated {names_c_path} (definition).")
+    
+    # Generate generated_string_data.c (embedded string values)
+    with open(data_c_path, 'w', encoding='utf-8') as f:
+        f.write("#include \"string_ids.h\"\n\n")
+        f.write("const char* g_embedded_strings[TEXT_COUNT] = {\n")
+        f.write("    [TEXT_INVALID] = \"ERROR: Invalid Text ID (Embedded Fallback)\",\n")
+        f.write("    [TEXT_EMPTY_LINE] = \"\",\n")
+        
+        id_to_value_map = {key: merged_data[key] for key in ids}
+
+        for _id in ids:
+            if _id not in ["TEXT_INVALID", "TEXT_EMPTY_LINE"]:
+                value = id_to_value_map[_id]
+                escaped_value = value.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+                f.write(f"    [{_id}] = \"{escaped_value}\",\n")
+        
+        f.write("};\n\n")
+
+    print(f"Generated {data_c_path} (embedded string data).")
 
 
 if __name__ == "__main__":
-    # Expect at least 1 input file + 3 output files = 4 args
-    if len(sys.argv) < 5:
-        print("Usage: python generate_string_ids.py <path_to_ids_header_file> <path_to_names_header_file> <path_to_names_c_file> <input_json_1> [input_json_2 ...]", file=sys.stderr)
+    if len(sys.argv) < 6:
+        print("Usage: python generate_string_ids.py <ids_header> <names_header> <names_c> <data_c> <json1> [json2...]", file=sys.stderr)
         sys.exit(1)
 
-    # Revised Argument Order for easier CMake List passing:
-    # 1: Output Header ID
-    # 2: Output Header Names
-    # 3: Output Source Names
-    # 4+: Input JSONs
-    
     header_output_path = sys.argv[1]
     names_header_output_path = sys.argv[2]
     names_c_output_path = sys.argv[3]
+    data_c_output_path = sys.argv[4]
+    json_input_paths = sys.argv[5:]
     
-    json_input_paths = sys.argv[4:]
-    
-    generate_string_ids_h(json_input_paths, header_output_path, names_header_output_path, names_c_output_path)
+    generate_string_ids_h(json_input_paths, header_output_path, names_header_output_path, names_c_output_path, data_c_output_path)

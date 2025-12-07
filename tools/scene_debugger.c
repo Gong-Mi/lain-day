@@ -51,17 +51,8 @@ int main(int argc, char* argv[]) {
     memset(&game_state, 0, sizeof(GameState));
     g_game_state_ptr = &game_state; // Set the global pointer for the debugger instance
 
-    // Initialize paths
-    GamePaths paths;
-    init_paths(argv[0], &paths);
-
-    // Load string table first
-    const char* string_file_paths[1]; // Debugger only needs main strings.json
-    char strings_json_path_buffer[MAX_PATH_LENGTH];
-    snprintf(strings_json_path_buffer, MAX_PATH_LENGTH, "%s/data/strings.json", paths.base_path);
-    string_file_paths[0] = strings_json_path_buffer;
-
-    if (!load_string_table(string_file_paths, 1)) {
+    // Load string table from embedded data
+    if (!load_string_table()) {
         fprintf(stderr, "ERROR: Failed to load string table for scene debugger.\n");
         return 1;
     }

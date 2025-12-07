@@ -1,18 +1,12 @@
-/*
- * scenes.c - Scene Transition Manager
- *
- * This file is responsible for mapping story file paths from action payloads
- * to their corresponding C-based scene initialization functions.
- * It uses a dispatch table (`scene_registrations`) for modularity and scalability.
- */
-
-#include "scenes.h" // Corrected include path
-#include "game_types.h"
+#include "scenes.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include "game_types.h"
+#include "flag_system.h"
+#include <stdlib.h> // For atoi
 
-// --- Scene Headers ---
-// Include all individual scene headers.
+// All scene init functions are declared here. They are defined in their respective data.c files.
 #include "SCENE_00_ENTRY_data.h"
 #include "SCENE_00A_WAIT_ONE_MINUTE_ENDPROLOGUE_data.h"
 #include "SCENE_01_LAIN_ROOM_data.h"
@@ -36,38 +30,16 @@
 #include "SCENE_IWAKURA_UPPER_HALLWAY_data.h"
 #include "SCENE_MIKA_ROOM_LOCKED_data.h"
 #include "SCENE_MIKA_ROOM_UNLOCKED_data.h"
-// NOTE: As more scenes are converted, their headers should be included here.
-// For now, we are only including the prologue scenes we have created.
-// To keep the game runnable, we will temporarily keep the old if-else for non-converted scenes.
+#include "SCENE_SHINJUKU_ABANDONED_SITE_data.h"
 
-// --- Scene Initializers ---
+// A function pointer type for scene initializers
+typedef void (*SceneInitFunc)(StoryScene*);
 
-// New Time Glitch Scene
-void init_scene_time_glitch(StoryScene* scene) {
-    strcpy(scene->scene_id, "SCENE_TIME_GLITCH");
-    strcpy(scene->name, "Time Glitch");
-    strcpy(scene->location_id, "the_wired");
-
-    scene->dialogue_line_count = 4;
-    scene->dialogue_lines[0] = (DialogueLine){SPEAKER_NONE, SID_TIME_GLITCH_1};
-    scene->dialogue_lines[1] = (DialogueLine){SPEAKER_NONE, SID_TIME_GLITCH_2};
-    scene->dialogue_lines[2] = (DialogueLine){SPEAKER_NONE, SID_TIME_GLITCH_3};
-    scene->dialogue_lines[3] = (DialogueLine){SPEAKER_NONE, SID_TIME_GLITCH_4};
-
-    scene->choice_count = 1;
-    scene->choices[0] = (StoryChoice){SID_TIME_GLITCH_CHOICE_1, "reset_from_glitch", {}};
-}
-
-
-// --- Dispatch Table ---
-// A struct to map a scene ID (story file path) to its init function.
-typedef struct {
+// The dispatch table mapping scene IDs to their init functions
+static const struct {
     const char* id;
-    void (*init_func)(StoryScene*);
-} SceneRegistration;
-
-// The central table for all registered C-based scenes.
-static const SceneRegistration scene_registrations[] = {
+    SceneInitFunc func;
+} scene_registrations[] = {
     {"SCENE_00_ENTRY", init_scene_scene_00_entry_from_data},
     {"SCENE_00A_WAIT_ONE_MINUTE_ENDPROLOGUE", init_scene_scene_00a_wait_one_minute_endprologue_from_data},
     {"SCENE_01_LAIN_ROOM", init_scene_scene_01_lain_room_from_data},
@@ -91,46 +63,48 @@ static const SceneRegistration scene_registrations[] = {
     {"SCENE_IWAKURA_UPPER_HALLWAY", init_scene_scene_iwakura_upper_hallway_from_data},
     {"SCENE_MIKA_ROOM_LOCKED", init_scene_scene_mika_room_locked_from_data},
     {"SCENE_MIKA_ROOM_UNLOCKED", init_scene_scene_mika_room_unlocked_from_data},
-    {"SCENE_TIME_GLITCH", init_scene_time_glitch},
+    {"SCENE_SHINJUKU_ABANDONED_SITE", init_scene_scene_shinjuku_abandoned_site_from_data},
 };
-static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(SceneRegistration);
 
+static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(scene_registrations[0]);
 
-// --- Public API ---
-
+bool transition_to_scene(const char* target_story_file, StoryScene* scene, GameState* game_state) {
 #ifdef USE_DEBUG_LOGGING
-int transition_to_scene(const char* target_story_file, StoryScene* scene, GameState* game_state) {
-    fprintf(stderr, "DEBUG: Attempting to transition to scene: %s\n", target_story_file);
+    const char* scene_id_str = (target_story_file != NULL) ? target_story_file : "NULL";
+    fprintf(stderr, "DEBUG: Attempting to transition to scene: %s\n", scene_id_str);
     fprintf(stderr, "DEBUG: transition_to_scene: scene ptr: %p\n", (void*)scene);
-#else
-int transition_to_scene(const char* target_story_file, StoryScene* scene, GameState* game_state) {
 #endif
-    // Clear the scene to ensure no leftover data
-    memset(scene, 0, sizeof(StoryScene));
 
-    // 1. Try to find the scene in our new dispatch table
+    if (target_story_file == NULL || scene == NULL) return false;
+    
     for (int i = 0; i < num_scene_registrations; ++i) {
-        if (strcmp(target_story_file, scene_registrations[i].id) == 0) {
+        if (strcmp(scene_registrations[i].id, target_story_file) == 0) {
 #ifdef USE_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: Scene '%s' found in dispatch table. Initializing...\n", target_story_file);
 #endif
-            scene_registrations[i].init_func(scene);
-            
-            // After successfully initializing, update the player's location if the scene specifies one.
-            if (strlen(scene->location_id) > 0) {
-                strncpy(game_state->player_state.location, scene->location_id, sizeof(game_state->player_state.location) - 1);
-            }
+            scene_registrations[i].func(scene);
 #ifdef USE_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: Successfully initialized scene '%s'.\n", target_story_file);
 #endif
-            return 1; // Success
+            return true;
         }
     }
     
-    // 2. If not found, this is a scene we haven't converted yet.
 #ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "ERROR: Scene '%s' is not registered in the C dispatch table.\n", target_story_file);
+    fprintf(stderr, "ERROR: Scene ID '%s' not found in scene registration table.\n", target_story_file);
 #endif
-    return 0; // Failure: scene not found
+    return false;
 }
 
+bool is_choice_selectable(const StoryChoice* choice, const GameState* game_state) {
+    if (choice->condition.flag_name[0] == '\0') {
+        return true;
+    }
+    const char* flag_value_str = hash_table_get(game_state->flags, choice->condition.flag_name);
+    if (flag_value_str != NULL) {
+        if (atoi(flag_value_str) == choice->condition.required_value) {
+            return true;
+        }
+    }
+    return false;
+}

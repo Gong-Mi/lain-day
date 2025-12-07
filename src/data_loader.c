@@ -9,6 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+// External declaration for the array of embedded string values
+extern const char* g_embedded_strings[TEXT_COUNT];
+
 static char* read_file_to_buffer(const char* path) {
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
@@ -29,91 +32,13 @@ static char* read_file_to_buffer(const char* path) {
     return buffer;
 }
 
-int load_string_table(const char** paths, int path_count) {
-    cJSON *merged_root = cJSON_CreateObject();
-    if (merged_root == NULL) {
-        fprintf(stderr, "ERROR: Failed to create merged JSON object for string table.\n");
-        return 0;
-    }
-
-    for (int p_idx = 0; p_idx < path_count; ++p_idx) {
-        const char* current_path = paths[p_idx];
-        char *json_string = read_file_to_buffer(current_path);
-        if (json_string == NULL) {
-            fprintf(stderr, "ERROR: Failed to read string data from %s\n", current_path);
-            cJSON_Delete(merged_root);
-            return 0;
-        }
-
-        cJSON *current_root = cJSON_Parse(json_string);
-        free(json_string);
-        if (current_root == NULL) {
-            const char *error_ptr = cJSON_GetErrorPtr();
-            if (error_ptr != NULL) {
-                fprintf(stderr, "ERROR: Malformed JSON in %s: %s\n", current_path, error_ptr);
-            } else {
-                fprintf(stderr, "ERROR: Failed to parse JSON from %s\n", current_path);
-            }
-            cJSON_Delete(merged_root);
-            return 0;
-        }
-
-        cJSON *item;
-        cJSON_ArrayForEach(item, current_root) {
-            if (cJSON_HasObjectItem(merged_root, item->string)) {
-#ifdef USE_DEBUG_LOGGING
-                fprintf(stderr, "DEBUG: Duplicate string ID '%s' found in %s. Overwriting.\n", item->string, current_path);
-#endif
-            }
-            cJSON_AddItemToObject(merged_root, item->string, cJSON_Duplicate(item, 1));
-        }
-        cJSON_Delete(current_root);
-    }
-
-    // Allocate temporary storage for strings in the correct order
-    const char** temp_strings = (const char**)malloc(sizeof(const char*) * TEXT_COUNT);
-    if (temp_strings == NULL) {
-        fprintf(stderr, "ERROR: Failed to allocate memory for temporary string table.\n");
-        cJSON_Delete(merged_root);
-        return 0;
-    }
-
-    // Populate temp_strings using generated g_string_id_names and merged JSON data
-    for (int i = 0; i < TEXT_COUNT; ++i) {
-        const char* id_name = g_string_id_names[i];
-        const cJSON *json_string_item = cJSON_GetObjectItemCaseSensitive(merged_root, id_name);
-        
-        if (cJSON_IsString(json_string_item)) {
-            temp_strings[i] = strdup(json_string_item->valuestring);
-        } else {
-            if (i == TEXT_INVALID) {
-                temp_strings[i] = strdup("ERROR: Invalid Text ID (Fallback)");
-            } else if (i == TEXT_EMPTY_LINE) {
-                temp_strings[i] = strdup("");
-            } else {
-                fprintf(stderr, "WARNING: Missing or invalid string for ID '%s'. Using fallback.\n", id_name);
-                temp_strings[i] = strdup("ERROR: Missing String");
-            }
-        }
-        if (temp_strings[i] == NULL) {
-            fprintf(stderr, "FATAL: strdup failed for ID '%s'. Out of memory?\n", id_name);
-            for (int j = 0; j < i; ++j) free((void*)temp_strings[j]);
-            free(temp_strings);
-            cJSON_Delete(merged_root);
-            return 0;
-        }
-    }
-
-    init_string_table(temp_strings, TEXT_COUNT);
-
-    for (int i = 0; i < TEXT_COUNT; ++i) {
-        free((void*)temp_strings[i]);
-    }
-    free(temp_strings);
-    cJSON_Delete(merged_root);
-    return 1;
+int load_string_table() {
+    // The g_embedded_strings array is generated at compile time and linked in.
+    // We just need to pass it to the string_table initialization function.
+    // The init_string_table function will manage copying these strings.
+    init_string_table(g_embedded_strings, TEXT_COUNT);
+    return 1; // Always succeeds as data is embedded
 }
-
 
 int load_player_state(const char* path, GameState* game_state) {
     if (game_state == NULL) return 0;
@@ -225,14 +150,21 @@ int load_player_state(const char* path, GameState* game_state) {
     return 1;
 }
 
-int load_items_data(const char* path, GameState* game_state) {
-    if (game_state == NULL) return 0;
-    char *json_string = read_file_to_buffer(path);
-    if (json_string == NULL) return 0;
+#include "items_data.h"
 
+// ... (other includes)
+
+// ... (other functions)
+
+int load_items_data(GameState* game_state) {
+    if (game_state == NULL) return 0;
+    
+    const char *json_string = ITEMS_JSON_DATA;
     cJSON *root = cJSON_Parse(json_string);
-    free(json_string);
-    if (root == NULL) return 0;
+    if (root == NULL) {
+        fprintf(stderr, "Error: Failed to parse embedded items.json data.\n");
+        return 0;
+    }
 
     game_state->item_count = 0;
     cJSON *item_json;
@@ -257,6 +189,7 @@ int load_items_data(const char* path, GameState* game_state) {
     cJSON_Delete(root);
     return 1;
 }
+
 
 void cleanup_game_state(GameState* game_state) {
     if (game_state == NULL) return;

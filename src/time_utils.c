@@ -1,7 +1,7 @@
 #include "time_utils.h"
 #include "ecc_time.h"
-#include "characters/mika.h" // For schedule updates
-#include <unistd.h> // For sleep
+#include "event_system.h" // Include the new event system
+#include <unistd.h> // For usleep
 
 // Mutex for protecting game_state->time_of_day
 pthread_mutex_t time_mutex;
@@ -9,15 +9,9 @@ pthread_mutex_t time_mutex;
 // Flag to signal the time thread to stop
 volatile bool game_is_running = true;
 
-// Total time units in a day (24 hours * 60 minutes * 60 seconds * 16 units/sec)
-#define UNITS_IN_A_DAY (24 * 60 * 60 * 16)
-// Time increment per second (1 minute * 60 seconds * 16 units/sec)
-// To keep the old rate of 1 minute passing per real-time second.
-// We will actually increment by 1 second of game time per real time second for now.
 #define TIME_INCREMENT_PER_SECOND (1 * 16)
 
-
-// Function run by the time thread to update game time
+// Function run by the time thread to update game time and push events
 void* time_thread_func(void* arg) {
     GameState* game_state = (GameState*)arg;
     static int tick_count = 0;
@@ -26,7 +20,7 @@ void* time_thread_func(void* arg) {
         
         tick_count++;
         if (tick_count < 10) {
-            continue; // Skip time update until 1 second has passed
+            continue; // Skip until 1 second has passed
         }
         tick_count = 0; // Reset counter
 
@@ -34,21 +28,20 @@ void* time_thread_func(void* arg) {
 
         // Decode the current time
         DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-
-        // For now, we ignore errors and just advance time.
-        // Later, DOUBLE_BIT_ERROR_DETECTED will trigger a 'time glitch'.
         uint32_t current_time = decoded_result.data;
 
-        // Increment time (monotonically increasing)
+        // Increment time
         uint32_t new_time = current_time + TIME_INCREMENT_PER_SECOND;
 
         // Re-encode and update
         game_state->time_of_day = encode_time_with_ecc(new_time);
-
-        // Update character locations based on the new time
-        mika_update_location_by_schedule(game_state);
-
+        
         pthread_mutex_unlock(&time_mutex);
+
+        // Push a time tick event to the queue
+        Event time_event;
+        time_event.type = TIME_TICK_EVENT;
+        push_event(time_event);
     }
     return NULL;
 }
