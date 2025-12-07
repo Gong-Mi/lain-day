@@ -1,5 +1,6 @@
 #include "executor.h"
 #include "scenes.h"
+#include "map_loader.h" // Added for get_location_by_id
 #include "render_utils.h"
 #include "flag_system.h"
 #include "cmap.h" // Use the new CMap module
@@ -527,9 +528,8 @@ bool execute_command(const char* input, GameState* game_state) {
     }
     // Command: arls / arls <poi_id>
     else if (strncmp(input, "arls", 4) == 0) {
-        char poi_id_buffer[MAX_NAME_LENGTH] = {0};
+        char poi_id_buffer[MAX_NAME_LENGTH];
         int scan_result = sscanf(input, "arls %s", poi_id_buffer);
-
         if (scan_result == 1) { // Command is "arls <something>"
             const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
             if (current_loc) {
@@ -554,40 +554,32 @@ bool execute_command(const char* input, GameState* game_state) {
             return false;
         } else { // Command is just "arls" (no specific POI ID)
             printf("\n--- Area List Scan ---\n");
-            const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+#ifdef USE_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: Arls: Player location ID is '%s'.\n", g_game_state_ptr->player_state.location);
+#endif
+            Location *current_loc = get_location_by_id(g_game_state_ptr->player_state.location);
             if (current_loc) {
 #ifdef USE_DEBUG_LOGGING
-                fprintf(stderr, "DEBUG: Arls: Retrieved location '%s', pois_count: %d\n", current_loc->id, current_loc->pois_count);
+                fprintf(stderr, "DEBUG: Arls: Retrieved location '%s', pois_count: %d. Description (first 50 chars): '%.50s...'\n", current_loc->id, current_loc->pois_count, current_loc->description);
 #endif
-                print_raw_text(current_loc->name);
-                print_raw_text(current_loc->description);
-                printf("\nPoints of Interest:\n");
-                if (current_loc->pois_count == 0) {
-                    print_raw_text("  (none)");
-                }
-                for (int i = 0; i < current_loc->pois_count; i++) {
+                render_scene_description(current_loc->description);
+
+                if (current_loc->pois_count > 0) {
+                    render_text("\n\n Points of Interest: \n\n");
+                    for (int i = 0; i < current_loc->pois_count; i++) {
 #ifdef USE_DEBUG_LOGGING
-                    fprintf(stderr, "DEBUG: Arls: Printing POI '%s'\n", current_loc->pois[i].name);
+                        fprintf(stderr, "DEBUG: Arls: Printing POI '%s'.\n", current_loc->pois[i].name);
 #endif
-                    char poi_buf[MAX_LINE_LENGTH];
-                    // Add an indicator if the POI is examinable
-                    const char* examinable_indicator = (current_loc->pois[i].examine_action_id != NULL) ? " (*)" : ""; // Keep for now
-                    snprintf(poi_buf, MAX_LINE_LENGTH, "  - %s%s", current_loc->pois[i].id, examinable_indicator);
-                    print_raw_text(poi_buf);
+                        render_poi_name(current_loc->pois[i].name);
+                        render_text("\n");
+                    }
                 }
-                printf("\nConnections:\n");
-                if (current_loc->connection_count == 0) {
-                    print_raw_text("  (none)");
-                }
-                for (int i = 0; i < current_loc->connection_count; i++) {
-                    char conn_buf[MAX_LINE_LENGTH];
-                    const Connection* conn = &current_loc->connections[i];
-                    snprintf(conn_buf, MAX_LINE_LENGTH, "  - %s -> %s", conn->action_id, conn->target_location_id);
-                    print_raw_text(conn_buf);
-                }
-            } else {
-                printf("Error: Current location '%s' not found in map data.\n", game_state->player_state.location);
             }
+#ifdef USE_DEBUG_LOGGING
+            else {
+                fprintf(stderr, "ERROR: Arls: get_location_by_id returned NULL for ID '%s'. Current location '%s' not found in map data.\n", g_game_state_ptr->player_state.location, g_game_state_ptr->player_state.location);
+            }
+#endif
             printf("----------------------\n");
             return false;
         }

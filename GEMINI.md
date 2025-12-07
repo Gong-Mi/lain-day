@@ -31,7 +31,7 @@ The game will prompt for a session name. You can enter a new name to start a new
 
 *   **Language:** The project is written in C (C11 standard).
 *   **Build System:** CMake is used for building the project.
-*   **Design:** The project has evolved from a purely data-driven model to a **hybrid data-driven and code-driven design**. While some content is still loaded from `.json` files, narrative sequences and complex logic are increasingly being implemented directly in C for more control and robustness.
+*   **Design:** The project uses a **hybrid data-driven and code-driven design**. Scene structure, dialogue, and choices are defined in `.ssl` (YAML) files located in `data/scenes/`. A build-time script parses these files and generates C functions to load and manage scene data. Core game logic and action execution are implemented directly in C.
 *   **Source of Truth:** For a detailed breakdown of what is implemented, what is in progress, and what is planned, please refer to **`include/project_status.h`**.
 *   **Key Changes:**
     *   The `actions.json` file has been **deprecated**. All action logic is now part of the C engine.
@@ -39,15 +39,49 @@ The game will prompt for a session name. You can enter a new name to start a new
 *   **Feature Toggles:** The `CMakeLists.txt` file includes several feature toggles for enabling and disabling characters and debug features. This is useful for creating different builds and for testing.
 *   **Testing:** The game can be run in an automated mode by providing input as command-line arguments. A `scene_debugger` tool is also available.
 
-## Scene Management Refactoring Strategy
+## Development Environment and Platform Strategy
 
-It has been identified that the game's scene management is in a hybrid state. While some scenes are defined programmatically in C code, the `transition_to_scene` function still uses `.md` file paths (e.g., `"story/01_lain_room.md"`) as string identifiers in a dispatch table to map to C-based scene initialization functions. This is a legacy of a previous, incomplete refactoring.
+### Primary Development Environment
 
-To improve clarity and maintainability without undertaking a massive, immediate refactoring:
-*   **Incremental Approach:** We will adopt an incremental refactoring strategy for scene naming.
-*   **New Scenes:** New scenes and scene states (e.g., for Mika's Room access) will use clear, C-style identifiers (e.g., `SCENE_MIKA_ROOM_UNLOCKED`, `SCENE_MIKA_ROOM_LOCKED`) as their keys in the `scene_registrations` dispatch table, instead of `.md` file path strings.
-*   **Story Content:** The actual story content (dialogue, choices, actions) for these new scenes will be defined directly in their corresponding C source files, replacing the need for separate `.md` files.
-*   **Goal:** This approach aims to gradually transition the entire story system to a more robust, C-code-based structure, reducing reliance on string parsing of file paths for scene identification.
+This project is currently being developed and tested primarily within the **Termux environment on Android devices**.
+
+### Platform Strategy
+
+In the current phase, as the narrative content and core framework are not yet fully established, the project adopts a **single-platform-first strategy**. All testing and iteration are concentrated on the Termux environment to maximize development efficiency and minimize the additional burden of multi-platform compatibility.
+
+Multi-platform considerations (e.g., Windows, Linux) will only be addressed once the core narrative and framework are stable. This strategy allows the solo developer to focus more intently on the project's core development.
+
+## Scene Management Architecture and Refactoring Strategy
+
+The game's scene management system is a key component that has evolved significantly. Understanding its current state is crucial for development.
+
+### Current Architecture
+
+The scene transition mechanism operates as follows:
+
+1.  **Scene Definition:** Scenes are defined as `.ssl` files (which are YAML format) in the `data/scenes/` directory. Each file defines the scene's content (dialogue, choices) and contains a unique string identifier, `scene_id` (e.g., `SCENE_01_LAIN_ROOM`).
+
+2.  **Build-Time Code Generation:** At build time, a Python script (`cmake/parse_scenes.py`) processes all `.ssl` files. For each scene, it automatically generates a corresponding C function (e.g., `init_scene_SCENE_01_LAIN_ROOM_from_data`).
+
+3.  **Dispatch Table:** The `src/scenes.c` file contains a static dispatch table named `scene_registrations`. This table maps the string `scene_id` from the `.ssl` files to the function pointers of the auto-generated C functions.
+
+4.  **Scene Transition:** A transition is initiated when a new `scene_id` is written to the `game_state->current_story_file` field. Note that the field name `current_story_file` is a misnomer from a previous design; it holds a `scene_id`, not a file path. The main game loop detects this change and calls `transition_to_scene`, which uses the `scene_id` to look up the correct function in the dispatch table and load the new scene.
+
+### Refactoring Strategy and Development Philosophy
+
+#### The Role of 'Fragile' Identifiers (Fail-Fast Principle)
+
+A key development philosophy for this project is "Fail-Fast." This principle is particularly important for a solo developer, as it minimizes the costly context switch of debugging issues long after they were introduced.
+
+The current reliance on string identifiers (`scene_id`) for scene dispatch is a deliberate implementation of this philosophy. The system is intentionally "fragile" in that a misspelled or non-existent `scene_id` should cause an immediate and loud failure during development. This provides instant feedback, allowing errors to be caught and fixed within the creative flow, rather than being discovered later during a separate testing phase. This is considered a feature for development efficiency, not a bug.
+
+#### Long-Term Refactoring Goal
+
+While the fail-fast approach is crucial during development, the long-term goal for the *runtime* is to enhance robustness and maintainability. Therefore, the refactoring strategy aims to achieve the best of both worlds:
+
+*   **Incremental Transition to Enums:** Gradually introduce C-style enumerations (`enum`) generated from the `scene_id`s. This will provide compile-time safety and improve code-completion and readability, reducing the chance of identifier errors in the first place.
+*   **Preserve Fail-Fast in Debug Builds:** The scene lookup function, even when using enums, should retain its strictness. In debug builds, an invalid scene identifier should still trigger an immediate assertion or crash, preserving the rapid feedback loop.
+*   **Goal:** To evolve the scene management system to be compile-time safe and highly readable through enums, while strictly enforcing the fail-fast discipline during development builds to maximize solo developer efficiency.
 
 ## Millennium Crisis Integration Design Considerations
 

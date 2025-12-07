@@ -11,6 +11,10 @@ void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState*
 void print_raw_text(const char* text);
 void clear_screen();
 
+void render_scene_description(const char* description); // Added
+void render_text(const char* text); // Added
+void render_poi_name(const char* name); // Added
+
 // Main scene rendering function
 void render_current_scene(const StoryScene* scene, const struct GameState* game_state);
 

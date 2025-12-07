@@ -132,6 +132,14 @@ static int load_programmatic_map_data(GameState* game_state) {
 
 // --- Public API Implementation ---
 
+// Helper function to get a location by its ID from the GameState's map
+Location* get_location_by_id(const char* location_id) {
+    if (g_game_state_ptr == NULL || g_game_state_ptr->location_map == NULL || location_id == NULL) {
+        return NULL;
+    }
+    return (Location*)cmap_get(g_game_state_ptr->location_map, location_id);
+}
+
 int load_map_data(const char* map_dir_path, GameState* game_state) {
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Entering load_map_data (programmatic) for path: %s\n", map_dir_path); // Path is ignored now

@@ -110,6 +110,27 @@ void print_raw_text(const char* text) {
     }
 }
 
+// Function to render the description of a scene/location
+void render_scene_description(const char* description) {
+    if (description != NULL && strlen(description) > 0) {
+        printf("\n%s\n", description);
+    }
+}
+
+// Function to render generic text (similar to print_raw_text but distinct if needed later)
+void render_text(const char* text) {
+    if (text != NULL && strlen(text) > 0) {
+        printf("%s", text); // No newline here, allows caller to control
+    }
+}
+
+// Function to render a POI name
+void render_poi_name(const char* name) {
+    if (name != NULL && strlen(name) > 0) {
+        printf(ANSI_COLOR_BLUE "  - %s" ANSI_COLOR_RESET, name);
+    }
+}
+
 // Helper function to render and clear transient messages
 static void _render_transient_message(GameState* game_state) {
     if (game_state->has_transient_message) {
