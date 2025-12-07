@@ -57,7 +57,8 @@ typedef struct {
     char id[MAX_NAME_LENGTH];
     char name[MAX_NAME_LENGTH];
     char description[MAX_DESC_LENGTH * 2];
-    const char* examine_action_id;
+    const char* view_scene_id;      // For 'arls': Scene to transition to for viewing contents (e.g., a fridge).
+    const char* examine_action_id;  // For 'exper': Action to trigger on interaction (e.g., opening NAVI).
 } POI;
 
 typedef struct {

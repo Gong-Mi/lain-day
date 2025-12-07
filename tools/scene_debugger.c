@@ -55,10 +55,13 @@ int main(int argc, char* argv[]) {
     GamePaths paths;
     init_paths(argv[0], &paths);
 
-    // Load string table
-    char strings_json_path[MAX_PATH_LENGTH];
-    snprintf(strings_json_path, MAX_PATH_LENGTH, "%s/data/strings.json", paths.base_path);
-    if (!load_string_table(strings_json_path)) {
+    // Load string table first
+    const char* string_file_paths[1]; // Debugger only needs main strings.json
+    char strings_json_path_buffer[MAX_PATH_LENGTH];
+    snprintf(strings_json_path_buffer, MAX_PATH_LENGTH, "%s/data/strings.json", paths.base_path);
+    string_file_paths[0] = strings_json_path_buffer;
+
+    if (!load_string_table(string_file_paths, 1)) {
         fprintf(stderr, "ERROR: Failed to load string table for scene debugger.\n");
         return 1;
     }

@@ -1,0 +1,14 @@
+---
+scene_id: SCENE_SHINJUKU_ABANDONED_SITE
+name_text_id: TEXT_SCENE_NAME_SHINJUKU_ABANDONED_SITE
+location_id: shinjuku_abandoned_site
+
+dialogue:
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_SHINJUKU_ABANDONED_SITE_DIALOGUE1
+
+choices:
+  - text_id: TEXT_CHOICE_SHINJUKU_EXPLORE
+    action_id: explore_shinjuku_site
+  - text_id: TEXT_CHOICE_SHINJUKU_LEAVE
+    action_id: go_back_to_shibuya

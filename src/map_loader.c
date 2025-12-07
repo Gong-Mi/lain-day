@@ -108,9 +108,21 @@ static int load_programmatic_map_data(GameState* game_state) {
     add_poi_to_location(shibuya_street, "crosswalk", get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_NAME), get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_DESC));
     add_connection_to_location(shibuya_street, "go_home", "outside_house", NULL, NULL);
     add_connection_to_location(shibuya_street, "enter_cyberia", "cyberia_club", NULL, NULL);
+    add_connection_to_location(shibuya_street, "go_to_shinjuku_site", "shinjuku_abandoned_site", NULL, NULL);
     cmap_insert(game_state->location_map, shibuya_street);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", shibuya_street->id);
+#endif
+    game_state->location_count++;
+
+    // --- New Location: Shinjuku Abandoned Site ---
+    if (game_state->location_count >= MAX_LOCATIONS) return 0;
+    Location* shinjuku_abandoned_site = &game_state->all_locations[game_state->location_count];
+    init_location(shinjuku_abandoned_site, "shinjuku_abandoned_site", get_string_by_id(MAP_LOCATION_SHINJUKU_ABANDONED_SITE_NAME), get_string_by_id(MAP_LOCATION_SHINJUKU_ABANDONED_SITE_DESC));
+    add_connection_to_location(shinjuku_abandoned_site, "go_back_to_shibuya", "shibuya_street", NULL, NULL);
+    cmap_insert(game_state->location_map, shinjuku_abandoned_site);
+#ifdef USE_MAP_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", shinjuku_abandoned_site->id);
 #endif
     game_state->location_count++;
 

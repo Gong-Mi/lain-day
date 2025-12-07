@@ -190,8 +190,22 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     else if (strcmp(action_id, "examine_navi") == 0) {
         enter_embedded_navi(game_state);
         scene_changed = 1;
-    } else if (strcmp(action_id, "refresh_navi_screen") == 0) {
-    } else if (strcmp(action_id, "wait_one_minute") == 0) {
+    } 
+    else if (strcmp(action_id, "go_back_to_shibuya") == 0) {
+        mika_return_to_schedule();
+        strncpy(game_state->player_state.location, "shibuya_street", MAX_NAME_LENGTH - 1);
+        strncpy(game_state->current_story_file, "SCENE_09_CYBERIA", MAX_PATH_LENGTH - 1); // Placeholder scene
+        scene_changed = 1;
+    } else if (strcmp(action_id, "go_to_shinjuku_site") == 0) {
+        mika_return_to_schedule();
+        strncpy(game_state->player_state.location, "shinjuku_abandoned_site", MAX_NAME_LENGTH - 1);
+        strncpy(game_state->current_story_file, "SCENE_SHINJUKU_ABANDONED_SITE", MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
+    } else if (strcmp(action_id, "explore_shinjuku_site") == 0) {
+        strncpy(game_state->transient_message, get_string_by_id(TEXT_EXPLORING_SITE_MESSAGE), MAX_LINE_LENGTH - 1);
+        game_state->has_transient_message = true;
+        scene_changed = 0; // Don't change scene, just show message
+
         const char* flag_val = hash_table_get(game_state->flags, "door_opened_by_ghost");
         if (flag_val == NULL || strcmp(flag_val, "1") != 0) {
             // Event has not happened yet, trigger it.
@@ -522,14 +536,15 @@ bool execute_command(const char* input, GameState* game_state) {
                 for (int i = 0; i < current_loc->pois_count; i++) {
                     if (strcmp(current_loc->pois[i].id, poi_id_buffer) == 0) {
 #ifdef USE_DEBUG_LOGGING
-                        fprintf(stderr, "DEBUG: Arls: Found POI '%s'. examine_action_id: '%s'\n", 
+                        fprintf(stderr, "DEBUG: Arls: Found POI '%s'. view_scene_id: '%s'\n", 
                                 current_loc->pois[i].id, 
-                                current_loc->pois[i].examine_action_id ? current_loc->pois[i].examine_action_id : "NULL");
+                                current_loc->pois[i].view_scene_id ? current_loc->pois[i].view_scene_id : "NULL");
 #endif
-                        if (current_loc->pois[i].examine_action_id != NULL) {
-                            return execute_action(current_loc->pois[i].examine_action_id, game_state);
+                        if (current_loc->pois[i].view_scene_id != NULL) {
+                            strncpy(game_state->current_story_file, current_loc->pois[i].view_scene_id, MAX_PATH_LENGTH - 1);
+                            return true; // Re-render needed for scene change
                         } else {
-                            printf("You examine the %s, but there's nothing more to see.\n", current_loc->pois[i].name);
+                            printf("You examine the %s: %s\n", current_loc->pois[i].name, current_loc->pois[i].description);
                             return false;
                         }
                     }
@@ -537,7 +552,6 @@ bool execute_command(const char* input, GameState* game_state) {
             }
             printf("'%s' is not a valid point of interest here.\n", poi_id_buffer);
             return false;
-
         } else { // Command is just "arls" (no specific POI ID)
             printf("\n--- Area List Scan ---\n");
             const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
@@ -557,7 +571,7 @@ bool execute_command(const char* input, GameState* game_state) {
 #endif
                     char poi_buf[MAX_LINE_LENGTH];
                     // Add an indicator if the POI is examinable
-                    const char* examinable_indicator = (current_loc->pois[i].examine_action_id != NULL) ? " (*)" : "";
+                    const char* examinable_indicator = (current_loc->pois[i].examine_action_id != NULL) ? " (*)" : ""; // Keep for now
                     snprintf(poi_buf, MAX_LINE_LENGTH, "  - %s%s", current_loc->pois[i].id, examinable_indicator);
                     print_raw_text(poi_buf);
                 }
@@ -575,6 +589,32 @@ bool execute_command(const char* input, GameState* game_state) {
                 printf("Error: Current location '%s' not found in map data.\n", game_state->player_state.location);
             }
             printf("----------------------\n");
+            return false;
+        }
+    }
+    // Command: exper <poi_id>
+    else if (strncmp(input, "exper ", 6) == 0) {
+        char poi_id_buffer[MAX_NAME_LENGTH] = {0};
+        int scan_result = sscanf(input, "exper %s", poi_id_buffer);
+
+        if (scan_result == 1) {
+            const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+            if (current_loc) {
+                for (int i = 0; i < current_loc->pois_count; i++) {
+                    if (strcmp(current_loc->pois[i].id, poi_id_buffer) == 0) {
+                        if (current_loc->pois[i].examine_action_id != NULL) {
+                            return execute_action(current_loc->pois[i].examine_action_id, game_state);
+                        } else {
+                            printf("You can't use or interact with the %s in that way.\n", current_loc->pois[i].name);
+                            return false;
+                        }
+                    }
+                }
+            }
+            printf("'%s' is not a valid point of interest here.\n", poi_id_buffer);
+            return false;
+        } else {
+            printf("Usage: exper <object_id>\n");
             return false;
         }
     }

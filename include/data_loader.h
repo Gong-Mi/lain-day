@@ -14,7 +14,7 @@ int load_items_data(const char* path, GameState* game_state);
 
 // Loads the string table from strings.json.
 // Returns 1 on success, 0 on failure.
-int load_string_table(const char* path);
+int load_string_table(const char** paths, int path_count);
 
 // Loads all action data from the actions.json file.
 // Returns 1 on success, 0 on failure.

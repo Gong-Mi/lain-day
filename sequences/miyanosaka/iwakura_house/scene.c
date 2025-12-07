@@ -24,7 +24,7 @@ static void add_connection(Location* loc, const char* action_id, const char* tar
 }
 
 // Helper function to safely add a POI to a location
-static void add_poi(Location* loc, const char* poi_id, const char* poi_name, const char* poi_desc, const char* examine_action_id) {
+static void add_poi(Location* loc, const char* poi_id, const char* poi_name, const char* poi_desc, const char* view_scene_id, const char* examine_action_id) {
     if (loc == NULL || poi_id == NULL) return;
     if (loc->pois_count < MAX_POIS) {
         POI* new_poi = &loc->pois[loc->pois_count];
@@ -34,6 +34,7 @@ static void add_poi(Location* loc, const char* poi_id, const char* poi_name, con
         new_poi->name[MAX_NAME_LENGTH - 1] = '\0';
         strncpy(new_poi->description, poi_desc, (MAX_DESC_LENGTH * 2) - 1); // MAX_DESC_LENGTH * 2 for POIs
         new_poi->description[(MAX_DESC_LENGTH * 2) - 1] = '\0';
+        new_poi->view_scene_id = view_scene_id;
         new_poi->examine_action_id = examine_action_id;
         loc->pois_count++;
     } else {
@@ -62,8 +63,8 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(front_yard->name, get_string_by_id(MAP_LOCATION_FRONT_YARD_NAME));
     strcpy(front_yard->description, get_string_by_id(MAP_LOCATION_FRONT_YARD_DESC));
     add_connection(front_yard, "enter_house", "iwakura_lower_hallway", NULL, NULL);
-    add_poi(front_yard, "mailbox", get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_NAME), get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_DESC), NULL);
-    add_poi(front_yard, "doorbell", get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_NAME), get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_DESC), NULL);
+    add_poi(front_yard, "mailbox", get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_NAME), get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_DESC), NULL, NULL);
+    add_poi(front_yard, "doorbell", get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_NAME), get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_DESC), NULL, NULL);
 
     // --- 2. Lower Hallway (下走廊) ---
     *lower_hallway = (Location){0};
@@ -75,9 +76,9 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     add_connection(lower_hallway, "enter_bathroom", "iwakura_bathroom", NULL, NULL);
     add_connection(lower_hallway, "go_upstairs", "iwakura_upper_hallway", NULL, NULL);
     add_connection(lower_hallway, "enter_study", "iwakura_study", NULL, NULL);
-    add_poi(lower_hallway, "shoe_rack", get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_DESC), NULL);
-    add_poi(lower_hallway, "telephone", get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_DESC), NULL);
-    add_poi(lower_hallway, "umbrella_stand", get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_DESC), NULL);
+    add_poi(lower_hallway, "shoe_rack", get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_DESC), NULL, NULL);
+    add_poi(lower_hallway, "telephone", get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_DESC), NULL, NULL);
+    add_poi(lower_hallway, "umbrella_stand", get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_DESC), NULL, NULL);
 
     // --- 3. Living-Dining-Kitchen (客厅-餐厅-厨房) ---
     *living_dining_kitchen = (Location){0};
@@ -85,10 +86,10 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(living_dining_kitchen->name, get_string_by_id(MAP_LOCATION_LIVING_DINING_KITCHEN_NAME));
     strcpy(living_dining_kitchen->description, get_string_by_id(MAP_LOCATION_LIVING_DINING_KITCHEN_DESC));
     add_connection(living_dining_kitchen, "go_to_hallway", "iwakura_lower_hallway", NULL, NULL);
-    add_poi(living_dining_kitchen, "sofa", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_SOFA_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_SOFA_DESC), NULL);
-    add_poi(living_dining_kitchen, "tv", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_DESC), NULL);
-    add_poi(living_dining_kitchen, "dining_table", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_DESC), NULL);
-    add_poi(living_dining_kitchen, "refrigerator", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_DESC), "SCENE_EXAMINE_FRIDGE");
+    add_poi(living_dining_kitchen, "sofa", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_SOFA_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_SOFA_DESC), NULL, NULL);
+    add_poi(living_dining_kitchen, "tv", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_DESC), NULL, NULL);
+    add_poi(living_dining_kitchen, "dining_table", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_DESC), NULL, NULL);
+    add_poi(living_dining_kitchen, "refrigerator", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_DESC), "SCENE_EXAMINE_FRIDGE", NULL);
 
     // --- 4. Bathroom (浴室) ---
     *bathroom = (Location){0};
@@ -96,8 +97,8 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(bathroom->name, get_string_by_id(MAP_LOCATION_BATHROOM_NAME));
     strcpy(bathroom->description, get_string_by_id(MAP_LOCATION_BATHROOM_DESC));
     add_connection(bathroom, "go_to_hallway", "iwakura_lower_hallway", NULL, NULL);
-    add_poi(bathroom, "sink", get_string_by_id(MAP_POI_BATHROOM_SINK_NAME), get_string_by_id(MAP_POI_BATHROOM_SINK_DESC), NULL);
-    add_poi(bathroom, "bathtub", get_string_by_id(MAP_POI_BATHROOM_BATHTUB_NAME), get_string_by_id(MAP_POI_BATHROOM_BATHTUB_DESC), NULL);
+    add_poi(bathroom, "sink", get_string_by_id(MAP_POI_BATHROOM_SINK_NAME), get_string_by_id(MAP_POI_BATHROOM_SINK_DESC), NULL, NULL);
+    add_poi(bathroom, "bathtub", get_string_by_id(MAP_POI_BATHROOM_BATHTUB_NAME), get_string_by_id(MAP_POI_BATHROOM_BATHTUB_DESC), NULL, NULL);
 
     // --- 5. Upper Hallway (上走廊) ---
     *upper_hallway = (Location){0};
@@ -107,7 +108,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     add_connection(upper_hallway, "go_downstairs", "iwakura_lower_hallway", NULL, NULL);
     add_connection(upper_hallway, "enter_lains_room", "iwakura_lains_room", NULL, NULL);
     add_connection(upper_hallway, "enter_mikas_room", "iwakura_mikas_room", get_mika_module()->is_room_accessible, "SCENE_MIKA_ROOM_LOCKED");
-    add_poi(upper_hallway, "painting", get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_NAME), get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_DESC), NULL);
+    add_poi(upper_hallway, "painting", get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_NAME), get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_DESC), NULL, NULL);
 
     // --- 6. Lain's Room (Lain的房间) ---
     *lains_room = (Location){0};
@@ -116,11 +117,11 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(lains_room->description, get_string_by_id(MAP_LOCATION_LAINS_ROOM_DESC_IWAKURA));
     add_connection(lains_room, "exit_room", "iwakura_upper_hallway", NULL, NULL);
     // POIs from original lain_room
-    add_poi(lains_room, "navi_computer", get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_DESC), "examine_navi");
-    add_poi(lains_room, "bed", get_string_by_id(MAP_POI_LAINS_ROOM_BED_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BED_DESC_IWAKURA), NULL);
-    add_poi(lains_room, "window", get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_DESC), NULL);
-    add_poi(lains_room, "toy_dog", get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_DESC), NULL);
-    add_poi(lains_room, "bookshelf", get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_DESC_IWAKURA), NULL);
+    add_poi(lains_room, "navi_computer", get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_DESC), NULL, "examine_navi");
+    add_poi(lains_room, "bed", get_string_by_id(MAP_POI_LAINS_ROOM_BED_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BED_DESC_IWAKURA), NULL, NULL);
+    add_poi(lains_room, "window", get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_DESC), NULL, NULL);
+    add_poi(lains_room, "toy_dog", get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_DESC), NULL, NULL);
+    add_poi(lains_room, "bookshelf", get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_DESC_IWAKURA), NULL, NULL);
 
     // --- 7. Mika's Room (美香的房间) ---
     *mikas_room = (Location){0};
@@ -128,8 +129,8 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(mikas_room->name, get_string_by_id(MAP_LOCATION_MIKAS_ROOM_NAME));
     strcpy(mikas_room->description, get_string_by_id(MAP_LOCATION_MIKAS_ROOM_DESC));
     add_connection(mikas_room, "exit_room", "iwakura_upper_hallway", NULL, NULL);
-    add_poi(mikas_room, "desk", get_string_by_id(MAP_POI_MIKAS_ROOM_DESK_NAME), get_string_by_id(MAP_POI_MIKAS_ROOM_DESK_DESC), NULL);
-    add_poi(mikas_room, "wardrobe", get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_NAME), get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_DESC), NULL);
+    add_poi(mikas_room, "desk", get_string_by_id(MAP_POI_MIKAS_ROOM_DESK_NAME), get_string_by_id(MAP_POI_MIKAS_ROOM_DESK_DESC), NULL, NULL);
+    add_poi(mikas_room, "wardrobe", get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_NAME), get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_DESC), NULL, NULL);
     
     // --- 8. Study (书房) ---
     *study = (Location){0};
@@ -137,8 +138,8 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(study->name, get_string_by_id(MAP_LOCATION_STUDY_NAME));
     strcpy(study->description, get_string_by_id(MAP_LOCATION_STUDY_DESC));
     add_connection(study, "go_to_hallway", "iwakura_lower_hallway", NULL, NULL);
-    add_poi(study, "bookshelf", get_string_by_id(MAP_POI_STUDY_BOOKSHELF_NAME), get_string_by_id(MAP_POI_STUDY_BOOKSHELF_DESC), NULL);
-    add_poi(study, "desk", get_string_by_id(MAP_POI_STUDY_DESK_NAME), get_string_by_id(MAP_POI_STUDY_DESK_DESC), NULL);
+    add_poi(study, "bookshelf", get_string_by_id(MAP_POI_STUDY_BOOKSHELF_NAME), get_string_by_id(MAP_POI_STUDY_BOOKSHELF_DESC), NULL, NULL);
+    add_poi(study, "desk", get_string_by_id(MAP_POI_STUDY_DESK_NAME), get_string_by_id(MAP_POI_STUDY_DESK_DESC), NULL, NULL);
     
     return IWAKURA_HOUSE_ROOM_COUNT;
 }

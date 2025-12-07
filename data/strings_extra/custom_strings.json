@@ -1,3 +1,13 @@
 {
-  "TEXT_TEST_EXTRA_STRING": "This is a string from an extra file."
+  "TEXT_TEST_EXTRA_STRING": "This is a string from an extra file.",
+
+  "MAP_LOCATION_SHINJUKU_ABANDONED_SITE_NAME": "新宿的废弃工地",
+  "MAP_LOCATION_SHINJUKU_ABANDONED_SITE_DESC": "新宿边缘的一处废弃建筑工地，周围是高耸的围墙和腐朽的棚屋。空气中弥漫着混凝土和潮湿泥土的气味。",
+
+  "TEXT_SCENE_NAME_SHINJUKU_ABANDONED_SITE": "新宿废弃工地",
+  "TEXT_SHINJUKU_ABANDONED_SITE_DIALOGUE1": "呼啸的风穿过钢筋水泥的骨架，发出呜咽声。这里似乎是遗忘的角落，但总有些东西在等待被发现。",
+  "TEXT_CHOICE_SHINJUKU_EXPLORE": "深入探索",
+  "TEXT_CHOICE_SHINJUKU_LEAVE": "离开这里",
+
+  "TEXT_EXPLORING_SITE_MESSAGE": "你在这片废弃的工地上搜寻着，除了瓦砾和生锈的钢筋，什么也没找到。似乎隐藏着某种不为人知的秘密。"
 }

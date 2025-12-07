@@ -64,9 +64,16 @@ int main(int argc, char *argv[]) {
     init_paths(argv[0], &paths);
 
     // Load string table first
-    char strings_json_path[MAX_PATH_LENGTH];
-    snprintf(strings_json_path, MAX_PATH_LENGTH, "%s/data/strings.json", paths.base_path);
-    if (!load_string_table(strings_json_path)) {
+    const char* string_file_paths[1]; 
+    char main_strings_path_buffer[MAX_PATH_LENGTH];
+
+    snprintf(main_strings_path_buffer, MAX_PATH_LENGTH, "%s/data/strings.json", paths.base_path);
+
+    string_file_paths[0] = main_strings_path_buffer;
+    int paths_count = 1; 
+
+    // Load string table
+    if (!load_string_table(string_file_paths, paths_count)) {
         fprintf(stderr, "Error: Failed to load string table.\n");
         return 1;
     }

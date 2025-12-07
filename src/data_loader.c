@@ -29,73 +29,91 @@ static char* read_file_to_buffer(const char* path) {
     return buffer;
 }
 
-int load_string_table(const char* path) {
-    char *json_string = read_file_to_buffer(path);
-    if (json_string == NULL) {
-        fprintf(stderr, "ERROR: Failed to read strings.json from %s\n", path);
+int load_string_table(const char** paths, int path_count) {
+    cJSON *merged_root = cJSON_CreateObject();
+    if (merged_root == NULL) {
+        fprintf(stderr, "ERROR: Failed to create merged JSON object for string table.\n");
         return 0;
     }
 
-    cJSON *root = cJSON_Parse(json_string);
-    free(json_string); 
-    if (root == NULL) {
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL) {
-            fprintf(stderr, "ERROR: Malformed JSON in %s: %s\n", path, error_ptr);
-        } else {
-            fprintf(stderr, "ERROR: Failed to parse JSON from %s\n", path);
+    for (int p_idx = 0; p_idx < path_count; ++p_idx) {
+        const char* current_path = paths[p_idx];
+        char *json_string = read_file_to_buffer(current_path);
+        if (json_string == NULL) {
+            fprintf(stderr, "ERROR: Failed to read string data from %s\n", current_path);
+            cJSON_Delete(merged_root);
+            return 0;
         }
-        return 0;
+
+        cJSON *current_root = cJSON_Parse(json_string);
+        free(json_string);
+        if (current_root == NULL) {
+            const char *error_ptr = cJSON_GetErrorPtr();
+            if (error_ptr != NULL) {
+                fprintf(stderr, "ERROR: Malformed JSON in %s: %s\n", current_path, error_ptr);
+            } else {
+                fprintf(stderr, "ERROR: Failed to parse JSON from %s\n", current_path);
+            }
+            cJSON_Delete(merged_root);
+            return 0;
+        }
+
+        cJSON *item;
+        cJSON_ArrayForEach(item, current_root) {
+            if (cJSON_HasObjectItem(merged_root, item->string)) {
+#ifdef USE_DEBUG_LOGGING
+                fprintf(stderr, "DEBUG: Duplicate string ID '%s' found in %s. Overwriting.\n", item->string, current_path);
+#endif
+            }
+            cJSON_AddItemToObject(merged_root, item->string, cJSON_Duplicate(item, 1));
+        }
+        cJSON_Delete(current_root);
     }
 
     // Allocate temporary storage for strings in the correct order
     const char** temp_strings = (const char**)malloc(sizeof(const char*) * TEXT_COUNT);
     if (temp_strings == NULL) {
         fprintf(stderr, "ERROR: Failed to allocate memory for temporary string table.\n");
-        cJSON_Delete(root);
+        cJSON_Delete(merged_root);
         return 0;
     }
 
-    // Populate temp_strings using generated g_string_id_names and JSON data
+    // Populate temp_strings using generated g_string_id_names and merged JSON data
     for (int i = 0; i < TEXT_COUNT; ++i) {
         const char* id_name = g_string_id_names[i];
-        const cJSON *json_string_item = cJSON_GetObjectItemCaseSensitive(root, id_name);
+        const cJSON *json_string_item = cJSON_GetObjectItemCaseSensitive(merged_root, id_name);
         
         if (cJSON_IsString(json_string_item)) {
             temp_strings[i] = strdup(json_string_item->valuestring);
         } else {
-            // Handle missing string in JSON or non-string value
-            // TEXT_INVALID and TEXT_EMPTY_LINE are special cases
             if (i == TEXT_INVALID) {
                 temp_strings[i] = strdup("ERROR: Invalid Text ID (Fallback)");
             } else if (i == TEXT_EMPTY_LINE) {
                 temp_strings[i] = strdup("");
             } else {
-                fprintf(stderr, "WARNING: Missing or invalid string for ID '%s' in %s. Using fallback.\n", id_name, path);
+                fprintf(stderr, "WARNING: Missing or invalid string for ID '%s'. Using fallback.\n", id_name);
                 temp_strings[i] = strdup("ERROR: Missing String");
             }
         }
         if (temp_strings[i] == NULL) {
             fprintf(stderr, "FATAL: strdup failed for ID '%s'. Out of memory?\n", id_name);
-            // Clean up already allocated temp_strings before exiting
             for (int j = 0; j < i; ++j) free((void*)temp_strings[j]);
             free(temp_strings);
-            cJSON_Delete(root);
+            cJSON_Delete(merged_root);
             return 0;
         }
     }
 
-    // Initialize the main string table in string_table.c
     init_string_table(temp_strings, TEXT_COUNT);
 
-    // Free temporary strings, as init_string_table makes its own copies
     for (int i = 0; i < TEXT_COUNT; ++i) {
         free((void*)temp_strings[i]);
     }
     free(temp_strings);
-    cJSON_Delete(root);
+    cJSON_Delete(merged_root);
     return 1;
 }
+
 
 int load_player_state(const char* path, GameState* game_state) {
     if (game_state == NULL) return 0;
