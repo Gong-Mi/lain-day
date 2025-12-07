@@ -41,7 +41,7 @@ void add_poi_to_location(Location* loc, const char* id, const char* name, const 
     loc->pois_count++;
 }
 
-void add_connection_to_location(Location* loc, const char* action_id, const char* target_location_id, is_accessible_func is_accessible, const char* access_denied_scene_id) {
+void add_connection_to_location(Location* loc, const char* action_id, const char* target_location_id, is_accessible_func is_accessible, const char* access_denied_scene_id, const char* target_scene_id) {
     if (loc->connection_count >= MAX_CONNECTIONS) {
         fprintf(stderr, "WARNING: Max connections reached for location %s. Cannot add connection to %s.\n", loc->id, target_location_id);
         return;
@@ -51,6 +51,7 @@ void add_connection_to_location(Location* loc, const char* action_id, const char
     conn->target_location_id = target_location_id;
     conn->is_accessible = is_accessible;
     conn->access_denied_scene_id = access_denied_scene_id;
+    conn->target_scene_id = target_scene_id; // Store the new scene ID
     loc->connection_count++;
 }
 
@@ -67,7 +68,7 @@ static int load_programmatic_map_data(GameState* game_state) {
     init_location(lain_room, "lain_room", get_string_by_id(MAP_LOCATION_LAIN_ROOM_NAME), get_string_by_id(MAP_LOCATION_LAIN_ROOM_DESC));
     add_poi_to_location(lain_room, "navi", get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_DESC));
     add_poi_to_location(lain_room, "bed", get_string_by_id(MAP_POI_LAIN_ROOM_BED_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_BED_DESC));
-    add_connection_to_location(lain_room, "go_downstairs", "downstairs", NULL, NULL);
+    add_connection_to_location(lain_room, "downstairs", "downstairs", NULL, NULL, "SCENE_02_DOWNSTAIRS");
     cmap_insert(game_state->location_map, lain_room);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", lain_room->id);
@@ -80,8 +81,8 @@ static int load_programmatic_map_data(GameState* game_state) {
     init_location(downstairs, "downstairs", get_string_by_id(MAP_LOCATION_DOWNSTAIRS_NAME), get_string_by_id(MAP_LOCATION_DOWNSTAIRS_DESC));
     add_poi_to_location(downstairs, "kitchen", get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_DESC));
     add_poi_to_location(downstairs, "tv", get_string_by_id(MAP_POI_DOWNSTAIRS_TV_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_TV_DESC));
-    add_connection_to_location(downstairs, "enter_lain_room", "lain_room", NULL, NULL);
-    add_connection_to_location(downstairs, "go_outside", "outside_house", NULL, NULL);
+    add_connection_to_location(downstairs, "lains_room", "lain_room", NULL, NULL, "SCENE_01_LAIN_ROOM");
+    add_connection_to_location(downstairs, "outside", "outside_house", NULL, NULL, "SCENE_00_ENTRY");
     cmap_insert(game_state->location_map, downstairs);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", downstairs->id);
@@ -93,8 +94,8 @@ static int load_programmatic_map_data(GameState* game_state) {
     Location* outside_house = &game_state->all_locations[game_state->location_count];
     init_location(outside_house, "outside_house", get_string_by_id(MAP_LOCATION_OUTSIDE_HOUSE_NAME), get_string_by_id(MAP_LOCATION_OUTSIDE_HOUSE_DESC));
     add_poi_to_location(outside_house, "mailbox", get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_NAME), get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_DESC));
-    add_connection_to_location(outside_house, "go_downstairs", "downstairs", NULL, NULL); // Action leads back
-    add_connection_to_location(outside_house, "go_to_shibuya", "shibuya_street", NULL, NULL);
+    add_connection_to_location(outside_house, "downstairs", "downstairs", NULL, NULL, "SCENE_02_DOWNSTAIRS"); // Action leads back
+    add_connection_to_location(outside_house, "shibuya", "shibuya_street", NULL, NULL, "SCENE_09_CYBERIA");
     cmap_insert(game_state->location_map, outside_house);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", outside_house->id);
@@ -106,9 +107,9 @@ static int load_programmatic_map_data(GameState* game_state) {
     Location* shibuya_street = &game_state->all_locations[game_state->location_count];
     init_location(shibuya_street, "shibuya_street", get_string_by_id(MAP_LOCATION_SHIBUYA_STREET_NAME), get_string_by_id(MAP_LOCATION_SHIBUYA_STREET_DESC));
     add_poi_to_location(shibuya_street, "crosswalk", get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_NAME), get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_DESC));
-    add_connection_to_location(shibuya_street, "go_home", "outside_house", NULL, NULL);
-    add_connection_to_location(shibuya_street, "enter_cyberia", "cyberia_club", NULL, NULL);
-    add_connection_to_location(shibuya_street, "go_to_shinjuku_site", "shinjuku_abandoned_site", NULL, NULL);
+    add_connection_to_location(shibuya_street, "home", "outside_house", NULL, NULL, "SCENE_00_ENTRY");
+    add_connection_to_location(shibuya_street, "cyberia", "cyberia_club", NULL, NULL, "SCENE_09_CYBERIA");
+    add_connection_to_location(shibuya_street, "shinjuku_site", "shinjuku_abandoned_site", NULL, NULL, "SCENE_SHINJUKU_ABANDONED_SITE");
     cmap_insert(game_state->location_map, shibuya_street);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", shibuya_street->id);
@@ -119,7 +120,7 @@ static int load_programmatic_map_data(GameState* game_state) {
     if (game_state->location_count >= MAX_LOCATIONS) return 0;
     Location* shinjuku_abandoned_site = &game_state->all_locations[game_state->location_count];
     init_location(shinjuku_abandoned_site, "shinjuku_abandoned_site", get_string_by_id(MAP_LOCATION_SHINJUKU_ABANDONED_SITE_NAME), get_string_by_id(MAP_LOCATION_SHINJUKU_ABANDONED_SITE_DESC));
-    add_connection_to_location(shinjuku_abandoned_site, "go_back_to_shibuya", "shibuya_street", NULL, NULL);
+    add_connection_to_location(shinjuku_abandoned_site, "shibuya", "shibuya_street", NULL, NULL, "SCENE_09_CYBERIA");
     cmap_insert(game_state->location_map, shinjuku_abandoned_site);
 #ifdef USE_MAP_DEBUG_LOGGING
     fprintf(stderr, "DEBUG: Programmatically added location: %s\n", shinjuku_abandoned_site->id);

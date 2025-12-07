@@ -110,6 +110,7 @@ typedef struct Connection {
     const char* action_id;
     is_accessible_func is_accessible;
     const char* access_denied_scene_id;
+    const char* target_scene_id; // Added: The scene to transition to upon successful connection
 } Connection;
 
 // Location Struct (depends on POI and Connection)

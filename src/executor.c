@@ -127,64 +127,26 @@ int execute_action(const char* action_id, struct GameState* game_state) {
                         return 1; // Scene changed to "access denied" scene.
                     }
                 }
-                // If we are here, access is granted. Fall through to the specific action logic below.
-                break; // Found our connection, no need to loop further.
+                // If we are here, access is granted.
+                mika_return_to_schedule(); // Mika's schedule might change upon player movement
+                strncpy(game_state->player_state.location, conn->target_location_id, MAX_NAME_LENGTH - 1);
+                if (conn->target_scene_id != NULL) {
+                    strncpy(game_state->current_story_file, conn->target_scene_id, MAX_PATH_LENGTH - 1);
+                } else {
+                    // Fallback: If no specific target scene is provided, try to load a scene based on location ID
+                    // This might be a generic "enter location" scene or an empty scene.
+                    // For now, we'll just keep the current scene to avoid unexpected transitions.
+                    // A better long-term solution would be to define default scenes for locations.
+                    fprintf(stderr, "WARNING: Connection to '%s' has no target scene ID. Current scene will persist.\n", conn->target_location_id);
+                }
+                return 1; // Scene or location has changed.
             }
         }
     }
     
-    // --- LOCATION CHANGE ACTIONS ---
-    if (strcmp(action_id, "enter_lains_room") == 0) {
-        mika_return_to_schedule();
-        strncpy(game_state->player_state.location, "iwakura_lains_room", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "SCENE_01_LAIN_ROOM", MAX_PATH_LENGTH - 1);
-        
-        scene_changed = 1;
-    } else if (strcmp(action_id, "go_downstairs") == 0) {
-        mika_return_to_schedule();
-        strncpy(game_state->player_state.location, "iwakura_living_dining_kitchen", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "SCENE_02_DOWNSTAIRS", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
-    } else if (strcmp(action_id, "return_to_upstairs") == 0) {
-        mika_return_to_schedule();
-        strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "SCENE_IWAKURA_UPPER_HALLWAY", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
-    } else if (strcmp(action_id, "go_to_upper_hallway") == 0) {
-        mika_return_to_schedule();
-        strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "SCENE_IWAKURA_UPPER_HALLWAY", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
-    } else if (strcmp(action_id, "exit_room") == 0) {
-        mika_return_to_schedule();
-        strncpy(game_state->player_state.location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "SCENE_IWAKURA_UPPER_HALLWAY", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
-    } else if (strcmp(action_id, "return_to_living_room") == 0) {
-        mika_return_to_schedule();
-        strncpy(game_state->player_state.location, "iwakura_living_dining_kitchen", MAX_NAME_LENGTH - 1); // This location needs to exist programmatically
-        strncpy(game_state->current_story_file, "SCENE_02_DOWNSTAIRS", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
-    } else if (strcmp(action_id, "enter_mikas_room") == 0) {
-        mika_return_to_schedule();
-        // The conditional logic is now handled by the generic connection handler above.
-        // If we reach here, it means access was granted.
-        strncpy(game_state->player_state.location, "iwakura_mikas_room", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "SCENE_MIKA_ROOM_UNLOCKED", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
-    } else if (strcmp(action_id, "enter_house") == 0) {
-        mika_return_to_schedule();
-        strncpy(game_state->player_state.location, "iwakura_lower_hallway", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "SCENE_02_DOWNSTAIRS", MAX_PATH_LENGTH - 1); // Placeholder for a hallway scene
-        
-        scene_changed = 1;
-    } else if (strcmp(action_id, "go_outside") == 0) {
-        mika_return_to_schedule();
-        strncpy(game_state->player_state.location, "iwakura_front_yard", MAX_NAME_LENGTH - 1);
-        strncpy(game_state->current_story_file, "SCENE_00_ENTRY", MAX_PATH_LENGTH - 1); // Point to entry scene as outside placeholder
-        
-        scene_changed = 1;
-    }
+    // --- LOCATION CHANGE ACTIONS (OLD - REMOVED) ---
+    // The previous hardcoded location change logic has been removed and generalized
+    // into the "Generic Connection Handling" block above.
 
 
     // --- STORY CHANGE ACTIONS ---
@@ -574,6 +536,16 @@ bool execute_command(const char* input, GameState* game_state) {
                         render_text("\n");
                     }
                 }
+
+                if (current_loc->connection_count > 0) {
+                    render_text("\n\nConnections:\n\n");
+                    for (int i = 0; i < current_loc->connection_count; i++) {
+                        char conn_buf[MAX_LINE_LENGTH];
+                        const Connection* conn = &current_loc->connections[i];
+                        snprintf(conn_buf, MAX_LINE_LENGTH, "  - %s -> %s\n", conn->action_id, conn->target_location_id);
+                        render_text(conn_buf);
+                    }
+                }
             }
 #ifdef USE_DEBUG_LOGGING
             else {
@@ -607,6 +579,27 @@ bool execute_command(const char* input, GameState* game_state) {
             return false;
         } else {
             printf("Usage: exper <object_id>\n");
+            return false;
+        }
+    }
+    // Command: move <destination>
+    else if (strncmp(input, "move ", 5) == 0) {
+        char destination_buffer[MAX_NAME_LENGTH] = {0};
+        sscanf(input, "move %s", destination_buffer);
+
+        if (strlen(destination_buffer) > 0) {
+            const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+            if (current_loc) {
+                for (int i = 0; i < current_loc->connection_count; i++) {
+                    if (strcmp(current_loc->connections[i].action_id, destination_buffer) == 0) {
+                        return execute_action(destination_buffer, game_state);
+                    }
+                }
+            }
+            printf("You can't move to '%s' from here.\n", destination_buffer);
+            return false;
+        } else {
+            printf("Usage: move <destination>\n");
             return false;
         }
     }
@@ -653,17 +646,8 @@ bool execute_command(const char* input, GameState* game_state) {
         }
         return false;
     }
-    // Command: Try to match with current location's connections
+    // Unrecognized command
     else {
-        const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
-        if (current_loc != NULL) {
-            for (int i = 0; i < current_loc->connection_count; i++) {
-                if (strcmp(current_loc->connections[i].action_id, input) == 0) {
-                    return execute_action(input, game_state) == 1;
-                }
-            }
-        }
-        
         printf("Command not recognized: %s\n", input);
         return false; // No re-render needed for unrecognized command
     }
