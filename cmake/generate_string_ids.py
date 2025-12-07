@@ -2,23 +2,35 @@ import json
 import sys
 import os
 
-def generate_string_ids_h(json_path, header_path, names_header_path, names_c_path):
-    try:
-        with open(json_path, 'r', encoding='utf-8') as f:
-            string_data = json.load(f)
-    except FileNotFoundError:
-        print(f"Error: JSON file not found at {json_path}", file=sys.stderr)
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        print(f"Error: Malformed JSON in {json_path}: {e}", file=sys.stderr)
-        sys.exit(1)
+def generate_string_ids_h(json_paths, header_path, names_header_path, names_c_path):
+    merged_data = {}
+    
+    print(f"Processing {len(json_paths)} string data files...")
 
-    ids = sorted(string_data.keys())
+    for json_path in json_paths:
+        try:
+            with open(json_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                # Merge data, newer keys overwrite older keys
+                # We could add a check here for duplicates if strictness is required
+                for key, value in data.items():
+                    if key in merged_data and merged_data[key] != value:
+                        print(f"Warning: Duplicate string ID '{key}' found in {json_path}. Overwriting previous value.")
+                    merged_data[key] = value
+                    
+        except FileNotFoundError:
+            print(f"Error: JSON file not found at {json_path}", file=sys.stderr)
+            sys.exit(1)
+        except json.JSONDecodeError as e:
+            print(f"Error: Malformed JSON in {json_path}: {e}", file=sys.stderr)
+            sys.exit(1)
+
+    ids = sorted(merged_data.keys())
     
     # Check for empty IDs or non-string IDs
     for _id in ids:
         if not _id or not isinstance(_id, str):
-            print(f"Error: Invalid (empty or non-string) ID found in {json_path}", file=sys.stderr)
+            print(f"Error: Invalid (empty or non-string) ID found.", file=sys.stderr)
             sys.exit(1)
 
     # Ensure output directories exist
@@ -77,12 +89,21 @@ def generate_string_ids_h(json_path, header_path, names_header_path, names_c_pat
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        print("Usage: python generate_string_ids_h.py <path_to_json> <path_to_ids_header_file> <path_to_names_header_file> <path_to_names_c_file>", file=sys.stderr)
+    # Expect at least 1 input file + 3 output files = 4 args
+    if len(sys.argv) < 5:
+        print("Usage: python generate_string_ids.py <path_to_ids_header_file> <path_to_names_header_file> <path_to_names_c_file> <input_json_1> [input_json_2 ...]", file=sys.stderr)
         sys.exit(1)
 
-    json_input_path = sys.argv[1]
-    header_output_path = sys.argv[2]
-    names_header_output_path = sys.argv[3]
-    names_c_output_path = sys.argv[4]
-    generate_string_ids_h(json_input_path, header_output_path, names_header_output_path, names_c_output_path)
+    # Revised Argument Order for easier CMake List passing:
+    # 1: Output Header ID
+    # 2: Output Header Names
+    # 3: Output Source Names
+    # 4+: Input JSONs
+    
+    header_output_path = sys.argv[1]
+    names_header_output_path = sys.argv[2]
+    names_c_output_path = sys.argv[3]
+    
+    json_input_paths = sys.argv[4:]
+    
+    generate_string_ids_h(json_input_paths, header_output_path, names_header_output_path, names_c_output_path)

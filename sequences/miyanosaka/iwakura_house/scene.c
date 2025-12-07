@@ -1,6 +1,8 @@
 #include "scene.h"
 #include <string.h>
 #include <stdio.h>
+#include "string_table.h"
+#include "string_table.h"
 #include "conditions.h"
 #include "scenes.h" // For SCENE_MIKA_ROOM_LOCKED etc.
 #include "flag_system.h" // For hash_table_get
@@ -22,7 +24,7 @@ static void add_connection(Location* loc, const char* action_id, const char* tar
 }
 
 // Helper function to safely add a POI to a location
-static void add_poi(Location* loc, const char* poi_id, const char* poi_name, const char* poi_desc, const char* examine_scene_id) {
+static void add_poi(Location* loc, const char* poi_id, const char* poi_name, const char* poi_desc, const char* examine_action_id) {
     if (loc == NULL || poi_id == NULL) return;
     if (loc->pois_count < MAX_POIS) {
         POI* new_poi = &loc->pois[loc->pois_count];
@@ -32,7 +34,7 @@ static void add_poi(Location* loc, const char* poi_id, const char* poi_name, con
         new_poi->name[MAX_NAME_LENGTH - 1] = '\0';
         strncpy(new_poi->description, poi_desc, (MAX_DESC_LENGTH * 2) - 1); // MAX_DESC_LENGTH * 2 for POIs
         new_poi->description[(MAX_DESC_LENGTH * 2) - 1] = '\0';
-        new_poi->examine_scene_id = examine_scene_id;
+        new_poi->examine_action_id = examine_action_id;
         loc->pois_count++;
     } else {
         fprintf(stderr, "Warning: Max POIs reached for location %s. Cannot add %s.\n", loc->id, poi_id);
@@ -57,86 +59,86 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     // --- 1. Front Yard (前院) ---
     *front_yard = (Location){0}; // Zero out the struct
     strcpy(front_yard->id, "iwakura_front_yard");
-    strcpy(front_yard->name, "前院");
-    strcpy(front_yard->description, "岩仓家的前院。这是一栋需要走3次楼梯才能到达主楼的小独栋。从外面看，似乎没有自己的停车位，也许是为了更好的采光设计。没有什么特别的东西。");
+    strcpy(front_yard->name, get_string_by_id(MAP_LOCATION_FRONT_YARD_NAME));
+    strcpy(front_yard->description, get_string_by_id(MAP_LOCATION_FRONT_YARD_DESC));
     add_connection(front_yard, "enter_house", "iwakura_lower_hallway", NULL, NULL);
-    add_poi(front_yard, "mailbox", "邮箱", "一个老旧的邮箱，里面可能有什么东西。", NULL);
-    add_poi(front_yard, "doorbell", "门铃", "一个铜制的门铃，上面有些生锈。", NULL);
+    add_poi(front_yard, "mailbox", get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_NAME), get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_DESC), NULL);
+    add_poi(front_yard, "doorbell", get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_NAME), get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_DESC), NULL);
 
     // --- 2. Lower Hallway (下走廊) ---
     *lower_hallway = (Location){0};
     strcpy(lower_hallway->id, "iwakura_lower_hallway");
-    strcpy(lower_hallway->name, "下走廊");
-    strcpy(lower_hallway->description, "连接着房子一楼的各个房间。");
+    strcpy(lower_hallway->name, get_string_by_id(MAP_LOCATION_LOWER_HALLWAY_NAME));
+    strcpy(lower_hallway->description, get_string_by_id(MAP_LOCATION_LOWER_HALLWAY_DESC));
     add_connection(lower_hallway, "go_outside", "iwakura_front_yard", NULL, NULL);
     add_connection(lower_hallway, "enter_living_area", "iwakura_living_dining_kitchen", NULL, NULL);
     add_connection(lower_hallway, "enter_bathroom", "iwakura_bathroom", NULL, NULL);
     add_connection(lower_hallway, "go_upstairs", "iwakura_upper_hallway", NULL, NULL);
     add_connection(lower_hallway, "enter_study", "iwakura_study", NULL, NULL);
-    add_poi(lower_hallway, "shoe_rack", "鞋柜", "一个放着家人鞋子的鞋柜，有些凌乱。", NULL);
-    add_poi(lower_hallway, "telephone", "电话", "墙上挂着一部老式电话。", NULL);
-    add_poi(lower_hallway, "umbrella_stand", "雨伞桶", "一个放着各式雨伞的桶，看上去家里的每个人都有一把。", NULL);
+    add_poi(lower_hallway, "shoe_rack", get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_DESC), NULL);
+    add_poi(lower_hallway, "telephone", get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_DESC), NULL);
+    add_poi(lower_hallway, "umbrella_stand", get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_DESC), NULL);
 
     // --- 3. Living-Dining-Kitchen (客厅-餐厅-厨房) ---
     *living_dining_kitchen = (Location){0};
     strcpy(living_dining_kitchen->id, "iwakura_living_dining_kitchen");
-    strcpy(living_dining_kitchen->name, "客厅-餐厅-厨房");
-    strcpy(living_dining_kitchen->description, "一个开放式的起居空间，包含了客厅、餐厅和厨房的功能。");
+    strcpy(living_dining_kitchen->name, get_string_by_id(MAP_LOCATION_LIVING_DINING_KITCHEN_NAME));
+    strcpy(living_dining_kitchen->description, get_string_by_id(MAP_LOCATION_LIVING_DINING_KITCHEN_DESC));
     add_connection(living_dining_kitchen, "go_to_hallway", "iwakura_lower_hallway", NULL, NULL);
-    add_poi(living_dining_kitchen, "sofa", "沙发", "一套舒适的布艺沙发。", NULL);
-    add_poi(living_dining_kitchen, "tv", "电视", "一台播放着新闻节目的电视机。", NULL);
-    add_poi(living_dining_kitchen, "dining_table", "餐桌", "摆放着水果和杯子的餐桌。", NULL);
-    add_poi(living_dining_kitchen, "refrigerator", "冰箱", "发出嗡嗡声的冰箱，里面有4盒未开封的1L牛奶，一些面包和罐头等食物。", "SCENE_EXAMINE_FRIDGE");
+    add_poi(living_dining_kitchen, "sofa", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_SOFA_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_SOFA_DESC), NULL);
+    add_poi(living_dining_kitchen, "tv", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_DESC), NULL);
+    add_poi(living_dining_kitchen, "dining_table", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_DESC), NULL);
+    add_poi(living_dining_kitchen, "refrigerator", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_DESC), "SCENE_EXAMINE_FRIDGE");
 
     // --- 4. Bathroom (浴室) ---
     *bathroom = (Location){0};
     strcpy(bathroom->id, "iwakura_bathroom");
-    strcpy(bathroom->name, "浴室");
-    strcpy(bathroom->description, "一个普通的浴室。");
+    strcpy(bathroom->name, get_string_by_id(MAP_LOCATION_BATHROOM_NAME));
+    strcpy(bathroom->description, get_string_by_id(MAP_LOCATION_BATHROOM_DESC));
     add_connection(bathroom, "go_to_hallway", "iwakura_lower_hallway", NULL, NULL);
-    add_poi(bathroom, "sink", "洗手台", "干净的洗手台，上面放着牙刷。", NULL);
-    add_poi(bathroom, "bathtub", "浴缸", "一个白色的浴缸，看起来很干净。", NULL);
+    add_poi(bathroom, "sink", get_string_by_id(MAP_POI_BATHROOM_SINK_NAME), get_string_by_id(MAP_POI_BATHROOM_SINK_DESC), NULL);
+    add_poi(bathroom, "bathtub", get_string_by_id(MAP_POI_BATHROOM_BATHTUB_NAME), get_string_by_id(MAP_POI_BATHROOM_BATHTUB_DESC), NULL);
 
     // --- 5. Upper Hallway (上走廊) ---
     *upper_hallway = (Location){0};
     strcpy(upper_hallway->id, "iwakura_upper_hallway");
-    strcpy(upper_hallway->name, "上走廊");
-    strcpy(upper_hallway->description, "连接着房子二楼的房间。");
+    strcpy(upper_hallway->name, get_string_by_id(MAP_LOCATION_UPPER_HALLWAY_NAME));
+    strcpy(upper_hallway->description, get_string_by_id(MAP_LOCATION_UPPER_HALLWAY_DESC));
     add_connection(upper_hallway, "go_downstairs", "iwakura_lower_hallway", NULL, NULL);
     add_connection(upper_hallway, "enter_lains_room", "iwakura_lains_room", NULL, NULL);
     add_connection(upper_hallway, "enter_mikas_room", "iwakura_mikas_room", get_mika_module()->is_room_accessible, "SCENE_MIKA_ROOM_LOCKED");
-    add_poi(upper_hallway, "painting", "装饰画", "墙上挂着一幅抽象画。", NULL);
+    add_poi(upper_hallway, "painting", get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_NAME), get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_DESC), NULL);
 
     // --- 6. Lain's Room (Lain的房间) ---
     *lains_room = (Location){0};
     strcpy(lains_room->id, "iwakura_lains_room");
-    strcpy(lains_room->name, "Lain的房间");
-    strcpy(lains_room->description, "你的房间。很暗，充满了电子设备运作的嗡嗡声。");
+    strcpy(lains_room->name, get_string_by_id(MAP_LOCATION_LAINS_ROOM_NAME_IWAKURA));
+    strcpy(lains_room->description, get_string_by_id(MAP_LOCATION_LAINS_ROOM_DESC_IWAKURA));
     add_connection(lains_room, "exit_room", "iwakura_upper_hallway", NULL, NULL);
     // POIs from original lain_room
-    add_poi(lains_room, "navi_computer", "NAVI电脑", "一台巨大的Navi电脑，屏幕上闪烁着绿色的光标。", NULL);
-    add_poi(lains_room, "bed", "床", "一张单人床，被子有些凌乱。", NULL);
-    add_poi(lains_room, "window", "窗户", "一扇看向外面世界的窗户，外面是夜色。", NULL);
-    add_poi(lains_room, "toy_dog", "玩具狗", "一个陈旧的玩具狗，坐在书桌一角。", NULL);
-    add_poi(lains_room, "bookshelf", "书架", "一个堆满了各种书籍和杂志的书架。", NULL);
+    add_poi(lains_room, "navi_computer", get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_DESC), "examine_navi");
+    add_poi(lains_room, "bed", get_string_by_id(MAP_POI_LAINS_ROOM_BED_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BED_DESC_IWAKURA), NULL);
+    add_poi(lains_room, "window", get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_DESC), NULL);
+    add_poi(lains_room, "toy_dog", get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_DESC), NULL);
+    add_poi(lains_room, "bookshelf", get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_DESC_IWAKURA), NULL);
 
     // --- 7. Mika's Room (美香的房间) ---
     *mikas_room = (Location){0};
     strcpy(mikas_room->id, "iwakura_mikas_room");
-    strcpy(mikas_room->name, "美香的房间");
-    strcpy(mikas_room->description, "姐姐美香的房间。与你的房间相比，这里整洁得有些不真实。");
+    strcpy(mikas_room->name, get_string_by_id(MAP_LOCATION_MIKAS_ROOM_NAME));
+    strcpy(mikas_room->description, get_string_by_id(MAP_LOCATION_MIKAS_ROOM_DESC));
     add_connection(mikas_room, "exit_room", "iwakura_upper_hallway", NULL, NULL);
-    add_poi(mikas_room, "desk", "书桌", "一张整洁的书桌，上面摆放着化妆品和教科书。", NULL);
-    add_poi(mikas_room, "wardrobe", "衣柜", "一个高大的衣柜，里面是美香的衣服。", NULL);
+    add_poi(mikas_room, "desk", get_string_by_id(MAP_POI_MIKAS_ROOM_DESK_NAME), get_string_by_id(MAP_POI_MIKAS_ROOM_DESK_DESC), NULL);
+    add_poi(mikas_room, "wardrobe", get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_NAME), get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_DESC), NULL);
     
     // --- 8. Study (书房) ---
     *study = (Location){0};
     strcpy(study->id, "iwakura_study");
-    strcpy(study->name, "书房");
-    strcpy(study->description, "父亲的书房。空气中弥漫着旧书和淡淡的烟草味。");
+    strcpy(study->name, get_string_by_id(MAP_LOCATION_STUDY_NAME));
+    strcpy(study->description, get_string_by_id(MAP_LOCATION_STUDY_DESC));
     add_connection(study, "go_to_hallway", "iwakura_lower_hallway", NULL, NULL);
-    add_poi(study, "bookshelf", "书架", "一个巨大的书架，塞满了各种专业书籍。", NULL);
-    add_poi(study, "desk", "办公桌", "一张堆满了文件和电脑的办公桌。", NULL);
+    add_poi(study, "bookshelf", get_string_by_id(MAP_POI_STUDY_BOOKSHELF_NAME), get_string_by_id(MAP_POI_STUDY_BOOKSHELF_DESC), NULL);
+    add_poi(study, "desk", get_string_by_id(MAP_POI_STUDY_DESK_NAME), get_string_by_id(MAP_POI_STUDY_DESK_DESC), NULL);
     
     return IWAKURA_HOUSE_ROOM_COUNT;
 }

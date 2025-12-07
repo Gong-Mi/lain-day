@@ -56,5 +56,17 @@
     "name": "装着沙子的试剂瓶",
     "description": "一个装着干净海沙和贝壳碎的瓶子。瓶子本身很普通，但里面的沙子似乎对千砂有特殊的意义。",
     "required_credit": 0
+  },
+  "handi_navi": {
+    "name": "手持式NAVI",
+    "description": "一部先进的手持式NAVI终端，是手机的未来形态。屏幕很大，但目前运行的是标准固件。"
+  },
+  "firmware_flasher": {
+    "name": "固件刷写器",
+    "description": "一条特制的数据线，一端是标准的USB接口，另一端是一个带有探针的复杂连接器。可以用来重写设备的底层固件。"
+  },
+  "data_cable": {
+    "name": "数据线",
+    "description": "一条普通的NAVI数据传输线。"
   }
 }

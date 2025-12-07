@@ -57,7 +57,7 @@ typedef struct {
     char id[MAX_NAME_LENGTH];
     char name[MAX_NAME_LENGTH];
     char description[MAX_DESC_LENGTH * 2];
-    const char* examine_scene_id; // Scene to transition to when examined
+    const char* examine_action_id;
 } POI;
 
 typedef struct {

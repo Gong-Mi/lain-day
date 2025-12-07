@@ -97,6 +97,7 @@ find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
 # Include directories
 include_directories(include)
+include_directories(include/systems) # Add systems directory to include path
 include_directories(scenes) # Add scenes directory to include path
 include_directories(sequences) # Add sequences directory to include path
 include_directories("${PROJECT_BINARY_DIR}/include") # For generated headers
@@ -119,17 +120,24 @@ add_custom_command(
 # Create a target for the generated header to ensure it's built
 add_custom_target(generate_character_header ALL DEPENDS ${GENERATED_CHARACTER_DATA_H})
 
-# --- Auto-generate string_ids.h from strings.json ---
+# --- Auto-generate string_ids.h from strings.json and strings_extra/*.json ---
 set(STRINGS_JSON_FILE "${PROJECT_SOURCE_DIR}/data/strings.json")
+file(GLOB STRINGS_EXTRA_FILES "${PROJECT_SOURCE_DIR}/data/strings_extra/*.json")
+
 set(GENERATED_STRINGS_H "${PROJECT_BINARY_DIR}/include/string_ids.h")
 set(GENERATED_STRINGS_NAMES_H "${PROJECT_BINARY_DIR}/include/string_id_names.h")
 set(GENERATED_STRINGS_NAMES_C "${PROJECT_BINARY_DIR}/src/generated_string_id_names.c")
 
 add_custom_command(
     OUTPUT ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C}
-    COMMAND /data/data/com.termux/files/usr/bin/python3.12 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py ${STRINGS_JSON_FILE} ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C}
-    DEPENDS ${STRINGS_JSON_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py
-    COMMENT "Generating C headers and source from strings.json"
+    COMMAND /data/data/com.termux/files/usr/bin/python3.12 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py 
+        ${GENERATED_STRINGS_H} 
+        ${GENERATED_STRINGS_NAMES_H} 
+        ${GENERATED_STRINGS_NAMES_C} 
+        ${STRINGS_JSON_FILE} 
+        ${STRINGS_EXTRA_FILES}
+    DEPENDS ${STRINGS_JSON_FILE} ${STRINGS_EXTRA_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py
+    COMMENT "Generating C headers and source from strings.json and extra modules"
 )
 
 add_custom_target(generate_string_ids_header ALL DEPENDS ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C})
@@ -210,6 +218,8 @@ set(GAME_ENGINE_SOURCES
         src/render_utils.c
 
         src/game_paths.c
+
+        src/systems/embedded_navi.c
 
         external/linenoise/linenoise.c
     external/linenoise/stringbuf.c

@@ -1,0 +1,50 @@
+{
+  "name": "Lain",
+  "class": "网络潜行者 (Net Diver)",
+  "level": 1,
+  "credit_level": 1,
+  "asked_teacher": 0,
+  "asked_proxy": 0,
+  "asked_chisa": 0,
+  "hp": {
+    "current": 100,
+    "max": 100
+  },
+  "attributes": {
+    "strength": 5,
+    "dexterity": 8,
+    "intelligence": 12
+  },
+  "inventory": {},
+  "location": "iwakura_upper_hallway",
+  "day": 3,
+  "time_of_day": 125353995,
+  "overload": 0,
+  "pseudo_terminal_cwd": "/home/lain",
+  "unlocked_commands": [
+    "help",
+    "whoami",
+    "clear",
+    "cls",
+    "inventory",
+    "inv",
+    "arls",
+    "examine",
+    "time"
+  ],
+  "current_story_file": "SCENE_00_ENTRY",
+  "return_to_story_file": null,
+  "drivers": {
+    "kwsk_ver3.1": "loaded",
+    "audio_subsystem_v4": "unloaded"
+  },
+  "typewriter_delay": 0.04,
+  "network_status": {
+    "protocols": {
+      "ipv4": "on",
+      "ipv6": "off",
+      "ip7": "off"
+    },
+    "scope": "地区局域网"
+  }
+}

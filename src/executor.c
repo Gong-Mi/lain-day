@@ -7,6 +7,7 @@
 #include "ecc_time.h"
 #include "characters/mika.h"
 #include "string_table.h" // For get_string_by_id
+#include "systems/embedded_navi.h" // Include the new Embedded NAVI system
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> // For atoi
@@ -187,11 +188,9 @@ int execute_action(const char* action_id, struct GameState* game_state) {
 
     // --- STORY CHANGE ACTIONS ---
     else if (strcmp(action_id, "examine_navi") == 0) {
-        strncpy(game_state->current_story_file, "SCENE_01A_EXAMINE_NAVI", MAX_PATH_LENGTH - 1);
+        enter_embedded_navi(game_state);
         scene_changed = 1;
     } else if (strcmp(action_id, "refresh_navi_screen") == 0) {
-        strncpy(game_state->current_story_file, "SCENE_01A_EXAMINE_NAVI", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
     } else if (strcmp(action_id, "wait_one_minute") == 0) {
         const char* flag_val = hash_table_get(game_state->flags, "door_opened_by_ghost");
         if (flag_val == NULL || strcmp(flag_val, "1") != 0) {
@@ -523,13 +522,12 @@ bool execute_command(const char* input, GameState* game_state) {
                 for (int i = 0; i < current_loc->pois_count; i++) {
                     if (strcmp(current_loc->pois[i].id, poi_id_buffer) == 0) {
 #ifdef USE_DEBUG_LOGGING
-                        fprintf(stderr, "DEBUG: Arls: Found POI '%s'. examine_scene_id: '%s'\n", 
+                        fprintf(stderr, "DEBUG: Arls: Found POI '%s'. examine_action_id: '%s'\n", 
                                 current_loc->pois[i].id, 
-                                current_loc->pois[i].examine_scene_id ? current_loc->pois[i].examine_scene_id : "NULL");
+                                current_loc->pois[i].examine_action_id ? current_loc->pois[i].examine_action_id : "NULL");
 #endif
-                        if (current_loc->pois[i].examine_scene_id != NULL) {
-                            strncpy(game_state->current_story_file, current_loc->pois[i].examine_scene_id, MAX_PATH_LENGTH - 1);
-                            return true; // Re-render needed for scene change
+                        if (current_loc->pois[i].examine_action_id != NULL) {
+                            return execute_action(current_loc->pois[i].examine_action_id, game_state);
                         } else {
                             printf("You examine the %s, but there's nothing more to see.\n", current_loc->pois[i].name);
                             return false;
@@ -559,7 +557,7 @@ bool execute_command(const char* input, GameState* game_state) {
 #endif
                     char poi_buf[MAX_LINE_LENGTH];
                     // Add an indicator if the POI is examinable
-                    const char* examinable_indicator = (current_loc->pois[i].examine_scene_id != NULL) ? " (*)" : "";
+                    const char* examinable_indicator = (current_loc->pois[i].examine_action_id != NULL) ? " (*)" : "";
                     snprintf(poi_buf, MAX_LINE_LENGTH, "  - %s%s", current_loc->pois[i].id, examinable_indicator);
                     print_raw_text(poi_buf);
                 }

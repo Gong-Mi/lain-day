@@ -12,7 +12,7 @@
 #include "game_types.h"
 #include "data_loader.h"
 #include "map_loader.h"
-#include "story_parser.h"
+
 #include "executor.h"
 #include "string_table.h"
 #include "string_id_names.h" // Include generated string ID names

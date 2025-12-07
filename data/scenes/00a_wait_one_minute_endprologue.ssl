@@ -18,6 +18,6 @@ dialogue:
   text_id: TEXT_WAIT_DESC5
 - speaker: SPEAKER_MIRA
   text_id: TEXT_WAIT_QUOTE
-location_id: entry
+location_id: iwakura_upper_hallway
 name_text_id: TEXT_SCENE_NAME_00A_WAIT_ONE_MINUTE_ENDPROLOGUE
 scene_id: SCENE_00A_WAIT_ONE_MINUTE_ENDPROLOGUE

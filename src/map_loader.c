@@ -1,4 +1,5 @@
 #include "map_loader.h"
+#include "string_table.h"
 #include "cJSON.h" // Still needed for other uses potentially, keep for now
 #include "cmap.h" // Include our new CMap header
 #include <stdio.h>
@@ -63,9 +64,9 @@ static int load_programmatic_map_data(GameState* game_state) {
 
     // --- Placeholder: lain_room ---
     Location* lain_room = &game_state->all_locations[game_state->location_count];
-    init_location(lain_room, "lain_room", "Lain's Room", "A messy room filled with wires and humming electronics. The air hums with the presence of your NAVI.");
-    add_poi_to_location(lain_room, "navi", "NAVI", "Your trusty personal computer, covered in strange symbols.");
-    add_poi_to_location(lain_room, "bed", "Bed", "A simple, unmade bed.");
+    init_location(lain_room, "lain_room", get_string_by_id(MAP_LOCATION_LAIN_ROOM_NAME), get_string_by_id(MAP_LOCATION_LAIN_ROOM_DESC));
+    add_poi_to_location(lain_room, "navi", get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_DESC));
+    add_poi_to_location(lain_room, "bed", get_string_by_id(MAP_POI_LAIN_ROOM_BED_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_BED_DESC));
     add_connection_to_location(lain_room, "go_downstairs", "downstairs", NULL, NULL);
     cmap_insert(game_state->location_map, lain_room);
 #ifdef USE_MAP_DEBUG_LOGGING
@@ -76,9 +77,9 @@ static int load_programmatic_map_data(GameState* game_state) {
     // --- Placeholder: downstairs ---
     if (game_state->location_count >= MAX_LOCATIONS) return 0;
     Location* downstairs = &game_state->all_locations[game_state->location_count];
-    init_location(downstairs, "downstairs", "Downstairs", "The living room and kitchen area of your home. It feels quiet, almost too quiet.");
-    add_poi_to_location(downstairs, "kitchen", "Kitchen", "A functional but sparsely used kitchen.");
-    add_poi_to_location(downstairs, "tv", "Television", "A large, old-fashioned television set.");
+    init_location(downstairs, "downstairs", get_string_by_id(MAP_LOCATION_DOWNSTAIRS_NAME), get_string_by_id(MAP_LOCATION_DOWNSTAIRS_DESC));
+    add_poi_to_location(downstairs, "kitchen", get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_DESC));
+    add_poi_to_location(downstairs, "tv", get_string_by_id(MAP_POI_DOWNSTAIRS_TV_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_TV_DESC));
     add_connection_to_location(downstairs, "enter_lain_room", "lain_room", NULL, NULL);
     add_connection_to_location(downstairs, "go_outside", "outside_house", NULL, NULL);
     cmap_insert(game_state->location_map, downstairs);
@@ -90,8 +91,8 @@ static int load_programmatic_map_data(GameState* game_state) {
     // --- Placeholder: outside_house ---
     if (game_state->location_count >= MAX_LOCATIONS) return 0;
     Location* outside_house = &game_state->all_locations[game_state->location_count];
-    init_location(outside_house, "outside_house", "Outside the House", "The quiet suburban street where you live. The air is surprisingly crisp.");
-    add_poi_to_location(outside_house, "mailbox", "Mailbox", "A standard mailbox, mostly empty.");
+    init_location(outside_house, "outside_house", get_string_by_id(MAP_LOCATION_OUTSIDE_HOUSE_NAME), get_string_by_id(MAP_LOCATION_OUTSIDE_HOUSE_DESC));
+    add_poi_to_location(outside_house, "mailbox", get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_NAME), get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_DESC));
     add_connection_to_location(outside_house, "go_downstairs", "downstairs", NULL, NULL); // Action leads back
     add_connection_to_location(outside_house, "go_to_shibuya", "shibuya_street", NULL, NULL);
     cmap_insert(game_state->location_map, outside_house);
@@ -103,8 +104,8 @@ static int load_programmatic_map_data(GameState* game_state) {
     // --- Placeholder: shibuya_street ---
     if (game_state->location_count >= MAX_LOCATIONS) return 0;
     Location* shibuya_street = &game_state->all_locations[game_state->location_count];
-    init_location(shibuya_street, "shibuya_street", "Shibuya Street", "The neon glow of Shibuya. Crowds move with an almost hypnotic rhythm.");
-    add_poi_to_location(shibuya_street, "crosswalk", "Shibuya Crossing", "The famous scramble crosswalk, a river of humanity.");
+    init_location(shibuya_street, "shibuya_street", get_string_by_id(MAP_LOCATION_SHIBUYA_STREET_NAME), get_string_by_id(MAP_LOCATION_SHIBUYA_STREET_DESC));
+    add_poi_to_location(shibuya_street, "crosswalk", get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_NAME), get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_DESC));
     add_connection_to_location(shibuya_street, "go_home", "outside_house", NULL, NULL);
     add_connection_to_location(shibuya_street, "enter_cyberia", "cyberia_club", NULL, NULL);
     cmap_insert(game_state->location_map, shibuya_street);
