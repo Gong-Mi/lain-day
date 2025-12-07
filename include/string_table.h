@@ -12,4 +12,7 @@ void cleanup_string_table();
 // Declare the public function to access strings by ID
 const char* get_string_by_id(StringID id);
 
+// Declare the global string table
+extern const char* g_string_table[TEXT_COUNT];
+
 #endif // STRING_TABLE_H

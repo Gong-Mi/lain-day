@@ -20,7 +20,7 @@ option(CHARACTER_LAINS_SISTER_MIRA_ALIVE "Include Mira (Lain's Sister) in the ga
 # effectively disabling all debug output.
 # If set to ON, the individual debug toggles (ENABLE_DEBUG_LOGGING, etc.) will be respected.
 # Default: ON (allowing individual toggles to be used or providing a quick way to disable all debugs).
-option(MASTER_DEBUG_SWITCH "Master switch for all debug logging" OFF)
+option(MASTER_DEBUG_SWITCH "Master switch for all debug logging" ON)
 # ENABLE_TYPEWRITER_EFFECT:
 # Controls the typewriter text rendering effect.
 # When MASTER_DEBUG_SWITCH is ON, this toggle determines if text is printed character by character.
@@ -31,19 +31,19 @@ option(ENABLE_TYPEWRITER_EFFECT "Enable typewriter text rendering effect" OFF)
 # These messages provide insight into core game logic and data loading.
 # Only effective if MASTER_DEBUG_SWITCH is ON.
 # Default: ON (useful for general development tracking).
-# option(ENABLE_DEBUG_LOGGING "Enable debug logging to stderr" ON)
+option(ENABLE_DEBUG_LOGGING "Enable debug logging to stderr" ON)
 # ENABLE_STRING_DEBUG_LOGGING:
 # Controls detailed debug messages related to String IDs and their content during scene rendering.
 # Useful for debugging text display and internationalization issues.
 # Only effective if MASTER_DEBUG_SWITCH is ON.
 # Default: OFF (to keep console output clean during normal development).
-option(ENABLE_STRING_DEBUG_LOGGING "Enable debug logging for string IDs to stderr" OFF)
+option(ENABLE_STRING_DEBUG_LOGGING "Enable debug logging for string IDs to stderr" ON)
 # ENABLE_MAP_DEBUG_LOGGING:
 # Controls detailed debug messages during map loading and processing (e.g., programmatic location additions, POI verification).
 # Useful for debugging world structure and navigation.
 # Only effective if MASTER_DEBUG_SWITCH is ON.
 # Default: OFF (to keep console output clean during normal development).
-option(ENABLE_MAP_DEBUG_LOGGING "Enable debug logging for map loading and processing to stderr" OFF)
+option(ENABLE_MAP_DEBUG_LOGGING "Enable debug logging for map loading and processing to stderr" ON)
 # ENABLE_CLEAR_SCREEN:
 # Controls whether the terminal screen is cleared on each scene render.
 # When MASTER_DEBUG_SWITCH is ON, this option functions as a game style toggle.
@@ -90,7 +90,7 @@ configure_file(
 # Set C standard
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
@@ -242,11 +242,17 @@ add_dependencies(scene_debugger generate_character_header generate_string_ids_he
 # on MASTER_DEBUG_SWITCH being ON. This means if MASTER_DEBUG_SWITCH is OFF,
 # none of these features will be enabled, regardless of their individual settings.
 target_compile_definitions(scene_debugger PUBLIC
+    $<$<BOOL:${MASTER_DEBUG_SWITCH}>:$<$<BOOL:${ENABLE_DEBUG_LOGGING}>:USE_DEBUG_LOGGING>>
+    $<$<BOOL:${MASTER_DEBUG_SWITCH}>:$<$<BOOL:${ENABLE_STRING_DEBUG_LOGGING}>:USE_STRING_DEBUG_LOGGING>>
+    $<$<BOOL:${MASTER_DEBUG_SWITCH}>:$<$<BOOL:${ENABLE_MAP_DEBUG_LOGGING}>:USE_MAP_DEBUG_LOGGING>>
 )
 
 
 # Add compile definitions for character life/death options
 target_compile_definitions(lain_day_c PUBLIC
+    $<$<BOOL:${MASTER_DEBUG_SWITCH}>:$<$<BOOL:${ENABLE_DEBUG_LOGGING}>:USE_DEBUG_LOGGING>>
+    $<$<BOOL:${MASTER_DEBUG_SWITCH}>:$<$<BOOL:${ENABLE_STRING_DEBUG_LOGGING}>:USE_STRING_DEBUG_LOGGING>>
+    $<$<BOOL:${MASTER_DEBUG_SWITCH}>:$<$<BOOL:${ENABLE_MAP_DEBUG_LOGGING}>:USE_MAP_DEBUG_LOGGING>>
     $<$<BOOL:${CHARACTER_ALICE_ALIVE}>:CHARACTER_ALICE_ALIVE>
     $<$<BOOL:${CHARACTER_CHISA_ALIVE}>:CHARACTER_CHISA_ALIVE>
     $<$<BOOL:${CHARACTER_FATHER_ALIVE}>:CHARACTER_FATHER_ALIVE>

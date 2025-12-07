@@ -141,9 +141,7 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     } else if (strcmp(action_id, "go_downstairs") == 0) {
         mika_return_to_schedule();
         strncpy(game_state->player_state.location, "iwakura_living_dining_kitchen", MAX_NAME_LENGTH - 1);
-strncpy(game_state->current_story_file, "SCENE_02_DOWNSTAIRS", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
-strncpy(game_state->current_story_file, "SCENE_00_ENTRY", MAX_PATH_LENGTH - 1);
+        strncpy(game_state->current_story_file, "SCENE_02_DOWNSTAIRS", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "return_to_upstairs") == 0) {
         mika_return_to_schedule();
@@ -192,7 +190,7 @@ strncpy(game_state->current_story_file, "SCENE_00_ENTRY", MAX_PATH_LENGTH - 1);
         strncpy(game_state->current_story_file, "SCENE_01A_EXAMINE_NAVI", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "refresh_navi_screen") == 0) {
-        strncpy(game_state->current_story_file, "story/01a_examine_navi.md", MAX_PATH_LENGTH - 1);
+        strncpy(game_state->current_story_file, "SCENE_01A_EXAMINE_NAVI", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "wait_one_minute") == 0) {
         const char* flag_val = hash_table_get(game_state->flags, "door_opened_by_ghost");
