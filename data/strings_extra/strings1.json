@@ -1,0 +1,5 @@
+{
+  "TEXT_SESSION_NEW_MESSAGE": "创建新会话 '%s'.",
+  "TEXT_PROMPT_SESSION_NAME": "请输入会话名称: ",
+  "TEXT_PROMPT_INPUT_ARROW": "> "
+}

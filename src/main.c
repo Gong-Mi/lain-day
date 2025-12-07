@@ -118,20 +118,37 @@ int main(int argc, char *argv[]) {
     } else {
         if (argc > arg_index) {
             strncpy(session_name, argv[arg_index], MAX_NAME_LENGTH - 1);
+            session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
             printf("Using session name from argument: %s\n", session_name);
         } else {
-             char* line = linenoise("Enter session name: ");
+             char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
              if(line) {
                 strncpy(session_name, line, MAX_NAME_LENGTH -1);
+                session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
+                // linenoiseHistoryAdd(line); // Temporarily disable history to debug segfault
                 free(line);
+             } else {
+                 fprintf(stderr, "Error: Failed to read session name, or EOF received.\n");
+                 return 1; // Exit game
              }
         }
-        mkdir(paths.session_root_dir, 0755);
+        if (strlen(session_name) == 0) { // Check if session_name is empty after input
+            fprintf(stderr, "Error: Session name cannot be empty.\n");
+            return 1;
+        }
+
+        if (!ensure_directory_exists_recursive(paths.session_root_dir, 0755)) {
+            fprintf(stderr, "Error: Failed to create session root directory '%s'. Check permissions or path.\n", paths.session_root_dir);
+            return 1;
+        }
         snprintf(session_dir_path, MAX_PATH_LENGTH, "%s/%s", paths.session_root_dir, session_name);
-        mkdir(session_dir_path, 0755);
+        if (!ensure_directory_exists_recursive(session_dir_path, 0755)) {
+            fprintf(stderr, "Error: Failed to create session directory '%s'. Check permissions or path.\n", session_dir_path);
+            return 1;
+        }
         snprintf(character_session_file_path, MAX_PATH_LENGTH, "%s/character.json", session_dir_path);
         if (access(character_session_file_path, F_OK) == -1) {
-            printf("Creating new session '%s'.\n", session_name);
+            printf(get_string_by_id(TEXT_SESSION_NEW_MESSAGE), session_name);
             if (!write_string_to_file(CHARACTER_JSON_DATA, character_session_file_path)) {
                 fprintf(stderr, "Error: Failed to write session file.\n");
                 return 1;
@@ -261,10 +278,10 @@ void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* 
         retval = select(STDIN_FILENO + 1, &readfds, NULL, NULL, &tv);
 
         if (retval > 0) {
-            char *line = linenoise("> ");
+            char *line = linenoise(get_string_by_id(TEXT_PROMPT_INPUT_ARROW));
             if (line != NULL) {
                 if (strlen(line) > 0) {
-                    linenoiseHistoryAdd(line);
+                    // linenoiseHistoryAdd(line); // Temporarily disable history to debug segfault
                 }
                 strncpy(buffer, line, buffer_size - 1);
                 free(line);

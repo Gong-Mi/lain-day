@@ -4,13 +4,54 @@
 #include <string.h>
 #include <libgen.h> // For dirname
 #include <errno.h>  // Required for errno and strerror
-#include <sys/stat.h> // For stat and S_ISDIR
-#include <unistd.h> // For realpath
+#include <sys/stat.h> // For stat and S_ISDIR, mkdir
+#include <unistd.h> // For realpath, geteuid, getegid
+#include <pwd.h>    // For getpwuid
+#include <grp.h>    // For getgrgid
 
 void get_base_path(char* exe_path, char* base_path, size_t size) {
     char* exe_dir = dirname(exe_path);
     snprintf(base_path, size, "%s/../..", exe_dir);
 }
+
+// Function to ensure a directory exists, creating parents as needed.
+bool ensure_directory_exists_recursive(const char* path, mode_t mode) {
+    char* path_copy = strdup(path);
+    if (path_copy == NULL) {
+        perror("strdup");
+        return false;
+    }
+
+    char* p = path_copy;
+    // If path starts with '/', start from the character after it to correctly handle absolute paths
+    if (*p == '/') {
+        p++;
+    }
+
+    for (; *p; p++) {
+        if (*p == '/') {
+            *p = '\0'; // Temporarily terminate the string
+            if (mkdir(path_copy, mode) == -1 && errno != EEXIST) {
+                 perror("mkdir");
+                 fprintf(stderr, "Failed to create directory: %s\n", path_copy);
+                 free(path_copy);
+                 return false;
+            }
+            *p = '/'; // Restore the slash
+        }
+    }
+    // Create the final directory component
+    if (mkdir(path_copy, mode) == -1 && errno != EEXIST) {
+        perror("mkdir");
+        fprintf(stderr, "Failed to create directory: %s\n", path_copy);
+        free(path_copy);
+        return false;
+    }
+
+    free(path_copy);
+    return true;
+}
+
 
 void init_paths(char* argv0, GamePaths* paths) {
     char exe_path[MAX_PATH_LENGTH];
@@ -22,6 +63,25 @@ void init_paths(char* argv0, GamePaths* paths) {
 
     char current_path[MAX_PATH_LENGTH];
     strncpy(current_path, dirname(resolved_path), MAX_PATH_LENGTH - 1);
+
+#ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Effective User ID (EUID): %d", geteuid());
+    struct passwd *pw = getpwuid(geteuid());
+    if (pw) fprintf(stderr, " (%s)", pw->pw_name);
+    fprintf(stderr, "\n");
+
+    fprintf(stderr, "DEBUG: Effective Group ID (EGID): %d", getegid());
+    struct group *gr = getgrgid(getegid());
+    if (gr) fprintf(stderr, " (%s)", gr->gr_name);
+    fprintf(stderr, "\n");
+
+    struct stat st_base;
+    if (stat(current_path, &st_base) == 0) {
+        fprintf(stderr, "DEBUG: Permissions of base path '%s': %o\n", current_path, st_base.st_mode & 0777);
+    } else {
+        fprintf(stderr, "DEBUG: Could not get permissions for base path '%s': %s\n", current_path, strerror(errno));
+    }
+#endif
 
 #if defined(USE_DEBUG_LOGGING)
     // In Debug mode, search upwards for a directory containing a ".git" folder
@@ -100,3 +160,4 @@ int write_string_to_file(const char* str, const char* dest_path) {
     fclose(dest);
     return 1;
 }
+
