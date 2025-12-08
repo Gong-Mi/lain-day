@@ -5,7 +5,7 @@ choices:
   text_id: TEXT_CHOICE_TALK_TO_MOM
 - action_id: get_milk
   text_id: TEXT_CHOICE_GET_MILK
-- action_id: return_to_upstairs
+- action_id: upstairs
   text_id: TEXT_CHOICE_RETURN_TO_UPSTAIRS
 dialogue:
 - speaker: SPEAKER_NONE

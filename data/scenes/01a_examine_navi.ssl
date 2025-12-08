@@ -7,7 +7,7 @@ choices:
   text_id: TEXT_CHOICE_NAVI_CONNECT
 - action_id: refresh_navi_screen
   text_id: TEXT_CHOICE_NAVI_REFRESH
-- action_id: exit_room
+- action_id: upper_hallway
   text_id: TEXT_CHOICE_LEAVE_ROOM
 dialogue:
 - speaker: SPEAKER_NONE

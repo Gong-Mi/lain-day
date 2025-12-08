@@ -17,7 +17,7 @@
 
 // --- Helper Functions ---
 
-static void print_header() {
+static void print_header(GameState* game_state) {
     clear_screen();
     printf("%s========================================\n", COLOR_NAVI_SYSTEM);
     printf("   NAVI EMBEDDED SYSTEM v0.1a (UNREGISTERED)\n");
@@ -32,6 +32,18 @@ static void print_header() {
     if (level <= 1)      printf("[=>....................] 5%%\n");
     else if (level == 2) printf("[=====>................] 28%%\n");
     else                 printf("[==============>.......] 77%%\n");
+
+    // Network Signal Indicator
+    const char* scope = hash_table_get(game_state->flags, "network_status.scope");
+    const char* signal_indicator = "[----]";
+    if (scope != NULL) {
+        if (strcmp(scope, "地区局域网") == 0) {
+            signal_indicator = "[||--]";
+        } else if (strcmp(scope, "全国互联网") == 0) {
+            signal_indicator = "[||||]";
+        }
+    }
+    printf("SIGNAL: %s\n", signal_indicator);
     
     printf("\n");
 }
@@ -57,8 +69,38 @@ static void handle_network(GameState* game_state) {
     printf("%s\nChecking connection to The Wired...\n%s", COLOR_NAVI_SYSTEM, ANSI_COLOR_RESET);
     // TODO: Check actual game flag like FLAG_NAVI_ONLINE
     sleep(1);
-    printf("Status: %sOFFLINE%s\n", COLOR_NAVI_ERROR, ANSI_COLOR_RESET);
-    printf("Gateway not found.\n");
+
+    // Simulate connection progress
+    const char* progress_frames[] = {"", ".", ".=", ".=≡", ".=≡."}; // Using user's provided example
+    printf("Connecting...");
+    for (int i = 0; i < 5; ++i) {
+        printf("\rConnecting... %s", progress_frames[i]); // \r returns cursor to start of line
+        fflush(stdout); // Ensure it prints immediately
+        usleep(200000); // 0.2 seconds delay
+    }
+    printf("\n"); // Newline after progress
+
+    // Display final status based on scope
+    const char* scope = hash_table_get(game_state->flags, "network_status.scope");
+    const char* signal_strength_display = "[----]"; // Default no signal
+    if (scope != NULL) {
+        if (strcmp(scope, "地区局域网") == 0) {
+            signal_strength_display = "[||--]"; // 2 bars for regional
+        } else if (strcmp(scope, "全国互联网") == 0) {
+            signal_strength_display = "[||||]"; // 4 bars for national
+        }
+    }
+    
+    // Check actual connection status (assuming flags determine this)
+    // For now, let's assume if scope is not NULL, we are connected.
+    // If we want a proper OFFLINE, we need a specific flag for it.
+    if (scope != NULL) {
+        printf("Status: %sCONNECTED%s %s\n", COLOR_NAVI_SUCCESS, ANSI_COLOR_RESET, signal_strength_display);
+    } else {
+        printf("Status: %sOFFLINE%s %s\n", COLOR_NAVI_ERROR, ANSI_COLOR_RESET, signal_strength_display);
+    }
+
+    printf("Gateway not found.\n"); 
     printf("(Press ENTER to return)");
     (void)getchar();
 }
@@ -89,7 +131,7 @@ void enter_embedded_navi(GameState* game_state) {
     usleep(500000); // 0.5s
     
     while (running) {
-        print_header();
+        print_header(game_state);
         print_menu();
 
         line = linenoise(NAVI_PROMPT);

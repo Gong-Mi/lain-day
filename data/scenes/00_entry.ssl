@@ -1,7 +1,7 @@
 choices:
-- action_id: enter_lains_room
+- action_id: lains_room
   text_id: TEXT_CHOICE_OPEN_DOOR
-- action_id: go_downstairs
+- action_id: downstairs
   text_id: TEXT_CHOICE_GO_DOWNSTAIRS
 - action_id: wait_one_minute
   text_id: TEXT_CHOICE_WAIT_ONE_MINUTE

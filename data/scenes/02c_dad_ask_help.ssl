@@ -1,5 +1,5 @@
 choices:
-- action_id: return_to_living_room
+- action_id: living_area
   text_id: TEXT_CHOICE_END_HELP_RETURN_TO_LIVING_ROOM
 dialogue:
 - speaker: SPEAKER_NONE

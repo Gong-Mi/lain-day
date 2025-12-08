@@ -11,4 +11,4 @@ choices:
   - text_id: TEXT_CHOICE_SHINJUKU_EXPLORE
     action_id: explore_shinjuku_site
   - text_id: TEXT_CHOICE_SHINJUKU_LEAVE
-    action_id: go_back_to_shibuya
+    action_id: shibuya

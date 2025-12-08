@@ -3,7 +3,7 @@ choices:
   text_id: TEXT_CHOICE_TALK_TO_FIGURE
 - action_id: examine_navi
   text_id: TEXT_CHOICE_EXAMINE_NAVI
-- action_id: exit_room
+- action_id: upper_hallway
   text_id: TEXT_CHOICE_LEAVE_ROOM
 dialogue:
 - speaker: SPEAKER_NONE
