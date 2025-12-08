@@ -73,15 +73,35 @@ static void acquire_item_logic(struct GameState* game_state, const char* item_id
 
 // Helper to get time cost for an action (in minutes)
 static int get_action_time_cost(const char* action_id) {
+    // --- General Actions ---
     if (strcmp(action_id, "wait_one_minute") == 0) return 1;
-    if (strcmp(action_id, "enter_lain_room") == 0) return 10;
-    if (strcmp(action_id, "go_downstairs") == 0) return 1;
-    if (strcmp(action_id, "enter_house") == 0) return 1;
-    if (strcmp(action_id, "go_outside") == 0) return 1;
     if (strcmp(action_id, "examine_navi") == 0) return 2;
     if (strcmp(action_id, "talk_to_dad") == 0) return 5;
+    if (strcmp(action_id, "talk_to_mom") == 0) return 5;
+    if (strcmp(action_id, "talk_to_sister") == 0) return 5;
     if (strcmp(action_id, "get_milk") == 0) return 3;
     if (strcmp(action_id, "take_milk_from_fridge") == 0) return 1;
+
+    // --- Movement Actions (refer to TIME_COST_DESIGN.md) ---
+    // Short-distance
+    if (strcmp(action_id, "downstairs") == 0) return 1;
+    if (strcmp(action_id, "upstairs") == 0) return 1;
+    if (strcmp(action_id, "lains_room") == 0) return 1;
+    if (strcmp(action_id, "mikas_room") == 0) return 1;
+    if (strcmp(action_id, "bathroom") == 0) return 1;
+    if (strcmp(action_id, "study") == 0) return 1;
+    if (strcmp(action_id, "living_area") == 0) return 1;
+    if (strcmp(action_id, "hallway") == 0) return 1;
+    if (strcmp(action_id, "outside") == 0) return 1;
+    if (strcmp(action_id, "house") == 0) return 1;
+    if (strcmp(action_id, "upper_hallway") == 0) return 1;
+
+    // Long-distance (placeholders)
+    if (strcmp(action_id, "shibuya") == 0) return 25;
+    if (strcmp(action_id, "home") == 0) return 25;
+    if (strcmp(action_id, "shinjuku_site") == 0) return 30;
+    if (strcmp(action_id, "cyberia") == 0) return 15;
+    
     // Default time cost for actions not explicitly listed
     return 0;
 }
