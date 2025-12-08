@@ -75,7 +75,6 @@ static void acquire_item_logic(struct GameState* game_state, const char* item_id
 static int get_action_time_cost(const char* action_id) {
     // --- General Actions ---
     if (strcmp(action_id, "wait_one_minute") == 0) return 1;
-    if (strcmp(action_id, "examine_navi") == 0) return 2;
     if (strcmp(action_id, "talk_to_dad") == 0) return 5;
     if (strcmp(action_id, "talk_to_mom") == 0) return 5;
     if (strcmp(action_id, "talk_to_sister") == 0) return 5;
@@ -164,13 +163,8 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         }
     }
     
-    // --- LOCATION CHANGE ACTIONS (OLD - REMOVED) ---
-    // The previous hardcoded location change logic has been removed and generalized
-    // into the "Generic Connection Handling" block above.
-
-
     // --- STORY CHANGE ACTIONS ---
-    else if (strcmp(action_id, "examine_navi") == 0) {
+    if (strcmp(action_id, "examine_navi") == 0) {
         enter_embedded_navi(game_state);
         scene_changed = 1;
     } 
@@ -576,6 +570,11 @@ bool execute_command(const char* input, GameState* game_state) {
             return false;
         }
     }
+    // Command: navi
+    else if (strcmp(input, "navi") == 0) {
+        enter_embedded_navi(game_state);
+        return true; // Re-render needed after exiting NAVI
+    }
     // Command: exper <poi_id>
     else if (strncmp(input, "exper ", 6) == 0) {
         char poi_id_buffer[MAX_NAME_LENGTH] = {0};
@@ -586,10 +585,12 @@ bool execute_command(const char* input, GameState* game_state) {
             if (current_loc) {
                 for (int i = 0; i < current_loc->pois_count; i++) {
                     if (strcmp(current_loc->pois[i].id, poi_id_buffer) == 0) {
-                        if (current_loc->pois[i].examine_action_id != NULL) {
-                            return execute_action(current_loc->pois[i].examine_action_id, game_state);
-                        } else {
-                            printf("You can't use or interact with the %s in that way.\n", current_loc->pois[i].name);
+                                                    if (current_loc->pois[i].examine_action_id != NULL) {
+                        #ifdef USE_DEBUG_LOGGING
+                                                        fprintf(stderr, "DEBUG: Calling execute_action with examine_action_id: '%s'\n", current_loc->pois[i].examine_action_id);
+                        #endif
+                                                        return execute_action(current_loc->pois[i].examine_action_id, game_state);
+                                                    } else {                            printf("You can't use or interact with the %s in that way.\n", current_loc->pois[i].name);
                             return false;
                         }
                     }

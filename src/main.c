@@ -65,6 +65,8 @@ static bool process_events(GameState* game_state, StoryScene* current_scene) {
 
 // --- Main Function ---
 int main(int argc, char *argv[]) {
+    g_argc = argc;
+    g_argv = argv;
     init_mika_module();
     pthread_t time_thread_id;
     pthread_mutex_init(&time_mutex, NULL);
@@ -86,6 +88,7 @@ int main(int argc, char *argv[]) {
     char character_session_file_path[MAX_PATH_LENGTH] = {0};
     char session_dir_path[MAX_PATH_LENGTH] = {0};
     int arg_index = 1;
+    g_arg_index_ptr = &arg_index;
     bool is_test_mode = false;
 
     GameState game_state;
@@ -120,6 +123,7 @@ int main(int argc, char *argv[]) {
             strncpy(session_name, argv[arg_index], MAX_NAME_LENGTH - 1);
             session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
             printf("Using session name from argument: %s\n", session_name);
+            arg_index++;
         } else {
              char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
              if(line) {

@@ -30,7 +30,8 @@
     "inv",
     "arls",
     "exper",
-    "time"
+    "time",
+    "navi"
   ],
   "current_story_file": "SCENE_00_ENTRY",
   "return_to_story_file": null,

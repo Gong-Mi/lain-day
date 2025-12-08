@@ -144,4 +144,10 @@ typedef struct GameState {
 // Global pointer to the GameState instance
 extern GameState* g_game_state_ptr;
 
+// Globals for command-line arguments
+extern int g_argc;
+extern char** g_argv;
+extern int* g_arg_index_ptr;
+
+
 #endif // GAME_TYPES_H

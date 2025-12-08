@@ -25,19 +25,19 @@ void init_location(Location* loc, const char* id, const char* name, const char* 
     loc->description[(MAX_DESC_LENGTH * 4) - 1] = '\0';
 }
 
-void add_poi_to_location(Location* loc, const char* id, const char* name, const char* description) {
+void add_poi_to_location(Location* loc, const char* id, const char* name, const char* description, const char* examine_action_id) {
     if (loc->pois_count >= MAX_POIS) {
         fprintf(stderr, "WARNING: Max POIs reached for location %s. Cannot add %s.\n", loc->id, id);
         return;
     }
-    POI* current_poi = &loc->pois[loc->pois_count];
-    memset(current_poi, 0, sizeof(POI));
-    strncpy(current_poi->id, id, MAX_NAME_LENGTH - 1);
-    current_poi->id[MAX_NAME_LENGTH - 1] = '\0';
-    strncpy(current_poi->name, name, MAX_NAME_LENGTH - 1);
-    current_poi->name[MAX_NAME_LENGTH - 1] = '\0';
-    strncpy(current_poi->description, description, (MAX_DESC_LENGTH * 2) - 1);
-    current_poi->description[(MAX_DESC_LENGTH * 2) - 1] = '\0';
+    POI* poi = &loc->pois[loc->pois_count];
+    strncpy(poi->id, id, MAX_NAME_LENGTH - 1);
+    strncpy(poi->name, name, MAX_NAME_LENGTH - 1);
+    strncpy(poi->description, description, MAX_DESC_LENGTH - 1);
+    
+    // Assign the provided examine action ID
+    poi->examine_action_id = examine_action_id; 
+
     loc->pois_count++;
 }
 
@@ -66,8 +66,8 @@ static int load_programmatic_map_data(GameState* game_state) {
     // --- Placeholder: lain_room ---
     Location* lain_room = &game_state->all_locations[game_state->location_count];
     init_location(lain_room, "lain_room", get_string_by_id(MAP_LOCATION_LAIN_ROOM_NAME), get_string_by_id(MAP_LOCATION_LAIN_ROOM_DESC));
-    add_poi_to_location(lain_room, "navi", get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_DESC));
-    add_poi_to_location(lain_room, "bed", get_string_by_id(MAP_POI_LAIN_ROOM_BED_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_BED_DESC));
+    add_poi_to_location(lain_room, "navi", get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_DESC), "examine_navi");
+    add_poi_to_location(lain_room, "bed", get_string_by_id(MAP_POI_LAIN_ROOM_BED_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_BED_DESC), NULL);
     add_connection_to_location(lain_room, "downstairs", "downstairs", NULL, NULL, "SCENE_02_DOWNSTAIRS");
     cmap_insert(game_state->location_map, lain_room);
 #ifdef USE_MAP_DEBUG_LOGGING
@@ -79,8 +79,8 @@ static int load_programmatic_map_data(GameState* game_state) {
     if (game_state->location_count >= MAX_LOCATIONS) return 0;
     Location* downstairs = &game_state->all_locations[game_state->location_count];
     init_location(downstairs, "downstairs", get_string_by_id(MAP_LOCATION_DOWNSTAIRS_NAME), get_string_by_id(MAP_LOCATION_DOWNSTAIRS_DESC));
-    add_poi_to_location(downstairs, "kitchen", get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_DESC));
-    add_poi_to_location(downstairs, "tv", get_string_by_id(MAP_POI_DOWNSTAIRS_TV_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_TV_DESC));
+    add_poi_to_location(downstairs, "kitchen", get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_DESC), NULL);
+    add_poi_to_location(downstairs, "tv", get_string_by_id(MAP_POI_DOWNSTAIRS_TV_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_TV_DESC), NULL);
     add_connection_to_location(downstairs, "lains_room", "lain_room", NULL, NULL, "SCENE_01_LAIN_ROOM");
     add_connection_to_location(downstairs, "outside", "outside_house", NULL, NULL, "SCENE_00_ENTRY");
     cmap_insert(game_state->location_map, downstairs);
@@ -93,7 +93,7 @@ static int load_programmatic_map_data(GameState* game_state) {
     if (game_state->location_count >= MAX_LOCATIONS) return 0;
     Location* outside_house = &game_state->all_locations[game_state->location_count];
     init_location(outside_house, "outside_house", get_string_by_id(MAP_LOCATION_OUTSIDE_HOUSE_NAME), get_string_by_id(MAP_LOCATION_OUTSIDE_HOUSE_DESC));
-    add_poi_to_location(outside_house, "mailbox", get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_NAME), get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_DESC));
+    add_poi_to_location(outside_house, "mailbox", get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_NAME), get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_DESC), NULL);
     add_connection_to_location(outside_house, "downstairs", "downstairs", NULL, NULL, "SCENE_02_DOWNSTAIRS"); // Action leads back
     add_connection_to_location(outside_house, "shibuya", "shibuya_street", NULL, NULL, "SCENE_09_CYBERIA");
     cmap_insert(game_state->location_map, outside_house);
@@ -106,7 +106,7 @@ static int load_programmatic_map_data(GameState* game_state) {
     if (game_state->location_count >= MAX_LOCATIONS) return 0;
     Location* shibuya_street = &game_state->all_locations[game_state->location_count];
     init_location(shibuya_street, "shibuya_street", get_string_by_id(MAP_LOCATION_SHIBUYA_STREET_NAME), get_string_by_id(MAP_LOCATION_SHIBUYA_STREET_DESC));
-    add_poi_to_location(shibuya_street, "crosswalk", get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_NAME), get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_DESC));
+    add_poi_to_location(shibuya_street, "crosswalk", get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_NAME), get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_DESC), NULL);
     add_connection_to_location(shibuya_street, "home", "outside_house", NULL, NULL, "SCENE_00_ENTRY");
     add_connection_to_location(shibuya_street, "cyberia", "cyberia_club", NULL, NULL, "SCENE_09_CYBERIA");
     add_connection_to_location(shibuya_street, "shinjuku_site", "shinjuku_abandoned_site", NULL, NULL, "SCENE_SHINJUKU_ABANDONED_SITE");

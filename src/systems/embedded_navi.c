@@ -17,6 +17,26 @@
 
 // --- Helper Functions ---
 
+static void get_next_navi_input(char* buffer, int buffer_size) {
+    memset(buffer, 0, buffer_size);
+
+    if (g_argc > *g_arg_index_ptr) {
+        strncpy(buffer, g_argv[*g_arg_index_ptr], buffer_size - 1);
+        (*g_arg_index_ptr)++;
+    } else {
+        char *line = linenoise(NAVI_PROMPT);
+        if (line != NULL) {
+            if (strlen(line) > 0) {
+                // linenoiseHistoryAdd(line);
+            }
+            strncpy(buffer, line, buffer_size - 1);
+            free(line);
+        } else {
+            strncpy(buffer, "exit", buffer_size - 1);
+        }
+    }
+}
+
 static void print_header(GameState* game_state) {
     clear_screen();
     printf("%s========================================\n", COLOR_NAVI_SYSTEM);
@@ -122,7 +142,7 @@ void enter_embedded_navi(GameState* game_state) {
     fprintf(stdout, "DEBUG: Entering Embedded NAVI interface.\n");
     fflush(stdout);
 #endif
-    char* line;
+    char line[MAX_LINE_LENGTH];
     int running = 1;
 
     // Boot animation
@@ -134,14 +154,12 @@ void enter_embedded_navi(GameState* game_state) {
         print_header(game_state);
         print_menu();
 
-        line = linenoise(NAVI_PROMPT);
+        get_next_navi_input(line, sizeof(line));
 
-        if (line == NULL) { // Ctrl+D or error
+        if (line == NULL) { // Should not happen with the new function
+            strncpy(buffer, "exit", buffer_size - 1);
             break; 
         }
-
-        // Add to history
-        linenoiseHistoryAdd(line);
 
         // Parse command
         if (strcmp(line, "exit") == 0 || strcmp(line, "0") == 0 || strcmp(line, "quit") == 0) {
@@ -172,8 +190,6 @@ void enter_embedded_navi(GameState* game_state) {
             printf("%sUnknown command: '%s'\n%s", COLOR_NAVI_ERROR, line, ANSI_COLOR_RESET);
             usleep(800000); // Wait a bit so user sees error
         }
-
-        free(line);
     }
     
     printf("%sShutting down interface...\n%s", COLOR_NAVI_SYSTEM, ANSI_COLOR_RESET);

@@ -264,9 +264,14 @@ target_link_libraries(lain_day_c PUBLIC zlibstatic pthread)
 add_executable(scene_debugger tools/scene_debugger.c ${GAME_ENGINE_SOURCES})
 target_link_libraries(scene_debugger PUBLIC zlibstatic pthread)
 
+# NAVI debugger tool
+add_executable(navi_debugger tools/navi_debugger.c ${GAME_ENGINE_SOURCES})
+target_link_libraries(navi_debugger PUBLIC zlibstatic pthread)
+
 # Add dependency to ensure header is generated before compiling executables
 add_dependencies(lain_day_c generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes)
-add_dependencies(scene_debugger generate_character_header generate_string_ids_header generate_ssl_scenes)
+add_dependencies(scene_debugger generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes)
+add_dependencies(navi_debugger generate_string_ids_header)
 
 # Add feature toggle definitions
 # The following compile definitions (USE_TYPEWRITER_EFFECT, USE_DEBUG_LOGGING, etc.)

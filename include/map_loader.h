@@ -9,7 +9,7 @@ int load_map_data(const char* map_dir_path, GameState* game_state);
 
 // Helper functions for programmatic map definition
 void init_location(Location* loc, const char* id, const char* name, const char* description);
-void add_poi_to_location(Location* loc, const char* id, const char* name, const char* description);
+void add_poi_to_location(Location* loc, const char* id, const char* name, const char* description, const char* examine_action_id);
 void add_connection_to_location(Location* loc, const char* action_id, const char* target_location_id, is_accessible_func is_accessible, const char* access_denied_scene_id, const char* target_scene_id);
 Location* get_location_by_id(const char* location_id); // Added for external use
 

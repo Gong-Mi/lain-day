@@ -15,6 +15,11 @@ static void debug_print_location(const Location* loc);
 
 // --- Main Function ---
 int main(int argc, char* argv[]) {
+    g_argc = argc;
+    g_argv = argv;
+    int arg_index = 1;
+    g_arg_index_ptr = &arg_index;
+
     if (argc < 2) {
         print_usage(argv[0]);
         return 1;
