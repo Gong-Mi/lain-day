@@ -39,6 +39,15 @@ The game will prompt for a session name. You can enter a new name to start a new
 *   **Feature Toggles:** The `CMakeLists.txt` file includes several feature toggles for enabling and disabling characters and debug features. This is useful for creating different builds and for testing.
 *   **Testing:** The game can be run in an automated mode by providing input as command-line arguments. A `scene_debugger` tool is also available.
 
+## Gameplay and Command System
+
+The game is played through a command-line interface that simulates a shell. Player interaction is driven by a set of commands that evolve as the game progresses.
+
+-   **`arls` (Area List Scan):** The primary command for environmental awareness. It displays the current location's description, a list of "Points of Interest" (POIs), and available "Connections" to other locations.
+-   **`exper <id>` (Experiment):** Used to interact with POIs. The `<id>` is discovered through the `arls` command.
+-   **`move <destination>`:** The primary command for navigation. The `<destination>` is an `action_id` found in the "Connections" list provided by the `arls` command.
+-   **Core Utilities:** Standard commands like `help`, `inventory` (`inv`), and `time` are also available.
+
 ## Development Environment and Platform Strategy
 
 ### Primary Development Environment

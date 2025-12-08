@@ -57,6 +57,17 @@
 
 只有在核心叙事和框架稳定之后，才会考虑和解决多平台（如 Windows, Linux）的兼容性问题。此策略旨在让单人开发者能够更专注地推进项目的核心开发。
 
+## 核心玩法与命令
+
+游戏通过一个类似 `shell` 的界面进行交互。玩家通过输入命令来探索世界、与物品互动和推进故事。
+
+-   **`arls` (Area List Scan):** 这是最核心的环境扫描命令。它会显示当前地点的描述、所有可观察的“兴趣点”（Points of Interest），以及所有可用的“连接”（Connections）或出口。
+-   **`exper <id>` (Experiment):** 用于与“兴趣点”进行互动。`id` 通常通过 `arls` 命令获得。例如，如果 `arls` 显示一个 `id` 为 `navi_computer` 的兴趣点，输入 `exper navi_computer` 就会尝试与之互动。
+-   **`move <destination>`:** 用于在不同地点之间移动。`destination` 是一个地点的 `action_id`，可以通过 `arls` 命令在“Connections”列表中找到。例如，如果 `arls` 显示一个连接是 `downstairs -> iwakura_lower_hallway`，那么输入 `move downstairs` 就会移动到楼下。
+-   **`help`:** 显示所有已解锁的可用命令。
+-   **`inventory` / `inv`:** 查看玩家当前的物品。
+-   **`time`:** 查看当前游戏内的时间。
+
 ## 构建与运行
 
 ```bash
