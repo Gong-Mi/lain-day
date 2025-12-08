@@ -71,7 +71,7 @@ static void handle_network(GameState* game_state) {
     sleep(1);
 
     // Simulate connection progress
-    const char* progress_frames[] = {"", ".", ".=", ".=≡", ".=≡."}; // Using user's provided example
+    const char* progress_frames[] = {"", "！", "！-", "！-=", "！-=≡"};
     printf("Connecting...");
     for (int i = 0; i < 5; ++i) {
         printf("\rConnecting... %s", progress_frames[i]); // \r returns cursor to start of line
