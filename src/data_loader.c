@@ -2,84 +2,88 @@
 #include "cJSON.h"
 #include "flag_system.h"
 #include "ecc_time.h"
-#include "string_ids.h"      // Include generated string IDs
-#include "string_id_names.h" // Include generated string ID names
-#include "string_table.h"    // Include string table functions
+#include "string_ids.h"
+#include "string_id_names.h"
+#include "string_table.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// External declaration for the array of embedded string values
 extern const char* g_embedded_strings[TEXT_COUNT];
 
-static char* read_file_to_buffer(const char* path) {
+DataLoaderStatus read_entire_file(const char* path, char** buffer_ptr, long* length_ptr) {
+    if (!path || !buffer_ptr || !length_ptr) {
+        return DATA_LOADER_ERROR_FILE_OPEN; // Or a new status for invalid args
+    }
+
+    *buffer_ptr = NULL;
+    *length_ptr = 0;
+
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Failed to open file: %s\n", path);
-#endif
-        return NULL;
+        return DATA_LOADER_ERROR_FILE_OPEN;
     }
+
     fseek(file, 0, SEEK_END);
     long length = ftell(file);
     fseek(file, 0, SEEK_SET);
-    if (length == -1) { fclose(file); return NULL; }
+
+    if (length == -1) {
+        fclose(file);
+        return DATA_LOADER_ERROR_FILE_STAT;
+    }
+
     char *buffer = (char*)malloc(length + 1);
-    if (buffer == NULL) { fclose(file); return NULL; }
-    if (fread(buffer, 1, length, file) != (size_t)length) { fclose(file); free(buffer); return NULL; }
+    if (buffer == NULL) {
+        fclose(file);
+        return DATA_LOADER_ERROR_MEMORY_ALLOC;
+    }
+
+    if (fread(buffer, 1, length, file) != (size_t)length) {
+        fclose(file);
+        free(buffer);
+        return DATA_LOADER_ERROR_FILE_READ;
+    }
+
     buffer[length] = '\0';
     fclose(file);
-    return buffer;
+
+    *buffer_ptr = buffer;
+    *length_ptr = length;
+
+    return DATA_LOADER_SUCCESS;
 }
 
 int load_string_table() {
-    // The g_embedded_strings array is generated at compile time and linked in.
-    // We just need to pass it to the string_table initialization function.
-    // The init_string_table function will manage copying these strings.
     init_string_table(g_embedded_strings, TEXT_COUNT);
-    return 1; // Always succeeds as data is embedded
+    return 1;
 }
 
 int load_player_state(const char* path, GameState* game_state) {
     if (game_state == NULL) return 0;
     
-    // Initialize the flag system
     game_state->flags = create_hash_table(128);
     if (game_state->flags == NULL) {
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Failed to create hash table for flags.\n");
-#endif
         return 0;
     }
 
     PlayerState* player_state = &game_state->player_state;
-    char *json_string = read_file_to_buffer(path);
-    if (json_string == NULL) {
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Failed to read file to buffer: %s\n", path);
-#endif
+    char *json_string = NULL;
+    long length = 0;
+
+    DataLoaderStatus status = read_entire_file(path, &json_string, &length);
+    if (status != DATA_LOADER_SUCCESS) {
+        // Here, you could handle different errors differently.
+        // For now, we just fail.
         return 0;
     }
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Read JSON string:\n%s\n", json_string);
-#endif
-    cJSON *root = cJSON_Parse(json_string);
+
+    cJSON *root = cJSON_ParseWithLength(json_string, length);
     free(json_string); 
+
     if (root == NULL) {
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL) {
-#ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: cJSON_Parse error before: %s\n", error_ptr);
-#endif
-        }
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Failed to parse JSON from %s\n", path);
-#endif
         return 0;
     }
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Successfully parsed JSON from %s\n", path);
-#endif
 
     const cJSON *location = cJSON_GetObjectItemCaseSensitive(root, "location");
     if (cJSON_IsString(location)) strncpy(player_state->location, location->valuestring, MAX_NAME_LENGTH - 1);
@@ -87,12 +91,11 @@ int load_player_state(const char* path, GameState* game_state) {
     const cJSON *credit_level = cJSON_GetObjectItemCaseSensitive(root, "credit_level");
     if (cJSON_IsNumber(credit_level)) player_state->credit_level = credit_level->valueint;
 
-    // Load typewriter delay, with a default value
     const cJSON *typewriter_delay_json = cJSON_GetObjectItemCaseSensitive(root, "typewriter_delay");
     if (cJSON_IsNumber(typewriter_delay_json)) {
         game_state->typewriter_delay = (float)typewriter_delay_json->valuedouble;
     } else {
-        game_state->typewriter_delay = 0.04f; // Default value
+        game_state->typewriter_delay = 0.04f;
     }
 
     const cJSON *inventory = cJSON_GetObjectItemCaseSensitive(root, "inventory");
@@ -129,20 +132,14 @@ int load_player_state(const char* path, GameState* game_state) {
     if (cJSON_IsNumber(time_json)) {
         game_state->time_of_day = (uint32_t)time_json->valuedouble;
     } else {
-        // Initialize with a default start time (Day 3, 20:00) if not found
-        const uint32_t default_start_time_units = (2 * 24 * 60 * 60 * 16) + (20 * 60 * 60 * 16); // Day 3, 8 PM
+        const uint32_t default_start_time_units = (2 * 24 * 60 * 60 * 16) + (20 * 60 * 60 * 16);
         game_state->time_of_day = encode_time_with_ecc(default_start_time_units);
     }
 
-    // Immediately check the loaded time for corruption
     DecodedTimeResult time_check = decode_time_with_ecc(game_state->time_of_day);
     if (time_check.status == DOUBLE_BIT_ERROR_DETECTED) {
         hash_table_set(game_state->flags, "TIME_GLITCH_ACTIVE", "1");
-        #ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Corrupted time detected! TIME_GLITCH_ACTIVE flag set.\n");
-        #endif
     } else {
-        // Ensure the flag is not set if time is okay
         hash_table_set(game_state->flags, "TIME_GLITCH_ACTIVE", "0");
     }
 
@@ -151,10 +148,6 @@ int load_player_state(const char* path, GameState* game_state) {
 }
 
 #include "items_data.h"
-
-// ... (other includes)
-
-// ... (other functions)
 
 int load_items_data(GameState* game_state) {
     if (game_state == NULL) return 0;
@@ -194,11 +187,9 @@ int load_items_data(GameState* game_state) {
 void cleanup_game_state(GameState* game_state) {
     if (game_state == NULL) return;
 
-    // Free the flag system hash table
     if (game_state->flags != NULL) {
         free_hash_table(game_state->flags);
     }
-    // Clean up the string table
     cleanup_string_table();
 }
 

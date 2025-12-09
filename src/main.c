@@ -10,6 +10,7 @@
 #include <sys/select.h>
 #include <fcntl.h>
 
+#include "game_paths.h"
 #include "build_info.h"
 #include "game_types.h"
 #include "data_loader.h"
@@ -167,9 +168,6 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     printf("Player data loaded.\n");
-
-    if (!load_map_data(paths.map_dir, &game_state)) return 1;
-    printf("Map data loaded.\n");
 
     if (!load_items_data(&game_state)) return 1;
     printf("Items data loaded.\n");
