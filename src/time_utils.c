@@ -4,13 +4,6 @@
 #include <unistd.h>
 #include <stdio.h>
 
-// --- Constants for Epoch/Cycle counter ---
-// The ECC scheme uses bits 0-29. We can use bits 30 and 31 for the epoch.
-#define EPOCH_BIT_1 (1U << 30)
-#define EPOCH_BIT_2 (1U << 31)
-#define EPOCH_MASK (EPOCH_BIT_1 | EPOCH_BIT_2)
-#define MAX_24_BIT_VALUE 0xFFFFFF
-
 // Mutex for protecting game_state->time_of_day
 pthread_mutex_t time_mutex;
 
@@ -34,33 +27,20 @@ void* time_thread_func(void* arg) {
 
         pthread_mutex_lock(&time_mutex);
 
-        uint32_t full_time_value = game_state->time_of_day;
-        DecodedTimeResult decoded_result = decode_time_with_ecc(full_time_value);
+        // Decode the current 24-bit data from the 32-bit value
+        DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
         uint32_t current_data = decoded_result.data;
 
+        // Increment the 24-bit data; overflow is handled by unsigned arithmetic
         uint32_t new_data = current_data + TIME_INCREMENT_PER_SECOND;
 
-        // Check for 24-bit overflow to increment epoch
-        if (new_data < current_data) {
-            uint32_t current_epoch = (full_time_value & EPOCH_MASK);
-            // Increment epoch (it's a 2-bit counter, 00 -> 01 -> 10 -> 11)
-            if ((current_epoch & EPOCH_BIT_1) == 0) {
-                current_epoch |= EPOCH_BIT_1;
-            } else if ((current_epoch & EPOCH_BIT_2) == 0) {
-                current_epoch &= ~EPOCH_BIT_1; // clear bit 1
-                current_epoch |= EPOCH_BIT_2;  // set bit 2
-            }
-            // After 11, it stays at 11. 48 days is the max.
-            full_time_value = (full_time_value & ~EPOCH_MASK) | current_epoch;
-        }
-
-        // Mask new_data to 24 bits just in case of overshoot
-        new_data &= MAX_24_BIT_VALUE;
-
+        // Re-encode the new 24-bit data
         uint32_t new_encoded_data = encode_time_with_ecc(new_data);
-        
-        // Preserve epoch bits and combine with new encoded data
-        game_state->time_of_day = (full_time_value & EPOCH_MASK) | (new_encoded_data & ~EPOCH_MASK);
+
+        // The upper 2 bits of game_state->time_of_day are random "noise" and are
+        // intentionally preserved. We only update the lower 30 bits used by ECC.
+        uint32_t preserved_noise = game_state->time_of_day & 0xC0000000; // Mask for top 2 bits
+        game_state->time_of_day = preserved_noise | (new_encoded_data & 0x3FFFFFFF); // Combine noise and new 30-bit codeword
         
         pthread_mutex_unlock(&time_mutex);
 
@@ -73,30 +53,19 @@ void* time_thread_func(void* arg) {
 
 // --- Time Interpretation Functions ---
 
-static int get_epoch(uint32_t time_of_day) {
-    uint32_t epoch_bits = time_of_day & EPOCH_MASK;
-    if (epoch_bits == (EPOCH_BIT_1 | EPOCH_BIT_2)) return 3;
-    if (epoch_bits == EPOCH_BIT_2) return 2;
-    if (epoch_bits == EPOCH_BIT_1) return 1;
-    return 0;
-}
-
 int get_total_game_days(uint32_t time_of_day) {
     DecodedTimeResult decoded_result = decode_time_with_ecc(time_of_day);
     if (decoded_result.status == DOUBLE_BIT_ERROR_DETECTED) {
         return -1; // Indicate error
     }
 
+    // This calculation is based purely on the 24-bit data and will wrap around every ~12 days.
     uint32_t raw_units = decoded_result.data;
     uint32_t total_seconds = raw_units / 16;
     uint32_t total_minutes = total_seconds / 60;
     uint32_t total_hours = total_minutes / 60;
-    int days_in_cycle = total_hours / 24;
-
-    int epoch = get_epoch(time_of_day);
-    const int days_per_epoch = 12; // As calculated before, 2^24 raw units is ~12.13 days
-
-    return (epoch * days_per_epoch) + days_in_cycle;
+    
+    return total_hours / 24;
 }
 
 int get_hour_of_day(uint32_t time_of_day) {

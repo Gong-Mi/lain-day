@@ -9,5 +9,8 @@
   "TEXT_CHOICE_SHINJUKU_EXPLORE": "深入探索",
   "TEXT_CHOICE_SHINJUKU_LEAVE": "离开这里",
 
-  "TEXT_EXPLORING_SITE_MESSAGE": "你在这片废弃的工地上搜寻着，除了瓦砾和生锈的钢筋，什么也没找到。似乎隐藏着某种不为人知的秘密。"
+  "TEXT_EXPLORING_SITE_MESSAGE": "你在这片废弃的工地上搜寻着，除了瓦砾和生锈的钢筋，什么也没找到。似乎隐藏着某种不为人知的秘密。",
+
+  "MAP_POI_LAIN_ROOM_PC_NAME": "NAVI mini",
+  "MAP_POI_LAIN_ROOM_PC_DESC": "一台更强大、更专业的NAVI，嗡嗡作响，似乎连接着更深层的网络。"
 }

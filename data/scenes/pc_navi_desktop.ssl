@@ -1,0 +1,13 @@
+scene_id: SCENE_PC_NAVI_DESKTOP
+name_text_id: TEXT_SCENE_NAME_PC_DESKTOP
+location_id: iwakura_lains_room
+dialogue:
+  - speaker: SPEAKER_NAVI
+    text_id: TEXT_PC_DESKTOP_WELCOME
+choices:
+  - text_id: TEXT_PC_DESKTOP_CHOICE_BROWSER
+    action_id: "BROWSE_THE_WIRED"
+  - text_id: TEXT_PC_DESKTOP_CHOICE_FILES
+    action_id: "VIEW_LOCAL_FILES"
+  - text_id: TEXT_PC_DESKTOP_CHOICE_LOG_OFF
+    action_id: "exit_story"

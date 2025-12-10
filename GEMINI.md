@@ -76,6 +76,8 @@ The scene transition mechanism operates as follows:
 
 4.  **Scene Transition:** A transition is initiated when a new `scene_id` is written to the `game_state->current_story_file` field. Note that the field name `current_story_file` is a misnomer from a previous design; it holds a `scene_id`, not a file path. The main game loop detects this change and calls `transition_to_scene`, which uses the `scene_id` to look up the correct function in the dispatch table and load the new scene.
 
+5.  **Conditional Choices:** The visibility of choices within a scene is managed by a flexible condition system. In the `.ssl` files, each choice can have a `conditions` list. At build time, `parse_scenes.py` converts this list into a C array of `Condition` structs. At runtime, the `is_choice_selectable` function calls `check_conditions` to evaluate this array, allowing for complex logic based on game days, time of day, and story flags. This avoids runtime parsing and provides high performance.
+
 ### Refactoring Strategy and Development Philosophy
 
 #### The Role of 'Fragile' Identifiers (Fail-Fast Principle)
@@ -120,4 +122,4 @@ The discussion explored preventing save file manipulation and integrating the mi
 *   **Player Save File Manipulation:** Players can potentially modify `character.json` to bypass in-game protection.
 *   **Proposed Solutions:**
     *   **Save File Checksum/Hashing:** Implement a checksum/hash for `character.json` to detect any tampering upon loading. This provides general save file integrity.
-    *   **Thematic Time Corruption (24-bit + 8-bit ECC):** For the `time_of_day` variable specifically, a 24-bit integer with 8-bit ECC (Error-Correcting Code) could be used. If the time value from the save file shows an uncorrectable ECC error (either from player tampering or a simulated Y2K event), this could trigger a *specific in-game event* (e.g., a 'time glitch' narrative sequence, a unique challenge) that aligns with the Y2K theme, rather than just rejecting the save. This allows for both general save file integrity and specific thematic corruption.
+    *   **Thematic Time Corruption and Obfuscation:** The `time_of_day` variable is a 32-bit integer with a special structure designed for data integrity and obfuscation. The lower 30 bits constitute an ECC (Error-Correcting Code) codeword, which protects 24 bits of actual time data with 6 bits of validation data (SECDED). The top 2 bits of the 32-bit integer are intentionally ignored by the time-advancement logic, acting as random "noise" to complicate save-file tampering. The 24-bit limit on the time data itself creates a natural cycle of approximately 12 game days, which is a core mechanic of the game's time progression. If the game detects an uncorrectable error in the time data upon loading, it can trigger specific in-game "time glitch" events.

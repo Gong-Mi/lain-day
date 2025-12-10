@@ -32,9 +32,11 @@
 #include "SCENE_SHINJUKU_ABANDONED_SITE_data.h"
 #include "SCENE_DAD_HUB_data.h"
 #include "SCENE_DAD_DAY_0_data.h"
+#include "SCENE_PC_NAVI_DESKTOP_data.h"
 
 // A function pointer type for scene initializers
 typedef void (*SceneInitFunc)(StoryScene*);
+
 
 // The dispatch table mapping scene IDs to their init functions
 static const struct {
@@ -66,6 +68,7 @@ static const struct {
     {"SCENE_SHINJUKU_ABANDONED_SITE", init_scene_scene_shinjuku_abandoned_site_from_data},
     {"SCENE_DAD_HUB", init_scene_scene_dad_hub_from_data},
     {"SCENE_DAD_DAY_0", init_scene_scene_dad_day_0_from_data},
+    {"SCENE_PC_NAVI_DESKTOP", init_scene_scene_pc_navi_desktop_from_data},
 };
 
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(scene_registrations[0]);

@@ -174,6 +174,18 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         enter_embedded_navi(game_state);
         scene_changed = 1;
     } 
+    else if (strcmp(action_id, "USE_NAVI_MINI") == 0) {
+        const char* flag_val = hash_table_get(game_state->flags, "PC_INITIALIZED");
+        if (flag_val == NULL || strcmp(flag_val, "1") != 0) {
+            // First time using the PC
+            strncpy(game_state->current_story_file, "SCENE_01B_NAVI_SHUTDOWN", MAX_PATH_LENGTH - 1);
+            set_flag(game_state, "PC_INITIALIZED", "1");
+        } else {
+            // Subsequent uses
+            strncpy(game_state->current_story_file, "SCENE_PC_NAVI_DESKTOP", MAX_PATH_LENGTH - 1);
+        }
+        scene_changed = 1;
+    } 
     else if (strcmp(action_id, "go_back_to_shibuya") == 0) {
         mika_return_to_schedule();
         strncpy(game_state->player_state.location, "shibuya_street", MAX_NAME_LENGTH - 1);

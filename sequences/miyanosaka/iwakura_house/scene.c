@@ -119,6 +119,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     add_connection(lains_room, "upper_hallway", "iwakura_upper_hallway", NULL, NULL, "SCENE_IWAKURA_UPPER_HALLWAY");
     // POIs from original lain_room
     add_poi(lains_room, "navi_computer", get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_DESC), NULL, "examine_navi");
+    add_poi(lains_room, "navi_mini", get_string_by_id(MAP_POI_LAIN_ROOM_PC_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_PC_DESC), NULL, "USE_NAVI_MINI");
     add_poi(lains_room, "bed", get_string_by_id(MAP_POI_LAINS_ROOM_BED_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BED_DESC_IWAKURA), NULL, NULL);
     add_poi(lains_room, "window", get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_DESC), NULL, NULL);
     add_poi(lains_room, "toy_dog", get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_DESC), NULL, NULL);
