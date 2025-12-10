@@ -156,11 +156,6 @@ void enter_embedded_navi(GameState* game_state) {
 
         get_next_navi_input(line, sizeof(line));
 
-        if (line == NULL) { // Should not happen with the new function
-            strncpy(buffer, "exit", buffer_size - 1);
-            break; 
-        }
-
         // Parse command
         if (strcmp(line, "exit") == 0 || strcmp(line, "0") == 0 || strcmp(line, "quit") == 0) {
 #ifdef USE_DEBUG_LOGGING

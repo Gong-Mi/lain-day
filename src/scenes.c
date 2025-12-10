@@ -16,7 +16,6 @@
 #include "SCENE_01D_NAVI_REBOOT_ENDPROLOGUE_data.h"
 #include "SCENE_01E_NAVI_CONNECT_ENDPROLOGUE_data.h"
 #include "SCENE_02_DOWNSTAIRS_data.h"
-#include "SCENE_02A_TALK_TO_DAD_data.h"
 #include "SCENE_02B_DAD_REPLY_NO_data.h"
 #include "SCENE_02C_DAD_ASK_HELP_data.h"
 #include "SCENE_02D_TALK_TO_MOM_NORMAL_data.h"
@@ -31,6 +30,8 @@
 #include "SCENE_MIKA_ROOM_LOCKED_data.h"
 #include "SCENE_MIKA_ROOM_UNLOCKED_data.h"
 #include "SCENE_SHINJUKU_ABANDONED_SITE_data.h"
+#include "SCENE_DAD_HUB_data.h"
+#include "SCENE_DAD_DAY_0_data.h"
 
 // A function pointer type for scene initializers
 typedef void (*SceneInitFunc)(StoryScene*);
@@ -49,7 +50,6 @@ static const struct {
     {"SCENE_01D_NAVI_REBOOT_ENDPROLOGUE", init_scene_scene_01d_navi_reboot_endprologue_from_data},
     {"SCENE_01E_NAVI_CONNECT_ENDPROLOGUE", init_scene_scene_01e_navi_connect_endprologue_from_data},
     {"SCENE_02_DOWNSTAIRS", init_scene_scene_02_downstairs_from_data},
-    {"SCENE_02A_TALK_TO_DAD", init_scene_scene_02a_talk_to_dad_from_data},
     {"SCENE_02B_DAD_REPLY_NO", init_scene_scene_02b_dad_reply_no_from_data},
     {"SCENE_02C_DAD_ASK_HELP", init_scene_scene_02c_dad_ask_help_from_data},
     {"SCENE_02D_TALK_TO_MOM_NORMAL", init_scene_scene_02d_talk_to_mom_normal_from_data},
@@ -64,6 +64,8 @@ static const struct {
     {"SCENE_MIKA_ROOM_LOCKED", init_scene_scene_mika_room_locked_from_data},
     {"SCENE_MIKA_ROOM_UNLOCKED", init_scene_scene_mika_room_unlocked_from_data},
     {"SCENE_SHINJUKU_ABANDONED_SITE", init_scene_scene_shinjuku_abandoned_site_from_data},
+    {"SCENE_DAD_HUB", init_scene_scene_dad_hub_from_data},
+    {"SCENE_DAD_DAY_0", init_scene_scene_dad_day_0_from_data},
 };
 
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(scene_registrations[0]);
@@ -96,15 +98,8 @@ bool transition_to_scene(const char* target_story_file, StoryScene* scene, GameS
     return false;
 }
 
+#include "conditions.h"
+
 bool is_choice_selectable(const StoryChoice* choice, const GameState* game_state) {
-    if (choice->condition.flag_name[0] == '\0') {
-        return true;
-    }
-    const char* flag_value_str = hash_table_get(game_state->flags, choice->condition.flag_name);
-    if (flag_value_str != NULL) {
-        if (atoi(flag_value_str) == choice->condition.required_value) {
-            return true;
-        }
-    }
-    return false;
+    return check_conditions(game_state, choice->conditions, choice->condition_count);
 }

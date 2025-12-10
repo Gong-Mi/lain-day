@@ -164,7 +164,13 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     }
     
     // --- STORY CHANGE ACTIONS ---
-    if (strcmp(action_id, "examine_navi") == 0) {
+    // New generic scene setter
+    if (strncmp(action_id, "SET_SCENE:", 10) == 0) {
+        const char* target_scene = action_id + 10;
+        strncpy(game_state->current_story_file, target_scene, MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
+    }
+    else if (strcmp(action_id, "examine_navi") == 0) {
         enter_embedded_navi(game_state);
         scene_changed = 1;
     } 
@@ -227,7 +233,7 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         strncpy(game_state->current_story_file, "SCENE_03_CHAPTER_ONE_INTRO", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     } else if (strcmp(action_id, "talk_to_dad") == 0) {
-        strncpy(game_state->current_story_file, "SCENE_02A_TALK_TO_DAD", MAX_PATH_LENGTH - 1);
+        strncpy(game_state->current_story_file, "SCENE_DAD_HUB", MAX_PATH_LENGTH - 1);
         set_flag(game_state, "sister_mood", "normal");
         scene_changed = 1;
     } else if (strcmp(action_id, "talk_to_mom") == 0) {

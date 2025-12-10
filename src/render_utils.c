@@ -1,4 +1,5 @@
 #include "render_utils.h"
+#include "scenes.h"
 #include "ansi_colors.h"
 #include "string_table.h" // Needed for get_string_by_id prototype
 #include "ecc_time.h"
@@ -187,24 +188,8 @@ void render_current_scene(const StoryScene* scene, const struct GameState* game_
         int visible_choice_index = 1;
         for (int i = 0; i < scene->choice_count; i++) {
             const StoryChoice* choice = &scene->choices[i];
-            int is_selectable = 0;
-
-            // Check if there is a condition
-            if (choice->condition.flag_name[0] == '\0') {
-                is_selectable = 1; // No condition, always selectable
-            } else {
-                const char* flag_value_str = hash_table_get(game_state->flags, choice->condition.flag_name);
-                if (flag_value_str != NULL) {
-                    // Flag exists, compare its value
-                    int current_value = atoi(flag_value_str);
-                    if (current_value == choice->condition.required_value) {
-                        is_selectable = 1;
-                    }
-                }
-                // If flag is not set, is_selectable remains 0.
-            }
-
-            if (is_selectable) {
+            
+            if (is_choice_selectable(choice, game_state)) {
                 printf("%d. %s\n", visible_choice_index++, get_string_by_id(choice->text_id));
             } else {
                 // Print disabled choice in gray and without a number

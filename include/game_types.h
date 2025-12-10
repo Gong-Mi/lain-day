@@ -61,10 +61,20 @@ typedef struct {
     const char* examine_action_id;  // For 'exper': Action to trigger on interaction (e.g., opening NAVI).
 } POI;
 
+#define MAX_CONDITIONS_PER_CHOICE 4
+
 typedef struct {
+    // Flag condition
     char flag_name[MAX_NAME_LENGTH];
-    int required_value;
-} ChoiceCondition;
+    char required_value[MAX_NAME_LENGTH];
+
+    // Time conditions (-1 means not used)
+    int min_day;
+    int max_day;
+    int exact_day;
+    int hour_start;
+    int hour_end;
+} Condition;
 
 typedef struct {
     char location_id[MAX_NAME_LENGTH];
@@ -84,7 +94,8 @@ typedef struct {
 typedef struct {
     StringID text_id;
     char action_id[MAX_NAME_LENGTH];
-    ChoiceCondition condition;
+    Condition conditions[MAX_CONDITIONS_PER_CHOICE];
+    int condition_count;
 } StoryChoice;
 
 typedef struct {

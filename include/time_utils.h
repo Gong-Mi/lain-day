@@ -14,4 +14,8 @@ extern volatile bool game_is_running;
 // Function run by the time thread to update game time
 void* time_thread_func(void* arg);
 
+// Functions to interpret game time
+int get_total_game_days(uint32_t time_of_day);
+int get_hour_of_day(uint32_t time_of_day);
+
 #endif // TIME_UTILS_H

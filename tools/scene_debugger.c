@@ -106,8 +106,35 @@ static void debug_print_scene(const StoryScene* scene, const GameState* game_sta
         printf("  Choice %d:\n", i + 1);
         printf("    Text:     \"%s\" (ID: %d)\n", get_string_by_id(choice->text_id), choice->text_id);
         printf("    Action:   %s\n", choice->action_id);
-        if (choice->condition.flag_name[0] != '\0') {
-            printf("    Condition: %s == %d\n", choice->condition.flag_name, choice->condition.required_value);
+
+        if (choice->condition_count > 0) {
+            printf("    Conditions (%d):\n", choice->condition_count);
+            for (int j = 0; j < choice->condition_count; j++) {
+                const Condition* cond = &choice->conditions[j];
+                printf("      - Condition %d:\n", j + 1);
+                if (cond->flag_name[0] != '\0') {
+                    if (cond->required_value[0] != '\0') {
+                        printf("          Flag '%s' must be '%s'\n", cond->flag_name, cond->required_value);
+                    } else {
+                        printf("          Flag '%s' must be set\n", cond->flag_name);
+                    }
+                }
+                if (cond->exact_day != -1) {
+                    printf("          Must be exactly day %d\n", cond->exact_day);
+                }
+                if (cond->min_day != -1) {
+                    printf("          Must be on or after day %d\n", cond->min_day);
+                }
+                if (cond->max_day != -1) {
+                    printf("          Must be on or before day %d\n", cond->max_day);
+                }
+                if (cond->hour_start != -1) {
+                    printf("          Hour must be >= %d\n", cond->hour_start);
+                }
+                if (cond->hour_end != -1) {
+                    printf("          Hour must be <= %d\n", cond->hour_end);
+                }
+            }
         }
     }
     printf("-------------------------------\n");

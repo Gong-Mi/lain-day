@@ -90,7 +90,7 @@ configure_file(
 # Set C standard
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Os")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)

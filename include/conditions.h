@@ -2,9 +2,9 @@
 #define CONDITIONS_H
 
 #include <stdbool.h>
+#include "game_types.h" // For GameState and Condition structs
 
-// Forward declare structs to avoid circular dependencies
-struct GameState;
-struct Connection;
+// Function to check if a set of conditions are met
+bool check_conditions(const struct GameState* game_state, const Condition* conditions, int condition_count);
 
 #endif // CONDITIONS_H

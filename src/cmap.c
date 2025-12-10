@@ -60,7 +60,12 @@ void cmap_insert(CMap* cmap, struct Location_struct* location) {
     
     // The key needs to be duplicated as the original location->id might change
     // or the location struct might be freed elsewhere.
-    new_node->key = strdup(location->id); 
+    new_node->key = strdup(location->id);
+    if (!new_node->key) {
+        fprintf(stderr, "Error: Failed to duplicate key for CMap node.\n");
+        free(new_node);
+        return;
+    }
     new_node->value = location; // Store pointer to the actual location
     new_node->next = NULL;
 

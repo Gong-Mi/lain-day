@@ -152,13 +152,34 @@ def parse_and_validate_ssl(ssl_path, generated_c_header_path, generated_c_source
                 text_id = choice['text_id']
                 action_id = choice['action_id']
                 
-                f.write("    scene->choices[{}] = (StoryChoice){{ {}, \"{}\" }};\n".format(i, text_id, action_id))
-                if 'condition' in choice:
-                    condition = choice['condition']
-                    flag_name = condition['flag']
-                    required_value = condition['value']
-                    f.write("    strcpy(scene->choices[{}].condition.flag_name, \"{}\");\n".format(i, flag_name))
-                    f.write("    scene->choices[{}].condition.required_value = {};\n".format(i, required_value))
+                # Basic choice initialization
+                f.write("    scene->choices[{}] = (StoryChoice){{ .text_id = {}, .action_id = \"{}\", .condition_count = 0 }};\n".format(i, text_id, action_id))
+                
+                # New conditions block
+                if 'conditions' in choice and isinstance(choice['conditions'], list):
+                    conditions = choice['conditions']
+                    f.write("    scene->choices[{}].condition_count = {};\n".format(i, len(conditions)))
+                    for cond_idx, condition in enumerate(conditions):
+                        flag_name = condition.get('requires_flag', '')
+                        flag_value = condition.get('flag_value', '')
+                        min_day = condition.get('min_day', -1)
+                        max_day = condition.get('max_day', -1)
+                        exact_day = condition.get('exact_day', -1)
+                        
+                        hour_is_between = condition.get('hour_is_between', [-1, -1])
+                        hour_start = hour_is_between[0] if isinstance(hour_is_between, list) and len(hour_is_between) == 2 else -1
+                        hour_end = hour_is_between[1] if isinstance(hour_is_between, list) and len(hour_is_between) == 2 else -1
+
+                        f.write("    scene->choices[{}].conditions[{}] = (Condition){{\n".format(i, cond_idx))
+                        f.write("        .flag_name = \"{}\",\n".format(flag_name))
+                        f.write("        .required_value = \"{}\",\n".format(flag_value))
+                        f.write("        .min_day = {},\n".format(min_day))
+                        f.write("        .max_day = {},\n".format(max_day))
+                        f.write("        .exact_day = {},\n".format(exact_day))
+                        f.write("        .hour_start = {},\n".format(hour_start))
+                        f.write("        .hour_end = {},\n".format(hour_end))
+                        f.write("    };\n")
+
 
         # Resolve scene name using StringID
         f.write("    strcpy(scene->name, get_string_by_id({}));\n".format(scene_data['name_text_id']))
