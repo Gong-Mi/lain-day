@@ -1,5 +1,11 @@
-choices: []
-dialogue: []
+choices:
+- text_id: TEXT_CHOICE_TAKE_MILK
+  action_id: take_milk_from_fridge
+- text_id: TEXT_CHOICE_CLOSE_FRIDGE
+  action_id: exit_story
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EXAMINE_FRIDGE_DESC1
 location_id: iwakura_living_dining_kitchen
 name_text_id: TEXT_SCENE_NAME_EXAMINE_FRIDGE
 scene_id: SCENE_EXAMINE_FRIDGE

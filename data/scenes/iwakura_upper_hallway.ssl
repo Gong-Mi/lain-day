@@ -1,5 +1,13 @@
-choices: []
-dialogue: []
-location_id: ''
+choices:
+- text_id: TEXT_CHOICE_ENTER_LAINS_ROOM
+  action_id: lains_room
+- text_id: TEXT_CHOICE_ENTER_MIKAS_ROOM
+  action_id: mikas_room
+- text_id: TEXT_CHOICE_GO_DOWNSTAIRS_FROM_UPPER_HALLWAY
+  action_id: downstairs
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_UPPER_HALLWAY_DESC1
+location_id: iwakura_upper_hallway
 name_text_id: TEXT_SCENE_NAME_IWAKURA_UPPER_HALLWAY
 scene_id: SCENE_IWAKURA_UPPER_HALLWAY

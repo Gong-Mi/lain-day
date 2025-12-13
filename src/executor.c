@@ -141,14 +141,26 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     // --- Refactored: Generic Connection Handling ---
     const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
     if (current_loc != NULL) {
+#ifdef USE_DEBUG_LOGGING
+        fprintf(stderr, "DEBUG: Current location is '%s', connection_count: %d\n", current_loc->id, current_loc->connection_count);
+#endif
         for (int i = 0; i < current_loc->connection_count; i++) {
             const Connection* conn = &current_loc->connections[i];
+#ifdef USE_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG:   Checking connection %d: action_id='%s', target_location_id='%s'\n", i, conn->action_id, conn->target_location_id);
+#endif
             if (strcmp(conn->action_id, action_id) == 0) {
                 // This action corresponds to a map connection. Check for conditions.
+#ifdef USE_DEBUG_LOGGING
+                fprintf(stderr, "DEBUG:   Match found for connection: '%s'\n", conn->action_id);
+#endif
                 if (conn->is_accessible != NULL) {
                     if (!conn->is_accessible(game_state, conn)) {
                         // Access is denied.
                         strncpy(game_state->current_story_file, conn->access_denied_scene_id, MAX_PATH_LENGTH - 1);
+#ifdef USE_DEBUG_LOGGING
+                        fprintf(stderr, "DEBUG:   Access denied. Transitioning to scene: '%s'\n", game_state->current_story_file);
+#endif
                         return 1; // Scene changed to "access denied" scene.
                     }
                 }
@@ -158,15 +170,18 @@ int execute_action(const char* action_id, struct GameState* game_state) {
                 if (conn->target_scene_id != NULL) {
                     strncpy(game_state->current_story_file, conn->target_scene_id, MAX_PATH_LENGTH - 1);
                 } else {
-                    // Fallback: If no specific target scene is provided, try to load a scene based on location ID
-                    // This might be a generic "enter location" scene or an empty scene.
-                    // For now, we'll just keep the current scene to avoid unexpected transitions.
-                    // A better long-term solution would be to define default scenes for locations.
                     fprintf(stderr, "WARNING: Connection to '%s' has no target scene ID. Current scene will persist.\n", conn->target_location_id);
                 }
+#ifdef USE_DEBUG_LOGGING
+                fprintf(stderr, "DEBUG:   Moved to location: '%s', target scene: '%s'\n", game_state->player_state.location, game_state->current_story_file);
+#endif
                 return 1; // Scene or location has changed.
             }
         }
+    } else {
+#ifdef USE_DEBUG_LOGGING
+        fprintf(stderr, "DEBUG: current_loc is NULL for player_state.location '%s'. Map data might not be loaded correctly.\n", game_state->player_state.location);
+#endif
     }
     
     // --- STORY CHANGE ACTIONS ---

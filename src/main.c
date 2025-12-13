@@ -207,6 +207,12 @@ int main(int argc, char *argv[]) {
     if (!load_items_data(game_state)) return 1;
     printf("Items data loaded.\n");
 
+    if (!load_map_data(NULL, game_state)) {
+        fprintf(stderr, "Error: Failed to load map data.\n");
+        return 1;
+    }
+    printf("Map data loaded.\n");
+
     pthread_create(&time_thread_id, NULL, time_thread_func, (void*)game_state);
 
     char input_buffer[MAX_LINE_LENGTH];
