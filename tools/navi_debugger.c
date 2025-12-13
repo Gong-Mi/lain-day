@@ -15,7 +15,6 @@ int main(int argc, char* argv[]) {
     // 1. Initialize a minimal GameState
     GameState game_state;
     memset(&game_state, 0, sizeof(GameState));
-    g_game_state_ptr = &game_state;
 
     // 2. Initialize necessary systems
     if (!load_string_table()) {

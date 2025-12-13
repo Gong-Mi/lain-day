@@ -9,6 +9,9 @@
 #include "characters/mika.h"
 #include "string_table.h" // For get_string_by_id
 #include "systems/embedded_navi.h" // Include the new Embedded NAVI system
+#include "systems/navi_mini.h"
+#include "systems/navi_pro.h"
+#include "systems/navi_alpha.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> // For atoi
@@ -94,6 +97,9 @@ static int get_action_time_cost(const char* action_id) {
     if (strcmp(action_id, "outside") == 0) return 1;
     if (strcmp(action_id, "house") == 0) return 1;
     if (strcmp(action_id, "upper_hallway") == 0) return 1;
+    if (strcmp(action_id, "go_to_park") == 0) return 1;
+    if (strcmp(action_id, "go_to_center_park") == 0) return 1;
+    if (strcmp(action_id, "return_to_street") == 0) return 1;
 
     // Long-distance (placeholders)
     if (strcmp(action_id, "shibuya") == 0) return 25;
@@ -170,20 +176,24 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         strncpy(game_state->current_story_file, target_scene, MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     }
-    else if (strcmp(action_id, "examine_navi") == 0) {
+    else if (strcmp(action_id, "lains_room") == 0) {
+        strncpy(game_state->current_story_file, "SCENE_01_LAIN_ROOM", MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
+    }
+    else if (strcmp(action_id, "use_phone_navi") == 0) {
         enter_embedded_navi(game_state);
         scene_changed = 1;
     } 
-    else if (strcmp(action_id, "USE_NAVI_MINI") == 0) {
-        const char* flag_val = hash_table_get(game_state->flags, "PC_INITIALIZED");
-        if (flag_val == NULL || strcmp(flag_val, "1") != 0) {
-            // First time using the PC
-            strncpy(game_state->current_story_file, "SCENE_01B_NAVI_SHUTDOWN", MAX_PATH_LENGTH - 1);
-            set_flag(game_state, "PC_INITIALIZED", "1");
-        } else {
-            // Subsequent uses
-            strncpy(game_state->current_story_file, "SCENE_PC_NAVI_DESKTOP", MAX_PATH_LENGTH - 1);
-        }
+    else if (strcmp(action_id, "use_desktop_navi") == 0) {
+        enter_navi_mini(game_state);
+        scene_changed = 1;
+    }
+    else if (strcmp(action_id, "use_navi_pro") == 0) {
+        enter_navi_pro(game_state);
+        scene_changed = 1;
+    }
+    else if (strcmp(action_id, "use_navi_alpha") == 0) {
+        enter_navi_alpha(game_state);
         scene_changed = 1;
     } 
     else if (strcmp(action_id, "go_back_to_shibuya") == 0) {
@@ -246,11 +256,6 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         scene_changed = 1;
     } else if (strcmp(action_id, "talk_to_dad") == 0) {
         strncpy(game_state->current_story_file, "SCENE_DAD_HUB", MAX_PATH_LENGTH - 1);
-        set_flag(game_state, "sister_mood", "normal");
-        scene_changed = 1;
-    } else if (strcmp(action_id, "talk_to_mom") == 0) {
-        strncpy(game_state->current_story_file, "SCENE_02D_TALK_TO_MOM_NORMAL", MAX_PATH_LENGTH - 1);
-        set_flag(game_state, "sister_mood", "normal");
         scene_changed = 1;
     } else if (strcmp(action_id, "get_milk") == 0) {
         strncpy(game_state->current_story_file, "SCENE_02J_GET_MILK_ENDPROLOGUE", MAX_PATH_LENGTH - 1);
@@ -358,8 +363,6 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     } else if (strcmp(action_id, "step_on_stage") == 0) {
         strncpy(game_state->current_story_file, "SCENE_SIDE_STORIES_OLD_MIC", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
-    strncpy(game_state->current_story_file, "SCENE_SINGING_RESULT_GUNSHOT", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
     } else if (strcmp(action_id, "trigger_echo") == 0) {
         strncpy(game_state->current_story_file, "SCENE_SIDE_STORIES_SINGING_RESULT_ECHO", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
@@ -384,15 +387,13 @@ int execute_action(const char* action_id, struct GameState* game_state) {
     } else if (strcmp(action_id, "gunshot_advance") == 0) {
         strncpy(game_state->current_story_file, "SCENE_GUNSHOT_ADVANCE", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
-    } else if (strcmp(action_id, "gunshot_exit") == 0) {
-        strncpy(game_state->current_story_file, "SCENE_SINGING_RESULT_GUNSHOT", MAX_PATH_LENGTH - 1);
-        scene_changed = 1;
-strncpy(game_state->current_story_file, "SCENE_00_ENTRY", MAX_PATH_LENGTH - 1);
-        const uint32_t default_start_time_units = 8 * 60 * 60 * 16;
-        game_state->time_of_day = encode_time_with_ecc(default_start_time_units);
-        hash_table_set(game_state->flags, "TIME_GLITCH_ACTIVE", "0");
-        scene_changed = 1;
-    } else if (strcmp(action_id, "end_chapter_two") == 0) {
+        } else if (strcmp(action_id, "gunshot_exit") == 0) {
+            strncpy(game_state->current_story_file, "SCENE_00_ENTRY", MAX_PATH_LENGTH - 1);
+            const uint32_t default_start_time_units = 8 * 60 * 60 * 16;
+            game_state->time_of_day = encode_time_with_ecc(default_start_time_units);
+            hash_table_set(game_state->flags, "TIME_GLITCH_ACTIVE", "0");
+            scene_changed = 1;
+        } else if (strcmp(action_id, "end_chapter_two") == 0) {
         strncpy(game_state->current_story_file, "SCENE_CHAPTER_THREE_INTRO", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     }
@@ -549,9 +550,9 @@ bool execute_command(const char* input, GameState* game_state) {
         } else { // Command is just "arls" (no specific POI ID)
             printf("\n--- Area List Scan ---\n");
 #ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Arls: Player location ID is '%s'.\n", g_game_state_ptr->player_state.location);
+    fprintf(stderr, "Executor ERROR: Arls: Player location ID is '%s'.\n", game_state->player_state.location);
 #endif
-            Location *current_loc = get_location_by_id(g_game_state_ptr->player_state.location);
+            Location *current_loc = get_location_by_id(game_state->player_state.location);
             if (current_loc) {
 #ifdef USE_DEBUG_LOGGING
                 fprintf(stderr, "DEBUG: Arls: Retrieved location '%s', pois_count: %d. Description (first 50 chars): '%.50s...'\n", current_loc->id, current_loc->pois_count, current_loc->description);
@@ -581,7 +582,7 @@ bool execute_command(const char* input, GameState* game_state) {
             }
 #ifdef USE_DEBUG_LOGGING
             else {
-                fprintf(stderr, "ERROR: Arls: get_location_by_id returned NULL for ID '%s'. Current location '%s' not found in map data.\n", g_game_state_ptr->player_state.location, g_game_state_ptr->player_state.location);
+                fprintf(stderr, "ERROR: Arls: get_location_by_id returned NULL for ID '%s'. Current location '%s' not found in map data.\n", game_state->player_state.location, game_state->player_state.location);
             }
 #endif
             printf("----------------------\n");

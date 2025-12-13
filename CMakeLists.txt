@@ -242,6 +242,12 @@ set(GAME_ENGINE_SOURCES
 
         src/systems/embedded_navi.c
 
+        src/systems/navi_mini.c
+
+        src/systems/navi_pro.c
+
+        src/systems/navi_alpha.c
+
         external/linenoise/linenoise.c
     external/linenoise/stringbuf.c
 
@@ -268,10 +274,15 @@ target_link_libraries(scene_debugger PUBLIC zlibstatic pthread)
 add_executable(navi_debugger tools/navi_debugger.c ${GAME_ENGINE_SOURCES})
 target_link_libraries(navi_debugger PUBLIC zlibstatic pthread)
 
+# Map debugger tool
+add_executable(map_debugger tools/map_debugger.c ${GAME_ENGINE_SOURCES})
+target_link_libraries(map_debugger PUBLIC zlibstatic pthread)
+
 # Add dependency to ensure header is generated before compiling executables
 add_dependencies(lain_day_c generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes)
 add_dependencies(scene_debugger generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes)
 add_dependencies(navi_debugger generate_string_ids_header)
+add_dependencies(map_debugger generate_string_ids_header)
 
 # Add feature toggle definitions
 # The following compile definitions (USE_TYPEWRITER_EFFECT, USE_DEBUG_LOGGING, etc.)

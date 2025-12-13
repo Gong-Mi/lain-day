@@ -152,8 +152,9 @@ typedef struct GameState {
     bool has_transient_message;
 } GameState;
 
-// Global pointer to the GameState instance
-extern GameState* g_game_state_ptr;
+// Global game state and configuration
+extern struct GameState* game_state;
+extern bool g_character_father_alive_compile_time; // Reflects CHARACTER_FATHER_ALIVE compile-time setting
 
 // Globals for command-line arguments
 extern int g_argc;

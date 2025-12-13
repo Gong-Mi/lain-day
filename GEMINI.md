@@ -94,6 +94,18 @@ While the fail-fast approach is crucial during development, the long-term goal f
 *   **Preserve Fail-Fast in Debug Builds:** The scene lookup function, even when using enums, should retain its strictness. In debug builds, an invalid scene identifier should still trigger an immediate assertion or crash, preserving the rapid feedback loop.
 *   **Goal:** To evolve the scene management system to be compile-time safe and highly readable through enums, while strictly enforcing the fail-fast discipline during development builds to maximize solo developer efficiency.
 
+### Map and Location Architecture
+
+The game's world map is constructed programmatically at runtime, moving away from a previous placeholder system.
+
+1.  **Location Definition:** The canonical definition for game locations (e.g., Lain's room, the street, parks) is now done in dedicated C files, typically named `scene.c`, located within subdirectories of the `sequences/` directory (e.g., `sequences/miyanosaka/iwakura_house/scene.c`). Each of these files contains a function (e.g., `create_iwakura_house_layout`) that programmatically defines one or more `Location` structs.
+
+2.  **Central Loader:** The main `load_map_data` function in `src/map_loader.c` acts as the central aggregator. It is responsible for calling the various `create_*_layout` functions from the `sequences` directory to collect all locations and populate the final world map.
+
+3.  **POIs and Connections:** Within each location's definition, Points of Interest (POIs) and Connections to other locations are added programmatically using the `add_poi_to_location` and `add_connection_to_location` helper functions. These connections use action IDs (e.g., `go_to_park`, `use_desktop_navi`) which are then handled by the `executor.c` module.
+
+4.  **Deprecated Placeholder System:** The function `load_programmatic_map_data` within `src/map_loader.c` previously contained hardcoded placeholder locations. This system is now **fully deprecated and has been gutted**. All locations are now defined through the more modular `sequences` system to avoid data duplication and logical errors.
+
 ## Millennium Crisis Integration Design Considerations
 
 **NOTE: The following section describes a design concept for a potential future feature. It has NOT been implemented.**

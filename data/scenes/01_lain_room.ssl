@@ -1,7 +1,7 @@
 choices:
 - action_id: talk_to_figure
   text_id: TEXT_CHOICE_TALK_TO_FIGURE
-- action_id: examine_navi
+- action_id: use_desktop_navi
   text_id: TEXT_CHOICE_EXAMINE_NAVI
 - action_id: upper_hallway
   text_id: TEXT_CHOICE_LEAVE_ROOM

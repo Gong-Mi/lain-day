@@ -1,6 +1,8 @@
 #ifndef EMBEDDED_NAVI_H
 #define EMBEDDED_NAVI_H
 
+// This system is for the mobile phone's embedded NAVI interface.
+
 #include "game_types.h"
 
 /**

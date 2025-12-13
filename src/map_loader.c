@@ -10,6 +10,8 @@
 // #include <ctype.h> // No longer directly used for map loading
 
 #include "../sequences/miyanosaka/iwakura_house/scene.h" // For dynamic layout
+#include "../sequences/miyanosaka/street/scene.h" // For dynamic layout
+#include "../sequences/miyanosaka/station/scene.h" // For dynamic layout
 #include "../sequences/shibuya/cyberia_club/scene.h" // For dynamic layout
 #include "../sequences/shinjuku/chisa_home/scene.h" // For dynamic layout
 
@@ -63,70 +65,9 @@ static int load_programmatic_map_data(GameState* game_state) {
         return 0;
     }
 
-    // --- Placeholder: lain_room ---
-    Location* lain_room = &game_state->all_locations[game_state->location_count];
-    init_location(lain_room, "lain_room", get_string_by_id(MAP_LOCATION_LAIN_ROOM_NAME), get_string_by_id(MAP_LOCATION_LAIN_ROOM_DESC));
-    add_poi_to_location(lain_room, "navi", get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_NAVI_DESC), "examine_navi");
-    add_poi_to_location(lain_room, "bed", get_string_by_id(MAP_POI_LAIN_ROOM_BED_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_BED_DESC), NULL);
-    add_connection_to_location(lain_room, "downstairs", "downstairs", NULL, NULL, "SCENE_02_DOWNSTAIRS");
-    cmap_insert(game_state->location_map, lain_room);
-#ifdef USE_MAP_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", lain_room->id);
-#endif
-    game_state->location_count++;
-
-    // --- Placeholder: downstairs ---
-    if (game_state->location_count >= MAX_LOCATIONS) return 0;
-    Location* downstairs = &game_state->all_locations[game_state->location_count];
-    init_location(downstairs, "downstairs", get_string_by_id(MAP_LOCATION_DOWNSTAIRS_NAME), get_string_by_id(MAP_LOCATION_DOWNSTAIRS_DESC));
-    add_poi_to_location(downstairs, "kitchen", get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_KITCHEN_DESC), NULL);
-    add_poi_to_location(downstairs, "tv", get_string_by_id(MAP_POI_DOWNSTAIRS_TV_NAME), get_string_by_id(MAP_POI_DOWNSTAIRS_TV_DESC), NULL);
-    add_connection_to_location(downstairs, "lains_room", "lain_room", NULL, NULL, "SCENE_01_LAIN_ROOM");
-    add_connection_to_location(downstairs, "outside", "outside_house", NULL, NULL, "SCENE_00_ENTRY");
-    cmap_insert(game_state->location_map, downstairs);
-#ifdef USE_MAP_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", downstairs->id);
-#endif
-    game_state->location_count++;
-
-    // --- Placeholder: outside_house ---
-    if (game_state->location_count >= MAX_LOCATIONS) return 0;
-    Location* outside_house = &game_state->all_locations[game_state->location_count];
-    init_location(outside_house, "outside_house", get_string_by_id(MAP_LOCATION_OUTSIDE_HOUSE_NAME), get_string_by_id(MAP_LOCATION_OUTSIDE_HOUSE_DESC));
-    add_poi_to_location(outside_house, "mailbox", get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_NAME), get_string_by_id(MAP_POI_OUTSIDE_HOUSE_MAILBOX_DESC), NULL);
-    add_connection_to_location(outside_house, "downstairs", "downstairs", NULL, NULL, "SCENE_02_DOWNSTAIRS"); // Action leads back
-    add_connection_to_location(outside_house, "shibuya", "shibuya_street", NULL, NULL, "SCENE_09_CYBERIA");
-    cmap_insert(game_state->location_map, outside_house);
-#ifdef USE_MAP_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", outside_house->id);
-#endif
-    game_state->location_count++;
-
-    // --- Placeholder: shibuya_street ---
-    if (game_state->location_count >= MAX_LOCATIONS) return 0;
-    Location* shibuya_street = &game_state->all_locations[game_state->location_count];
-    init_location(shibuya_street, "shibuya_street", get_string_by_id(MAP_LOCATION_SHIBUYA_STREET_NAME), get_string_by_id(MAP_LOCATION_SHIBUYA_STREET_DESC));
-    add_poi_to_location(shibuya_street, "crosswalk", get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_NAME), get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSWALK_DESC), NULL);
-    add_connection_to_location(shibuya_street, "home", "outside_house", NULL, NULL, "SCENE_00_ENTRY");
-    add_connection_to_location(shibuya_street, "cyberia", "cyberia_club", NULL, NULL, "SCENE_09_CYBERIA");
-    add_connection_to_location(shibuya_street, "shinjuku_site", "shinjuku_abandoned_site", NULL, NULL, "SCENE_SHINJUKU_ABANDONED_SITE");
-    cmap_insert(game_state->location_map, shibuya_street);
-#ifdef USE_MAP_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", shibuya_street->id);
-#endif
-    game_state->location_count++;
-
-    // --- New Location: Shinjuku Abandoned Site ---
-    if (game_state->location_count >= MAX_LOCATIONS) return 0;
-    Location* shinjuku_abandoned_site = &game_state->all_locations[game_state->location_count];
-    init_location(shinjuku_abandoned_site, "shinjuku_abandoned_site", get_string_by_id(MAP_LOCATION_SHINJUKU_ABANDONED_SITE_NAME), get_string_by_id(MAP_LOCATION_SHINJUKU_ABANDONED_SITE_DESC));
-    add_connection_to_location(shinjuku_abandoned_site, "shibuya", "shibuya_street", NULL, NULL, "SCENE_09_CYBERIA");
-    cmap_insert(game_state->location_map, shinjuku_abandoned_site);
-#ifdef USE_MAP_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Programmatically added location: %s\n", shinjuku_abandoned_site->id);
-#endif
-    game_state->location_count++;
-
+    // All programmatic locations are now deprecated and have been moved to
+    // dynamic layout creation in the /sequences directory.
+    // This function remains as a stub.
 
     return 1; // Success
 }
@@ -135,10 +76,10 @@ static int load_programmatic_map_data(GameState* game_state) {
 
 // Helper function to get a location by its ID from the GameState's map
 Location* get_location_by_id(const char* location_id) {
-    if (g_game_state_ptr == NULL || g_game_state_ptr->location_map == NULL || location_id == NULL) {
+    if (game_state == NULL || game_state->location_map == NULL || location_id == NULL) {
         return NULL;
     }
-    return (Location*)cmap_get(g_game_state_ptr->location_map, location_id);
+    return (Location*)cmap_get(game_state->location_map, location_id);
 }
 
 int load_map_data(const char* map_dir_path, GameState* game_state) {
@@ -241,6 +182,26 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
             }
         }
 #endif
+    }
+
+    // --- Dynamically add Miyanosaka Street layout ---
+    rooms_added = create_miyanosaka_street_layout(game_state->all_locations, game_state->location_count);
+    if (rooms_added > 0) {
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* new_loc = &game_state->all_locations[game_state->location_count + i];
+            cmap_insert(game_state->location_map, new_loc);
+        }
+        game_state->location_count += rooms_added;
+    }
+
+    // --- Dynamically add Miyanosaka Station layout ---
+    rooms_added = create_miyanosaka_station_layout(game_state->all_locations, game_state->location_count);
+    if (rooms_added > 0) {
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* new_loc = &game_state->all_locations[game_state->location_count + i];
+            cmap_insert(game_state->location_map, new_loc);
+        }
+        game_state->location_count += rooms_added;
     }
 
 

@@ -17,5 +17,7 @@ void* time_thread_func(void* arg);
 // Functions to interpret game time
 int get_total_game_days(uint32_t time_of_day);
 int get_hour_of_day(uint32_t time_of_day);
+int get_minute_of_hour(uint32_t time_of_day);
+int get_second_of_minute(uint32_t time_of_day);
 
 #endif // TIME_UTILS_H

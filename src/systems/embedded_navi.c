@@ -1,3 +1,6 @@
+// This file implements the self-contained, interactive embedded NAVI system
+// for the mobile phone interface.
+
 #include "../include/systems/embedded_navi.h"
 #include "string_table.h"
 #include "render_utils.h"
@@ -127,7 +130,7 @@ static void handle_network(GameState* game_state) {
 
 static void handle_system_info() {
     printf("%s\n--- SYSTEM INFO ---\n%s", COLOR_NAVI_SYSTEM, ANSI_COLOR_RESET);
-    printf("Hardware: NAVI-X (Desktop Model)\n");
+    printf("Hardware: NAVI-M (Mobile Model)\n");
     printf("Kernel:   Copland OS (Patched)\n");
     printf("User:     Iwakura Lain\n");
     printf("Uptime:   00:04:21\n");

@@ -65,8 +65,12 @@
     "name": "固件刷写器",
     "description": "一条特制的数据线，一端是标准的USB接口，另一端是一个带有探针的复杂连接器。可以用来重写设备的底层固件。"
   },
-  "data_cable": {
+  "data_cable_transfer_only": {
     "name": "数据线",
-    "description": "一条普通的NAVI数据传输线。"
+    "description": "一条随处可见的数据线，它只能进行基本的数据传输。"
+  },
+  "data_cable_firmware": {
+    "name": "數据线",
+    "description": "一条平平无奇的数据线，但它带有一个隐藏的固件刷写模块，可以用于重写设备的底层固件。"
   }
 }

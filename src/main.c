@@ -36,6 +36,7 @@ static uint32_t scene_entry_time = 0;
 // --- Function Prototypes ---
 void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index);
 int is_numeric(const char* str);
+bool is_valid_session_name(const char* name); // Added prototype for session name validation
 static bool process_events(GameState* game_state, StoryScene* current_scene);
 
 // --- Event Handling ---
@@ -79,12 +80,6 @@ int main(int argc, char *argv[]) {
     GamePaths paths;
     init_paths(argv[0], &paths);
 
-    if (!load_string_table()) {
-        fprintf(stderr, "Error: Failed to load embedded string table.\n");
-        return 1;
-    }
-    printf("String table loaded.\n");
-
     char session_name[MAX_NAME_LENGTH] = {0};
     char character_session_file_path[MAX_PATH_LENGTH] = {0};
     char session_dir_path[MAX_PATH_LENGTH] = {0};
@@ -92,10 +87,21 @@ int main(int argc, char *argv[]) {
     g_arg_index_ptr = &arg_index;
     bool is_test_mode = false;
 
-    GameState game_state;
-    memset(&game_state, 0, sizeof(GameState));
-    game_state.has_transient_message = false;
-    g_game_state_ptr = &game_state;
+    // Allocate and initialize the global game_state pointer
+    game_state = malloc(sizeof(GameState));
+    if (game_state == NULL) {
+        fprintf(stderr, "Error: Failed to allocate memory for GameState.\n");
+        return 1;
+    }
+    memset(game_state, 0, sizeof(GameState));
+    game_state->has_transient_message = false;
+
+    // Load string table first as other components depend on it
+    if (!load_string_table()) {
+        fprintf(stderr, "Error: Failed to load the string table.\n");
+        free(game_state);
+        return 1;
+    }
 
     while (arg_index < argc && argv[arg_index][0] == '-') {
         if (strcmp(argv[arg_index], "-d") == 0) {
@@ -123,25 +129,40 @@ int main(int argc, char *argv[]) {
         if (argc > arg_index) {
             strncpy(session_name, argv[arg_index], MAX_NAME_LENGTH - 1);
             session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
+            if (!is_valid_session_name(session_name)) {
+                printf("%s: %s\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME), session_name);
+                return 1; // Exit on invalid argument
+            }
             printf("Using session name from argument: %s\n", session_name);
             arg_index++;
         } else {
-             char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
-             if(line) {
-                strncpy(session_name, line, MAX_NAME_LENGTH -1);
-                session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
-                // linenoiseHistoryAdd(line); // Temporarily disable history to debug segfault
-                free(line);
-             } else {
-                 fprintf(stderr, "Error: Failed to read session name, or EOF received.\n");
-                 return 1; // Exit game
-             }
-        }
-        if (strlen(session_name) == 0) { // Check if session_name is empty after input
-            fprintf(stderr, "Error: Session name cannot be empty.\n");
-            return 1;
-        }
-
+                do {
+                    char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
+                    if(line) {
+                        strncpy(session_name, line, MAX_NAME_LENGTH -1);
+                        session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
+                        free(line);
+                        if (strlen(session_name) == 0) { // Check for empty input specifically
+                            printf("%s\n", get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY));
+                            continue; // Ask again
+                        }
+                        if (!is_valid_session_name(session_name)) {
+                            printf("%s\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME));
+                            session_name[0] = '\0'; // Clear to re-enter loop
+                            continue;
+                        }
+                    } else {
+                         fprintf(stderr, "Error: Failed to read session name, or EOF received.\n");
+                         return 1; // Exit game
+                    }
+                } while (session_name[0] == '\0'); // Loop until valid name is entered
+            }
+        
+            // No need for separate empty check here, handled in loop
+            // if (strlen(session_name) == 0) {
+            //     fprintf(stderr, "Error: Session name cannot be empty.\n");
+            //     return 1;
+            // }
         if (!ensure_directory_exists_recursive(paths.session_root_dir, 0755)) {
             fprintf(stderr, "Error: Failed to create session root directory '%s'. Check permissions or path.\n", paths.session_root_dir);
             return 1;
@@ -163,28 +184,28 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    if (!load_player_state(character_session_file_path, &game_state)) {
+    if (!load_player_state(character_session_file_path, game_state)) {
         fprintf(stderr, "Error: Failed to load player state from '%s'.\n", character_session_file_path);
         return 1;
     }
     printf("Player data loaded.\n");
 
-    if (!load_items_data(&game_state)) return 1;
+    if (!load_items_data(game_state)) return 1;
     printf("Items data loaded.\n");
 
-    pthread_create(&time_thread_id, NULL, time_thread_func, (void*)&game_state);
+    pthread_create(&time_thread_id, NULL, time_thread_func, (void*)game_state);
 
     char input_buffer[MAX_LINE_LENGTH];
     StoryScene current_scene;
     bool dirty = true;
 
     pthread_mutex_lock(&time_mutex);
-    if (!transition_to_scene(game_state.current_story_file, &current_scene, &game_state)) {
-        fprintf(stderr, "Failed to initialize starting scene: %s\n", game_state.current_story_file);
+    if (!transition_to_scene(game_state->current_story_file, &current_scene, game_state)) {
+        fprintf(stderr, "Failed to initialize starting scene: %s\n", game_state->current_story_file);
         pthread_mutex_unlock(&time_mutex);
         return 1;
     }
-    scene_entry_time = decode_time_with_ecc(game_state.time_of_day).data;
+    scene_entry_time = decode_time_with_ecc(game_state->time_of_day).data;
     pthread_mutex_unlock(&time_mutex);
 
     while (game_is_running) {
@@ -192,7 +213,7 @@ int main(int argc, char *argv[]) {
 
         pthread_mutex_lock(&time_mutex);
 
-        if (process_events(&game_state, &current_scene)) {
+        if (process_events(game_state, &current_scene)) {
             dirty = true;
         }
 
@@ -204,7 +225,7 @@ int main(int argc, char *argv[]) {
                 int visible_choice_count = 0;
                 int target_array_index = -1;
                 for (int i = 0; i < current_scene.choice_count; i++) {
-                    if (is_choice_selectable(&current_scene.choices[i], &game_state)) {
+                    if (is_choice_selectable(&current_scene.choices[i], game_state)) {
                         visible_choice_count++;
                         if (visible_choice_count == choice_num) {
                             target_array_index = i;
@@ -213,14 +234,14 @@ int main(int argc, char *argv[]) {
                     }
                 }
                 if (target_array_index != -1) {
-                    if (execute_action(current_scene.choices[target_array_index].action_id, &game_state)) {
+                    if (execute_action(current_scene.choices[target_array_index].action_id, game_state)) {
                         dirty = true;
                     }
                 } else {
                     printf("Invalid choice.\n");
                 }
             } else {
-                if (execute_command(input_buffer, &game_state)) {
+                if (execute_command(input_buffer, game_state)) {
                     dirty = true;
                 }
             }
@@ -228,15 +249,15 @@ int main(int argc, char *argv[]) {
         }
 
         if (dirty) {
-            if (strcmp(current_scene.scene_id, game_state.current_story_file) != 0) {
-                if (transition_to_scene(game_state.current_story_file, &current_scene, &game_state)) {
-                    scene_entry_time = decode_time_with_ecc(game_state.time_of_day).data;
+            if (strcmp(current_scene.scene_id, game_state->current_story_file) != 0) {
+                if (transition_to_scene(game_state->current_story_file, &current_scene, game_state)) {
+                    scene_entry_time = decode_time_with_ecc(game_state->time_of_day).data;
                 } else {
                     game_is_running = false;
                 }
             }
             if (game_is_running) {
-                render_current_scene(&current_scene, &game_state);
+                render_current_scene(&current_scene, game_state);
             }
             dirty = false;
         }
@@ -248,12 +269,12 @@ int main(int argc, char *argv[]) {
     pthread_join(time_thread_id, NULL);
     
     if (!is_test_mode) {
-        if (!save_game_state(character_session_file_path, &game_state)) {
+        if (!save_game_state(character_session_file_path, game_state)) {
              fprintf(stderr, "Error saving game state.\n");
         }
     }
     
-    cleanup_game_state(&game_state);
+    cleanup_game_state(game_state);
     pthread_mutex_destroy(&time_mutex);
 
     printf("\nLain-day C version exiting.\n");
@@ -304,4 +325,16 @@ int is_numeric(const char* str) {
         }
     }
     return 1;
+}
+
+bool is_valid_session_name(const char* name) {
+    if (name == NULL || *name == '\0') {
+        return false;
+    }
+    for (int i = 0; name[i] != '\0'; i++) {
+        if (!isalnum((unsigned char)name[i]) && name[i] != '_' && name[i] != '-') {
+            return false; // Found an invalid character
+        }
+    }
+    return true; // All characters are valid
 }

@@ -80,3 +80,29 @@ int get_hour_of_day(uint32_t time_of_day) {
     
     return (total_minutes / 60) % 24;
 }
+
+int get_minute_of_hour(uint32_t time_of_day) {
+    DecodedTimeResult decoded_result = decode_time_with_ecc(time_of_day);
+    if (decoded_result.status == DOUBLE_BIT_ERROR_DETECTED) {
+        return -1; // Indicate error
+    }
+
+    uint32_t raw_units = decoded_result.data;
+    uint32_t total_seconds = raw_units / 16;
+    uint32_t total_minutes = total_seconds / 60;
+    
+    return total_minutes % 60;
+}
+
+int get_second_of_minute(uint32_t time_of_day) {
+    DecodedTimeResult decoded_result = decode_time_with_ecc(time_of_day);
+    if (decoded_result.status == DOUBLE_BIT_ERROR_DETECTED) {
+        return -1; // Indicate error
+    }
+
+    uint32_t raw_units = decoded_result.data;
+    uint32_t total_seconds = raw_units / 16;
+    
+    return total_seconds % 60;
+}
+

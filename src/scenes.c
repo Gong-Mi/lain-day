@@ -34,6 +34,9 @@
 #include "SCENE_DAD_DAY_0_data.h"
 #include "SCENE_PC_NAVI_DESKTOP_data.h"
 
+#include "SCENE_DAD_HUB_data.h"
+#include "SCENE_DAD_DAY_0_data.h"
+
 // A function pointer type for scene initializers
 typedef void (*SceneInitFunc)(StoryScene*);
 
@@ -66,8 +69,10 @@ static const struct {
     {"SCENE_MIKA_ROOM_LOCKED", init_scene_scene_mika_room_locked_from_data},
     {"SCENE_MIKA_ROOM_UNLOCKED", init_scene_scene_mika_room_unlocked_from_data},
     {"SCENE_SHINJUKU_ABANDONED_SITE", init_scene_scene_shinjuku_abandoned_site_from_data},
+#ifdef CHARACTER_FATHER_ALIVE
     {"SCENE_DAD_HUB", init_scene_scene_dad_hub_from_data},
     {"SCENE_DAD_DAY_0", init_scene_scene_dad_day_0_from_data},
+#endif
     {"SCENE_PC_NAVI_DESKTOP", init_scene_scene_pc_navi_desktop_from_data},
 };
 

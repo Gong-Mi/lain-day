@@ -64,6 +64,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(front_yard->name, get_string_by_id(MAP_LOCATION_FRONT_YARD_NAME));
     strcpy(front_yard->description, get_string_by_id(MAP_LOCATION_FRONT_YARD_DESC));
     add_connection(front_yard, "house", "iwakura_lower_hallway", NULL, NULL, "SCENE_02_DOWNSTAIRS");
+    add_connection(front_yard, "street", "miyanosaka_street", NULL, NULL, NULL);
     add_poi(front_yard, "mailbox", get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_NAME), get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_DESC), NULL, NULL);
     add_poi(front_yard, "doorbell", get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_NAME), get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_DESC), NULL, NULL);
 
@@ -100,6 +101,9 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     add_connection(bathroom, "hallway", "iwakura_lower_hallway", NULL, NULL, "SCENE_02_DOWNSTAIRS");
     add_poi(bathroom, "sink", get_string_by_id(MAP_POI_BATHROOM_SINK_NAME), get_string_by_id(MAP_POI_BATHROOM_SINK_DESC), NULL, NULL);
     add_poi(bathroom, "bathtub", get_string_by_id(MAP_POI_BATHROOM_BATHTUB_NAME), get_string_by_id(MAP_POI_BATHROOM_BATHTUB_DESC), NULL, NULL);
+    // Add new POIs for mirror and shower
+    add_poi(bathroom, "mirror", get_string_by_id(MAP_POI_BATHROOM_MIRROR_NAME), get_string_by_id(MAP_POI_BATHROOM_MIRROR_DESC), NULL, NULL);
+    add_poi(bathroom, "shower", get_string_by_id(MAP_POI_BATHROOM_SHOWER_NAME), get_string_by_id(MAP_POI_BATHROOM_SHOWER_DESC), NULL, NULL);
 
     // --- 5. Upper Hallway (上走廊) ---
     *upper_hallway = (Location){0};
@@ -118,8 +122,8 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(lains_room->description, get_string_by_id(MAP_LOCATION_LAINS_ROOM_DESC_IWAKURA));
     add_connection(lains_room, "upper_hallway", "iwakura_upper_hallway", NULL, NULL, "SCENE_IWAKURA_UPPER_HALLWAY");
     // POIs from original lain_room
-    add_poi(lains_room, "navi_computer", get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_DESC), NULL, "examine_navi");
-    add_poi(lains_room, "navi_mini", get_string_by_id(MAP_POI_LAIN_ROOM_PC_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_PC_DESC), NULL, "USE_NAVI_MINI");
+    add_poi(lains_room, "navi_computer", get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_NAVI_COMPUTER_DESC), NULL, "use_phone_navi");
+    add_poi(lains_room, "navi_mini", get_string_by_id(MAP_POI_LAIN_ROOM_PC_NAME), get_string_by_id(MAP_POI_LAIN_ROOM_PC_DESC), NULL, "use_desktop_navi");
     add_poi(lains_room, "bed", get_string_by_id(MAP_POI_LAINS_ROOM_BED_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BED_DESC_IWAKURA), NULL, NULL);
     add_poi(lains_room, "window", get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_DESC), NULL, NULL);
     add_poi(lains_room, "toy_dog", get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_DESC), NULL, NULL);
