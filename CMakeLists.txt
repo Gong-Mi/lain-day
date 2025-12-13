@@ -241,6 +241,7 @@ set(GAME_ENGINE_SOURCES
         src/game_paths.c
 
         src/systems/embedded_navi.c
+        src/systems/mail_system.c # New: Add mail system source file
 
         src/systems/navi_mini.c
 

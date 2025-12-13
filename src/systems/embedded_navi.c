@@ -2,6 +2,7 @@
 // for the mobile phone interface.
 
 #include "../include/systems/embedded_navi.h"
+#include "../include/systems/mail_system.h" // New include
 #include "string_table.h"
 #include "render_utils.h"
 #include "linenoise.h"
@@ -81,11 +82,61 @@ static void print_menu() {
 }
 
 static void handle_mail(GameState* game_state) {
-    printf("%s\nScanning mailboxes...\n%s", COLOR_NAVI_SYSTEM, ANSI_COLOR_RESET);
-    sleep(1);
-    printf("No new messages.\n");
-    printf("(Press ENTER to return)");
-    (void)getchar();
+    Mailbox mailbox;
+    mail_system_init(&mailbox);
+    mail_system_load_emails(&mailbox, "world/home/lain/Maildir"); // Use relative path
+
+    char mail_cmd_line[MAX_LINE_LENGTH];
+    int mail_running = 1;
+
+    while (mail_running) {
+        clear_screen();
+        print_header(game_state);
+        mail_system_display_list(&mailbox);
+
+        printf("%sMAIL> %s", COLOR_NAVI_SYSTEM, ANSI_COLOR_RESET);
+        get_next_navi_input(mail_cmd_line, sizeof(mail_cmd_line));
+
+        if (strcmp(mail_cmd_line, "list") == 0) {
+            // Already displayed by mail_system_display_list, just wait
+            printf("%s(Already showing list. Type 'read <id>', 'delete <id>', or 'back')\n%s", COLOR_NAVI_SYSTEM, ANSI_COLOR_RESET);
+            usleep(800000);
+        } else if (strncmp(mail_cmd_line, "read ", 5) == 0) {
+            int email_id_to_read = atoi(mail_cmd_line + 5);
+            int email_index_to_read = -1;
+            for (int i = 0; i < mailbox.email_count; ++i) {
+                if (mailbox.emails[i].id == email_id_to_read && !mailbox.emails[i].is_deleted) { // Only read non-deleted
+                    email_index_to_read = i;
+                    break;
+                }
+            }
+
+            if (email_index_to_read != -1) {
+                clear_screen();
+                print_header(game_state);
+                mail_system_display_email(&mailbox, email_index_to_read);
+                mail_system_mark_as_read(&mailbox, email_id_to_read);
+                printf("\n(Press ENTER to return to mail list)");
+                (void)getchar();
+            } else {
+                printf("%sERROR: Invalid or deleted email ID. Type 'list' to see available IDs.\n%s", COLOR_NAVI_ERROR, ANSI_COLOR_RESET);
+                usleep(800000);
+            }
+        } else if (strncmp(mail_cmd_line, "delete ", 7) == 0) { // New delete command
+            int email_id_to_delete = atoi(mail_cmd_line + 7);
+            mail_system_delete_email(&mailbox, "world/home/lain/Maildir", email_id_to_delete);
+            // After deletion, reload emails to reflect the change in the list
+            mail_system_load_emails(&mailbox, "world/home/lain/Maildir");
+            usleep(800000); // Give user time to read output
+        } else if (strcmp(mail_cmd_line, "back") == 0 || strcmp(mail_cmd_line, "exit") == 0 || strcmp(mail_cmd_line, "0") == 0) {
+            mail_running = 0;
+        } else if (strlen(mail_cmd_line) > 0) {
+            printf("%sUnknown mail command: '%s'. Try 'list', 'read <id>', 'delete <id>', or 'back'.\n%s", COLOR_NAVI_ERROR, mail_cmd_line, ANSI_COLOR_RESET);
+            usleep(800000);
+        }
+    }
+
+    mail_system_cleanup(&mailbox); // Clean up after exiting mail system
 }
 
 static void handle_network(GameState* game_state) {

@@ -1,4 +1,6 @@
-choices: []
+choices:
+- action_id: prologue_go_downstairs
+  text_id: TEXT_CHOICE_GO_DOWNSTAIRS
 dialogue:
 - speaker: SPEAKER_NONE
   text_id: TEXT_NAVI_SHUTDOWN_TITLE

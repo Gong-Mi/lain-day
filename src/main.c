@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <sys/select.h>
 #include <fcntl.h>
+#include <locale.h> // Required for setlocale()
 
 #include "game_paths.h"
 #include "build_info.h"
@@ -67,6 +68,7 @@ static bool process_events(GameState* game_state, StoryScene* current_scene) {
 
 // --- Main Function ---
 int main(int argc, char *argv[]) {
+    setlocale(LC_ALL, ""); // Set locale for proper multibyte character handling
     g_argc = argc;
     g_argv = argv;
     init_mika_module();
@@ -137,22 +139,34 @@ int main(int argc, char *argv[]) {
             arg_index++;
         } else {
                 do {
-                    char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
-                    if(line) {
-                        strncpy(session_name, line, MAX_NAME_LENGTH -1);
+                    char temp_line_buffer[MAX_NAME_LENGTH + 2]; // +2 for newline and null terminator
+                    printf("%s", get_string_by_id(TEXT_PROMPT_SESSION_NAME)); // Use printf for prompt
+                    fflush(stdout); // Ensure prompt is displayed immediately
+
+                    if (fgets(temp_line_buffer, sizeof(temp_line_buffer), stdin) != NULL) {
+                        // Remove trailing newline character if present
+                        size_t len = strlen(temp_line_buffer);
+                        if (len > 0 && temp_line_buffer[len - 1] == '\n') {
+                            temp_line_buffer[len - 1] = '\0';
+                        }
+                        
+                        strncpy(session_name, temp_line_buffer, MAX_NAME_LENGTH - 1);
                         session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
-                        free(line);
+
                         if (strlen(session_name) == 0) { // Check for empty input specifically
                             printf("%s\n", get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY));
+                            fflush(stdout);
                             continue; // Ask again
                         }
                         if (!is_valid_session_name(session_name)) {
                             printf("%s\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME));
+                            fflush(stdout);
                             session_name[0] = '\0'; // Clear to re-enter loop
                             continue;
                         }
                     } else {
                          fprintf(stderr, "Error: Failed to read session name, or EOF received.\n");
+                         fflush(stderr);
                          return 1; // Exit game
                     }
                 } while (session_name[0] == '\0'); // Loop until valid name is entered
