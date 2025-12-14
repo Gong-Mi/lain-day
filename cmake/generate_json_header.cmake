@@ -5,7 +5,7 @@ file(READ ${INPUT_FILE} JSON_CONTENT)
 # C-escape the JSON content
 string(REPLACE "\\" "\\\\" JSON_CONTENT "${JSON_CONTENT}")
 string(REPLACE "\"" "\\\"" JSON_CONTENT "${JSON_CONTENT}")
-string(REPLACE "\n" "\\n\"\n\"" JSON_CONTENT "${JSON_CONTENT}")
+string(REPLACE "\n" "\\n" JSON_CONTENT "${JSON_CONTENT}")
 
 # Default variable name to CHARACTER_JSON_DATA if not provided
 if(NOT DEFINED JSON_VAR_NAME)

@@ -96,7 +96,17 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     memset(game_state, 0, sizeof(GameState));
-    game_state->has_transient_message = false;
+    // Copy initialized paths to game_state
+    memcpy(&game_state->paths, &paths, sizeof(GamePaths));
+
+    // Load string table first as other components depend on it
+    if (!load_string_table()) {
+        fprintf(stderr, "Error: Failed to load the string table.\n");
+        free(game_state);
+        return 1;
+    }
+    // Copy initialized paths to game_state
+    memcpy(&game_state->paths, &paths, sizeof(GamePaths));
 
     // Load string table first as other components depend on it
     if (!load_string_table()) {

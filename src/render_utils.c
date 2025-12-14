@@ -32,7 +32,7 @@ void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState*
         {SPEAKER_DAD, "爸爸", FATHER_COLOR},
         {SPEAKER_ALICE, "Alice", ALICE_COLOR},
         {SPEAKER_CHISA, "Chisa", CHISA_COLOR},
-        {SPEAKER_MIRA, "Mika", LAINS_SISTER_MIRA_COLOR},
+        {SPEAKER_MIKA, "Mika", LAINS_SISTER_MIRA_COLOR},
         {SPEAKER_GHOST, "幽灵", ANSI_COLOR_RED},
         {SPEAKER_DOCTOR, "米良柊子", FUYUKO_MIRA_COLOR},
         {SPEAKER_NAVI, "Navi", NAVI_COLOR},

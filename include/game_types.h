@@ -82,7 +82,7 @@ typedef struct {
 
 typedef enum {
     SPEAKER_NONE, SPEAKER_LAIN, SPEAKER_MOM, SPEAKER_DAD, SPEAKER_ALICE,
-    SPEAKER_CHISA, SPEAKER_MIRA, SPEAKER_GHOST, SPEAKER_DOCTOR, SPEAKER_NAVI,
+    SPEAKER_CHISA, SPEAKER_MIKA, SPEAKER_GHOST, SPEAKER_DOCTOR, SPEAKER_NAVI,
     SPEAKER_PARENT, SPEAKER_COUNT
 } SpeakerID;
 
@@ -136,6 +136,14 @@ typedef struct Location_struct {
 } Location;
 
 // GameState Struct (depends on PlayerState, Location, Item)
+typedef struct GamePaths {
+    char base_path[MAX_PATH_LENGTH];
+    char items_file[MAX_PATH_LENGTH];
+    char actions_file[MAX_PATH_LENGTH];
+    char map_dir[MAX_PATH_LENGTH];
+    char session_root_dir[MAX_PATH_LENGTH];
+} GamePaths;
+
 typedef struct GameState {
     PlayerState player_state;
     char current_story_file[MAX_PATH_LENGTH];
@@ -150,6 +158,7 @@ typedef struct GameState {
     int navi_progress_style;
     char transient_message[MAX_LINE_LENGTH];
     bool has_transient_message;
+    GamePaths paths; // Add GamePaths struct here
 } GameState;
 
 // Global game state and configuration

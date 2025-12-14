@@ -8,7 +8,7 @@ import re
 VALID_STRING_IDS = set() # This will be populated from generated string_ids.h
 VALID_SPEAKER_IDS = {
     "SPEAKER_NONE", "SPEAKER_LAIN", "SPEAKER_MOM", "SPEAKER_DAD", 
-    "SPEAKER_ALICE", "SPEAKER_CHISA", "SPEAKER_MIRA", "SPEAKER_GHOST", 
+    "SPEAKER_ALICE", "SPEAKER_CHISA", "SPEAKER_MIKA", "SPEAKER_GHOST", 
     "SPEAKER_DOCTOR", "SPEAKER_NAVI", "SPEAKER_PARENT"
 }
 VALID_ACTION_IDS = set() # This will need to be dynamically loaded or hardcoded

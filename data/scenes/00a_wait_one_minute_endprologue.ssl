@@ -16,7 +16,7 @@ dialogue:
   text_id: TEXT_EMPTY_LINE
 - speaker: SPEAKER_NONE
   text_id: TEXT_WAIT_DESC5
-- speaker: SPEAKER_MIRA
+- speaker: SPEAKER_MIKA
   text_id: TEXT_WAIT_QUOTE
 location_id: iwakura_upper_hallway
 name_text_id: TEXT_SCENE_NAME_00A_WAIT_ONE_MINUTE_ENDPROLOGUE

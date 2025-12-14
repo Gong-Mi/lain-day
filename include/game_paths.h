@@ -1,16 +1,13 @@
 #ifndef GAME_PATHS_H
 #define GAME_PATHS_H
 
-#include "game_types.h" // For MAX_PATH_LENGTH
+#include <stdbool.h> // For bool
+#include <stddef.h>  // For size_t
+#include <sys/types.h> // For mode_t
+#include "game_types.h" // For GamePaths struct and MAX_PATH_LENGTH
 
 // --- Path Management Struct ---
-typedef struct {
-    char base_path[MAX_PATH_LENGTH];
-    char items_file[MAX_PATH_LENGTH];
-    char actions_file[MAX_PATH_LENGTH];
-    char map_dir[MAX_PATH_LENGTH];
-    char session_root_dir[MAX_PATH_LENGTH];
-} GamePaths;
+// GamePaths struct is now defined in game_types.h
 
 void init_paths(char* argv0, GamePaths* paths);
 void get_base_path(char* exe_path, char* base_path, size_t size);

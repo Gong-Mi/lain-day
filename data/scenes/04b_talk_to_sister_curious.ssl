@@ -2,17 +2,17 @@ choices: []
 dialogue:
 - speaker: SPEAKER_NONE
   text_id: TEXT_SISTER_FIXED_DESC1
-- speaker: SPEAKER_MIRA
+- speaker: SPEAKER_MIKA
   text_id: TEXT_SISTER_CURIOUS_QUOTE1
-- speaker: SPEAKER_MIRA
+- speaker: SPEAKER_MIKA
   text_id: TEXT_SISTER_CURIOUS_QUOTE2
-- speaker: SPEAKER_MIRA
+- speaker: SPEAKER_MIKA
   text_id: TEXT_SISTER_CURIOUS_QUOTE3
-- speaker: SPEAKER_MIRA
+- speaker: SPEAKER_MIKA
   text_id: TEXT_SISTER_CURIOUS_QUOTE4
 - speaker: SPEAKER_NONE
   text_id: TEXT_SISTER_FIXED_DESC2
-- speaker: SPEAKER_MIRA
+- speaker: SPEAKER_MIKA
   text_id: TEXT_SISTER_FIXED_DESC3
 - speaker: SPEAKER_NONE
   text_id: TEXT_SISTER_FIXED_DESC4

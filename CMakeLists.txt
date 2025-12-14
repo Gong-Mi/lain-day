@@ -137,6 +137,23 @@ add_custom_command(
 
 add_custom_target(generate_items_header ALL DEPENDS ${GENERATED_ITEMS_DATA_H})
 
+# --- Auto-generate station_coordinates.json data header ---
+set(STATION_COORDINATES_JSON_FILE "${PROJECT_SOURCE_DIR}/sequences/station_coordinates.json")
+set(GENERATED_STATION_DATA_H "${PROJECT_BINARY_DIR}/include/station_coordinates_data.h")
+
+add_custom_command(
+    OUTPUT ${GENERATED_STATION_DATA_H}
+    COMMAND ${CMAKE_COMMAND} 
+        -DINPUT_FILE=${STATION_COORDINATES_JSON_FILE} 
+        -DOUTPUT_FILE=${GENERATED_STATION_DATA_H} 
+        -DJSON_VAR_NAME=STATION_COORDINATES_JSON_DATA
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_json_header.cmake
+    DEPENDS ${STATION_COORDINATES_JSON_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_json_header.cmake
+    COMMENT "Generating C header from station_coordinates.json"
+)
+
+add_custom_target(generate_station_data_header ALL DEPENDS ${GENERATED_STATION_DATA_H})
+
 # --- Auto-generate string_ids.h from strings.json and strings_extra/*.json ---
 set(STRINGS_JSON_FILE "${PROJECT_SOURCE_DIR}/data/strings.json")
 file(GLOB STRINGS_EXTRA_FILES "${PROJECT_SOURCE_DIR}/data/strings_extra/*.json")
@@ -248,6 +265,7 @@ set(GAME_ENGINE_SOURCES
         src/systems/navi_pro.c
 
         src/systems/navi_alpha.c
+        src/systems/train_system.c
 
         external/linenoise/linenoise.c
     external/linenoise/stringbuf.c
@@ -280,7 +298,7 @@ add_executable(map_debugger tools/map_debugger.c ${GAME_ENGINE_SOURCES})
 target_link_libraries(map_debugger PUBLIC zlibstatic pthread)
 
 # Add dependency to ensure header is generated before compiling executables
-add_dependencies(lain_day_c generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes)
+add_dependencies(lain_day_c generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes generate_station_data_header)
 add_dependencies(scene_debugger generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes)
 add_dependencies(navi_debugger generate_string_ids_header)
 add_dependencies(map_debugger generate_string_ids_header)

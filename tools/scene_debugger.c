@@ -71,7 +71,7 @@ static const char* get_speaker_name_str(SpeakerID id) {
         case SPEAKER_DAD: return "爸爸";
         case SPEAKER_ALICE: return "Alice";
         case SPEAKER_CHISA: return "Chisa";
-        case SPEAKER_MIRA: return "Mika (姐姐)";
+        case SPEAKER_MIKA: return "Mika (姐姐)";
         case SPEAKER_GHOST: return "幽灵";
         case SPEAKER_DOCTOR: return "冬子老师";
         case SPEAKER_NAVI: return "Navi";

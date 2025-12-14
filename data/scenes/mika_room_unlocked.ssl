@@ -8,7 +8,7 @@ choices:
 dialogue:
 - speaker: SPEAKER_NONE
   text_id: TEXT_MIKA_ROOM_UNLOCKED_DESC1
-- speaker: SPEAKER_MIRA
+- speaker: SPEAKER_MIKA
   text_id: TEXT_MIKA_ROOM_UNLOCKED_MIRA_QUOTE1
 location_id: iwakura_mikas_room
 name_text_id: TEXT_SCENE_NAME_MIKA_ROOM_UNLOCKED

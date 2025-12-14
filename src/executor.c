@@ -12,6 +12,7 @@
 #include "systems/navi_mini.h"
 #include "systems/navi_pro.h"
 #include "systems/navi_alpha.h"
+#include "systems/train_system.h" // Include for train system
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h> // For atoi
@@ -415,6 +416,9 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         } else if (strcmp(action_id, "end_chapter_two") == 0) {
         strncpy(game_state->current_story_file, "SCENE_CHAPTER_THREE_INTRO", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
+    } else if (strcmp(action_id, "use_ticket_machine") == 0) {
+        enter_ticket_machine_interface(game_state);
+        scene_changed = 0; // Interface handles its own rendering and input
     }
 
     // --- ACQUIRE ITEM ACTIONS ---

@@ -106,6 +106,24 @@ The game's world map is constructed programmatically at runtime, moving away fro
 
 4.  **Deprecated Placeholder System:** The function `load_programmatic_map_data` within `src/map_loader.c` previously contained hardcoded placeholder locations. This system is now **fully deprecated and has been gutted**. All locations are now defined through the more modular `sequences` system to avoid data duplication and logical errors.
 
+## Train System Integration (Work in Progress)
+
+The game will feature an interactive train system to facilitate travel across Tokyo. This system is implemented as a C-based module, offering a more dynamic and interactive experience than simple scene transitions.
+
+### Current Status: Ticket Machine Placeholder
+
+*   **Interface**: A `train_system` module (`src/systems/train_system.c`) has been introduced. When activated, it presents a "ticket machine" interface.
+*   **Functionality**: This interface lists all available train stations (loaded from `sequences/station_coordinates.json`) and allows the player to select a destination. Currently, only an "exit" option is functional, returning the player to their previous location.
+*   **Entry Point**: Each train station location will include a "ticket machine" Point of Interest (POI). Interacting with this POI (`exper ticket_machine`) will launch the `enter_ticket_machine_interface`.
+
+### Future Considerations and Planned Features
+
+*   **Programmatic Waiting**: Implement a system where players must wait for a train to arrive at a station.
+*   **Time Progression**: Integrate time advancement based on travel duration between stations.
+*   **Missing Stops**: Develop mechanics where players can accidentally miss their intended stop, leading to new challenges or narrative branches.
+*   **Complex Interactions**: Expand the train system to include various events, characters, or mini-games during transit.
+*   **Visual Representation**: Explore options for a more visual or animated representation of the train journey within the terminal.
+
 ## Millennium Crisis Integration Design Considerations
 
 **NOTE: The following section describes a design concept for a potential future feature. It has NOT been implemented.**
