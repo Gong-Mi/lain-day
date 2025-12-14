@@ -1,0 +1,17 @@
+choices:
+- text_id: TEXT_CHOICE_GO_TO_LIVING_DINING_KITCHEN
+  action_id: living_area
+- text_id: TEXT_CHOICE_GO_TO_BATHROOM
+  action_id: bathroom
+- text_id: TEXT_CHOICE_GO_TO_STUDY
+  action_id: study
+- text_id: TEXT_CHOICE_GO_UPSTAIRS
+  action_id: upstairs
+- text_id: TEXT_CHOICE_GO_OUTSIDE_FROM_LOWER_HALLWAY
+  action_id: outside
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_IWAKURA_LOWER_HALLWAY_DESC
+location_id: iwakura_lower_hallway
+name_text_id: TEXT_SCENE_NAME_IWAKURA_LOWER_HALLWAY
+scene_id: SCENE_IWAKURA_LOWER_HALLWAY

@@ -28,6 +28,6 @@ dialogue:
   text_id: TEXT_EMPTY_LINE
 - speaker: SPEAKER_NONE
   text_id: TEXT_DOWNSTAIRS_DESC5
-location_id: ''
+location_id: iwakura_living_dining_kitchen
 name_text_id: TEXT_SCENE_NAME_02_DOWNSTAIRS
 scene_id: SCENE_02_DOWNSTAIRS

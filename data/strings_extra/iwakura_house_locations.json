@@ -1,0 +1,9 @@
+{
+    "TEXT_SCENE_NAME_IWAKURA_LOWER_HALLWAY": "岩仓家下走廊",
+    "TEXT_IWAKURA_LOWER_HALLWAY_DESC": "你身处岩仓家一楼的走廊，通向不同的房间。这里铺着柔软的地毯，显得有些空旷。",
+    "TEXT_CHOICE_GO_TO_LIVING_DINING_KITCHEN": "前往客厅-餐厅-厨房",
+    "TEXT_CHOICE_GO_TO_BATHROOM": "前往浴室",
+    "TEXT_CHOICE_GO_TO_STUDY": "前往书房",
+    "TEXT_CHOICE_GO_UPSTAIRS": "上楼",
+    "TEXT_CHOICE_GO_OUTSIDE_FROM_LOWER_HALLWAY": "前往前院"
+}

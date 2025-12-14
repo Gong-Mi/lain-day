@@ -4,6 +4,7 @@
 #include "string_table.h" // Needed for get_string_by_id prototype
 #include "ecc_time.h"
 #include "characters/mika.h" // Needed for CharacterMika and get_mika_module
+#include "map_loader.h" // Needed for get_location_by_id
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h> // For usleep
@@ -159,8 +160,13 @@ void render_current_scene(const StoryScene* scene, const struct GameState* game_
 
     printf("\n========================================\n");
     if (scene->location_id[0] != '\0') {
-        // This part doesn't need typewriter effect
-        printf("Location: %s\n", scene->location_id);
+        // Look up the localized location name
+        Location* loc = get_location_by_id(scene->location_id);
+        if (loc && loc->name[0] != '\0') {
+            printf("Location: %s\n", loc->name);
+        } else {
+            printf("Location: %s\n", scene->location_id);
+        }
     }
     printf("========================================\n");
 
@@ -170,7 +176,7 @@ void render_current_scene(const StoryScene* scene, const struct GameState* game_
     if (strcmp(mika->current_location_id, game_state->player_state.location) == 0 &&
         strcmp(scene->scene_id, "SCENE_MIKA_ROOM_UNLOCKED") != 0) 
     {
-        printf(ANSI_COLOR_YELLOW "\n你看到姐姐美香也在这里。\n" ANSI_COLOR_RESET);
+        printf(ANSI_COLOR_YELLOW "你看到姐姐美香也在这里。\n" ANSI_COLOR_RESET);
     }
     // --- End check for character presence ---
 

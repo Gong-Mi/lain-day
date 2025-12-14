@@ -32,6 +32,7 @@
 #include "SCENE_MIKA_ROOM_EMPTY_data.h"
 #include "SCENE_EXAMINE_BOOKSHELF_data.h"
 #include "SCENE_EXAMINE_MIKA_WARDROBE_data.h"
+#include "SCENE_IWAKURA_LOWER_HALLWAY_data.h"
 #include "SCENE_SHINJUKU_ABANDONED_SITE_data.h"
 #include "SCENE_DAD_HUB_data.h"
 #include "SCENE_DAD_DAY_0_data.h"
@@ -71,6 +72,7 @@ static const struct {
     {"SCENE_MIKA_ROOM_EMPTY", init_scene_scene_mika_room_empty_from_data},
     {"SCENE_EXAMINE_BOOKSHELF", init_scene_scene_examine_bookshelf_from_data},
     {"SCENE_EXAMINE_MIKA_WARDROBE", init_scene_scene_examine_mika_wardrobe_from_data},
+    {"SCENE_IWAKURA_LOWER_HALLWAY", init_scene_scene_iwakura_lower_hallway_from_data},
     {"SCENE_SHINJUKU_ABANDONED_SITE", init_scene_scene_shinjuku_abandoned_site_from_data},
 #ifdef CHARACTER_FATHER_ALIVE
     {"SCENE_DAD_HUB", init_scene_scene_dad_hub_from_data},
