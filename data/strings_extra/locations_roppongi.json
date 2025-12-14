@@ -1,0 +1,18 @@
+{
+    "MAP_LOCATION_ROPPONGI_STREET_NAME": "六本木街道",
+    "MAP_LOCATION_ROPPONGI_STREET_DESC": "繁华的街道，高楼林立。这里充满了外国人和穿着时髦的年轻人。空气中混杂着昂贵香水和汽车尾气的味道。",
+    "MAP_LOCATION_ROPPONGI_SCHOOL_GATE_NAME": "私立学校校门",
+    "MAP_LOCATION_ROPPONGI_SCHOOL_GATE_DESC": "一座厚重的铁门，将喧嚣的街道与宁静的校园隔绝开来。门旁挂着一块 polished 的铭牌，上面写着学校的名字。",
+    "MAP_LOCATION_ROPPONGI_SCHOOL_HALLWAY_NAME": "学校走廊",
+    "MAP_LOCATION_ROPPONGI_SCHOOL_HALLWAY_DESC": "宽敞而明亮的走廊，地板擦得一尘不染。这里安静得有些过分，只能听到偶尔传来的读书声。",
+    "MAP_LOCATION_ROPPONGI_CLASSROOM_NAME": "教室",
+    "MAP_LOCATION_ROPPONGI_CLASSROOM_DESC": "你的教室。整齐排列的课桌椅，黑板上写着今天的课程内容。每个人都在做着自己的事，仿佛都在自己的气泡里。",
+    "MAP_LOCATION_ROPPONGI_ROOFTOP_NAME": "天台",
+    "MAP_LOCATION_ROPPONGI_ROOFTOP_DESC": "学校的天台。风很大，可以俯瞰整个六本木的景色。这里是逃避人群的好地方。",
+    "MAP_POI_ROPPONGI_CLASSROOM_DESK_NAME": "你的课桌",
+    "MAP_POI_ROPPONGI_CLASSROOM_DESK_DESC": "一张普通的课桌。桌面上有一些细微的划痕。",
+    "MAP_POI_ROPPONGI_CLASSROOM_BLACKBOARD_NAME": "黑板",
+    "MAP_POI_ROPPONGI_CLASSROOM_BLACKBOARD_DESC": "黑板上写满了复杂的数学公式。",
+    "MAP_POI_ROPPONGI_ROOFTOP_FENCE_NAME": "防护网",
+    "MAP_POI_ROPPONGI_ROOFTOP_FENCE_DESC": "高高的铁丝防护网，防止意外发生。"
+}

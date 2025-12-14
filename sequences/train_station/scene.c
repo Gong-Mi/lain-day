@@ -64,10 +64,10 @@ int create_train_station_layout(Location* all_locations, int starting_index) {
 
         if (cJSON_IsString(id_json) && cJSON_IsString(name_json)) {
             Location* current_station = &all_locations[starting_index + i];
-            init_location(current_station, id_json->valuestring, name_json->valuestring, "这是一个电车站台，人来人往。"); // Generic description
+            init_location(current_station, id_json->valuestring, name_json->valuestring, get_string_by_id(MAP_LOCATION_TRAIN_STATION_GENERIC_DESC)); // Generic description
             
             // Add a POI for the ticket machine
-            add_poi_to_location(current_station, "ticket_machine", "购票机", "一台自助购票机，可以查询线路和购票。", "use_ticket_machine");
+            add_poi_to_location(current_station, "ticket_machine", get_string_by_id(MAP_POI_TRAIN_STATION_TICKET_MACHINE_NAME), get_string_by_id(MAP_POI_TRAIN_STATION_TICKET_MACHINE_DESC), "use_ticket_machine");
 
             station_ids[i] = current_station->id; // Store ID for connections
         }

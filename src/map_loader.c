@@ -13,9 +13,11 @@
 #include "../sequences/miyanosaka/street/scene.h" // For dynamic layout
 #include "../sequences/miyanosaka/station/scene.h" // For dynamic layout
 #include "../sequences/shibuya/cyberia_club/scene.h" // For dynamic layout
+#include "../sequences/shibuya/scene.h" // For dynamic layout in Shibuya area
 #include "../sequences/shinjuku/chisa_home/scene.h" // For dynamic layout
 #include "../sequences/shinjuku/scene.h" // For dynamic layout in Shinjuku area
 #include "../sequences/train_station/scene.h" // For dynamic layout
+#include "../sequences/roppongi/scene.h" // For dynamic layout
 
 // --- Helper Functions for Programmatic Map Definition ---
 
@@ -141,6 +143,20 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
 #endif
     }
 
+    // --- Dynamically add Shibuya Street layout ---
+    prev_location_count = game_state->location_count; // Capture current count
+    rooms_added = create_shibuya_layout(game_state->all_locations, game_state->location_count);
+    if (rooms_added > 0) {
+        game_state->location_count += rooms_added; // Update total count
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* new_loc = &game_state->all_locations[prev_location_count + i];
+            cmap_insert(game_state->location_map, new_loc);
+#ifdef USE_MAP_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
+#endif
+        }
+    }
+
     // --- Dynamically add Cyberia Club layout ---
     prev_location_count = game_state->location_count; // Capture current count
     rooms_added = create_cyberia_club_layout(game_state->all_locations, game_state->location_count);
@@ -211,6 +227,17 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
     // --- Dynamically add Train Station layout ---
     prev_location_count = game_state->location_count; // Capture current count
     rooms_added = create_train_station_layout(game_state->all_locations, game_state->location_count);
+    if (rooms_added > 0) {
+        game_state->location_count += rooms_added; // Update total count
+        for (int i = 0; i < rooms_added; ++i) {
+            Location* new_loc = &game_state->all_locations[prev_location_count + i];
+            cmap_insert(game_state->location_map, new_loc);
+        }
+    }
+
+    // --- Dynamically add Roppongi layout ---
+    prev_location_count = game_state->location_count; // Capture current count
+    rooms_added = create_roppongi_layout(game_state->all_locations, game_state->location_count);
     if (rooms_added > 0) {
         game_state->location_count += rooms_added; // Update total count
         for (int i = 0; i < rooms_added; ++i) {
