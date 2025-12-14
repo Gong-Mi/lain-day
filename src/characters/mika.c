@@ -29,6 +29,13 @@ static bool mika_is_room_accessible_impl(struct GameState* game_state, const str
         return false;
     }
 
+    // Check for the key (override time restriction)
+    for (int i = 0; i < game_state->player_state.inventory_count; i++) {
+        if (strcmp(game_state->player_state.inventory[i].name, "key_mika_room") == 0) {
+            return true; // Access granted by key
+        }
+    }
+
     uint32_t encoded_time;
 
     // Accessing time safely is complex here without direct access to the mutex.
