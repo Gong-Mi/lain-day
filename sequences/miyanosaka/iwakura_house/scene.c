@@ -112,7 +112,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(upper_hallway->description, get_string_by_id(MAP_LOCATION_UPPER_HALLWAY_DESC));
     add_connection(upper_hallway, "downstairs", "iwakura_lower_hallway", NULL, NULL, "SCENE_02_DOWNSTAIRS");
     add_connection(upper_hallway, "lains_room", "iwakura_lains_room", NULL, NULL, "SCENE_01_LAIN_ROOM");
-    add_connection(upper_hallway, "mikas_room", "iwakura_mikas_room", get_mika_module()->is_room_accessible, "SCENE_MIKA_ROOM_LOCKED", "SCENE_MIKA_ROOM_UNLOCKED");
+    add_connection(upper_hallway, "enter_mika_room", "iwakura_mikas_room", get_mika_module()->is_room_accessible, "SCENE_MIKA_ROOM_LOCKED", NULL); // Target scene handled by executor
     add_poi(upper_hallway, "painting", get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_NAME), get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_DESC), NULL, NULL);
 
     // --- 6. Lain's Room (Lain的房间) ---

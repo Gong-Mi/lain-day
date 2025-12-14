@@ -90,7 +90,7 @@ static int get_action_time_cost(const char* action_id) {
     if (strcmp(action_id, "downstairs") == 0) return 1;
     if (strcmp(action_id, "upstairs") == 0) return 1;
     if (strcmp(action_id, "lains_room") == 0) return 1;
-    if (strcmp(action_id, "mikas_room") == 0) return 1;
+    if (strcmp(action_id, "enter_mika_room") == 0) return 1;
     if (strcmp(action_id, "bathroom") == 0) return 1;
     if (strcmp(action_id, "study") == 0) return 1;
     if (strcmp(action_id, "living_area") == 0) return 1;
@@ -168,7 +168,17 @@ int execute_action(const char* action_id, struct GameState* game_state) {
                 // If we are here, access is granted.
                 mika_return_to_schedule(); // Mika's schedule might change upon player movement
                 strncpy(game_state->player_state.location, conn->target_location_id, MAX_NAME_LENGTH - 1);
-                if (conn->target_scene_id != NULL) {
+                
+                // Special handling for Mika's room to support dynamic scene based on her presence
+                if (strcmp(action_id, "enter_mika_room") == 0) {
+                     const CharacterMika* mika = get_mika_module();
+                     if (mika->current_location_id != NULL && strcmp(mika->current_location_id, "iwakura_mikas_room") == 0) {
+                         strncpy(game_state->current_story_file, "SCENE_MIKA_ROOM_UNLOCKED", MAX_PATH_LENGTH - 1);
+                     } else {
+                         strncpy(game_state->current_story_file, "SCENE_MIKA_ROOM_EMPTY", MAX_PATH_LENGTH - 1);
+                     }
+                } 
+                else if (conn->target_scene_id != NULL) {
                     strncpy(game_state->current_story_file, conn->target_scene_id, MAX_PATH_LENGTH - 1);
                 } else {
                     fprintf(stderr, "WARNING: Connection to '%s' has no target scene ID. Current scene will persist.\n", conn->target_location_id);
@@ -467,7 +477,6 @@ int execute_action(const char* action_id, struct GameState* game_state) {
 
 
     // --- CONDITIONAL ACTIONS ---
-    // The logic for talking to the sister is now encapsulated in the Mika module.
     else if (strcmp(action_id, "talk_to_sister") == 0) {
         get_mika_module()->on_talk(game_state);
         // Note: The on_talk function itself calls execute_action internally,

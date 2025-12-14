@@ -1,0 +1,11 @@
+choices:
+- text_id: TEXT_CHOICE_MIKA_ROOM_JUST_LOOKING
+  action_id: upper_hallway
+- text_id: TEXT_CHOICE_RETURN_TO_UPPER_HALLWAY
+  action_id: upper_hallway
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_MIKA_ROOM_UNLOCKED_EMPTY_DESC1
+location_id: iwakura_mikas_room
+name_text_id: TEXT_SCENE_NAME_MIKA_ROOM_UNLOCKED
+scene_id: SCENE_MIKA_ROOM_EMPTY

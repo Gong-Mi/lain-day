@@ -56,19 +56,34 @@ static bool mika_is_room_accessible_impl(struct GameState* game_state, const str
 // Logic moved from src/executor.c
 static void mika_on_talk_impl(struct GameState* game_state) {
     const char* sister_mood = hash_table_get(game_state->flags, "sister_mood");
+#ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: mika_on_talk_impl: current sister_mood: %s\n", sister_mood ? sister_mood : "NULL");
+#endif
     if (sister_mood != NULL) {
         if (strcmp(sister_mood, "cold") == 0) {
+#ifdef USE_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: mika_on_talk_impl: Executing 'talk_to_sister_cold'\n");
+#endif
             execute_action("talk_to_sister_cold", game_state);
         } else if (strcmp(sister_mood, "curious") == 0) {
+#ifdef USE_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: mika_on_talk_impl: Executing 'talk_to_sister_curious'\n");
+#endif
             execute_action("talk_to_sister_curious", game_state);
         } else {
+#ifdef USE_DEBUG_LOGGING
+            fprintf(stderr, "DEBUG: mika_on_talk_impl: Executing 'talk_to_sister_default'\n");
+#endif
             execute_action("talk_to_sister_default", game_state);
         }
     } else {
+#ifdef USE_DEBUG_LOGGING
+        fprintf(stderr, "DEBUG: mika_on_talk_impl: sister_mood is NULL. Executing 'talk_to_sister_default'\n");
+#endif
         execute_action("talk_to_sister_default", game_state);
     }
     // After the conversation is initiated, Mika moves. This is a script-driven move.
-    mika_move_to("iwakura_living_dining_kitchen");
+    // Mika's movement should be handled by schedule or explicit plot events.
 }
 
 
