@@ -127,7 +127,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     add_poi(lains_room, "bed", get_string_by_id(MAP_POI_LAINS_ROOM_BED_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BED_DESC_IWAKURA), NULL, NULL);
     add_poi(lains_room, "window", get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_WINDOW_DESC), NULL, NULL);
     add_poi(lains_room, "toy_dog", get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_NAME), get_string_by_id(MAP_POI_LAINS_ROOM_TOY_DOG_DESC), NULL, NULL);
-    add_poi(lains_room, "bookshelf", get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_DESC_IWAKURA), NULL, NULL);
+    add_poi(lains_room, "bookshelf", get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_NAME_IWAKURA), get_string_by_id(MAP_POI_LAINS_ROOM_BOOKSHELF_DESC_IWAKURA), NULL, "examine_bookshelf");
 
     // --- 7. Mika's Room (美香的房间) ---
     *mikas_room = (Location){0};

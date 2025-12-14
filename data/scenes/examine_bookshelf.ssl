@@ -1,0 +1,11 @@
+choices:
+- text_id: TEXT_CHOICE_EXAMINE_HAMLET
+  action_id: examine_hamlet
+- text_id: TEXT_CHOICE_RETURN_TO_LAINS_ROOM
+  action_id: lains_room
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EXAMINE_BOOKSHELF_DESC
+location_id: iwakura_lains_room
+name_text_id: TEXT_SCENE_NAME_01_LAIN_ROOM
+scene_id: SCENE_EXAMINE_BOOKSHELF

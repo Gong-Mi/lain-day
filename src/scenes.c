@@ -29,13 +29,12 @@
 #include "SCENE_IWAKURA_UPPER_HALLWAY_data.h"
 #include "SCENE_MIKA_ROOM_LOCKED_data.h"
 #include "SCENE_MIKA_ROOM_UNLOCKED_data.h"
+#include "SCENE_MIKA_ROOM_EMPTY_data.h"
+#include "SCENE_EXAMINE_BOOKSHELF_data.h"
 #include "SCENE_SHINJUKU_ABANDONED_SITE_data.h"
 #include "SCENE_DAD_HUB_data.h"
 #include "SCENE_DAD_DAY_0_data.h"
 #include "SCENE_PC_NAVI_DESKTOP_data.h"
-
-#include "SCENE_DAD_HUB_data.h"
-#include "SCENE_DAD_DAY_0_data.h"
 
 // A function pointer type for scene initializers
 typedef void (*SceneInitFunc)(StoryScene*);
@@ -68,6 +67,8 @@ static const struct {
     {"SCENE_IWAKURA_UPPER_HALLWAY", init_scene_scene_iwakura_upper_hallway_from_data},
     {"SCENE_MIKA_ROOM_LOCKED", init_scene_scene_mika_room_locked_from_data},
     {"SCENE_MIKA_ROOM_UNLOCKED", init_scene_scene_mika_room_unlocked_from_data},
+    {"SCENE_MIKA_ROOM_EMPTY", init_scene_scene_mika_room_empty_from_data},
+    {"SCENE_EXAMINE_BOOKSHELF", init_scene_scene_examine_bookshelf_from_data},
     {"SCENE_SHINJUKU_ABANDONED_SITE", init_scene_scene_shinjuku_abandoned_site_from_data},
 #ifdef CHARACTER_FATHER_ALIVE
     {"SCENE_DAD_HUB", init_scene_scene_dad_hub_from_data},

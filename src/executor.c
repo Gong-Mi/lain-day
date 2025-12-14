@@ -495,6 +495,28 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         }
         scene_changed = 1;
     }
+    else if (strcmp(action_id, "examine_bookshelf") == 0) {
+        strncpy(game_state->current_story_file, "SCENE_EXAMINE_BOOKSHELF", MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
+    }
+    else if (strcmp(action_id, "examine_hamlet") == 0) {
+        bool has_key = false;
+        for(int i=0; i<game_state->player_state.inventory_count; ++i) {
+            if(strcmp(game_state->player_state.inventory[i].name, "key_mika_room") == 0) {
+                has_key = true;
+                break;
+            }
+        }
+        
+        if (has_key) {
+             strncpy(game_state->transient_message, get_string_by_id(TEXT_ALREADY_HAS_KEY_DESC), MAX_LINE_LENGTH - 1);
+        } else {
+             acquire_item_logic(game_state, "key_mika_room");
+             strncpy(game_state->transient_message, get_string_by_id(TEXT_FOUND_KEY_DESC), MAX_LINE_LENGTH - 1);
+        }
+        game_state->has_transient_message = true;
+        scene_changed = 0; // Stay in bookshelf scene
+    }
     
     // --- GENERIC FLAG SETTING ACTIONS (for dynamic values like typewriter_delay, network scope) ---
     else if (strcmp(action_id, "set_font_speed_fast") == 0) {

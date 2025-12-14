@@ -1,0 +1,8 @@
+{
+    "TEXT_EXAMINE_BOOKSHELF_DESC": "书架上塞满了各种书籍，大部分是关于计算机网络和心理学的专著。但最下面一层放着一些装饰用的世界名著。",
+    "TEXT_CHOICE_EXAMINE_HAMLET": "检查那本《哈姆雷特》",
+    "TEXT_FOUND_KEY_DESC": "你抽出了那本厚厚的《哈姆雷特》。书皮夹层里似乎藏着什么东西......是一把银色的钥匙，上面还夹着一个粉红色的发卡。这肯定是美香藏的。",
+    "TEXT_ALREADY_HAS_KEY_DESC": "你翻了翻那本《哈姆雷特》，里面什么也没有。看来美香已经把钥匙拿走了，或者你已经拿过了。",
+    "TEXT_TAKE_KEY": "拿走钥匙",
+    "TEXT_CHOICE_RETURN_TO_LAINS_ROOM": "不再检查书架"
+}
