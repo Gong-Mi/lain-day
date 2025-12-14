@@ -1,0 +1,15 @@
+choices:
+- text_id: TEXT_CHOICE_ASK_DAD_HELP
+  action_id: dad_ask_help
+- text_id: TEXT_CHOICE_TELL_DAD_NOTHING
+  action_id: dad_reply_no
+- text_id: TEXT_CHOICE_RETURN_TO_LIVING_ROOM
+  action_id: living_area
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_DAD_HUB_DESC
+- speaker: SPEAKER_DAD
+  text_id: TEXT_DAD_HUB_QUESTION
+location_id: iwakura_living_dining_kitchen
+name_text_id: TEXT_SCENE_NAME_DAD_HUB
+scene_id: SCENE_DAD_HUB
