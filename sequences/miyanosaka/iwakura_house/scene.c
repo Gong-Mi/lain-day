@@ -136,7 +136,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(mikas_room->description, get_string_by_id(MAP_LOCATION_MIKAS_ROOM_DESC));
     add_connection(mikas_room, "upper_hallway", "iwakura_upper_hallway", NULL, NULL, "SCENE_IWAKURA_UPPER_HALLWAY");
     add_poi(mikas_room, "desk", get_string_by_id(MAP_POI_MIKAS_ROOM_DESK_NAME), get_string_by_id(MAP_POI_MIKAS_ROOM_DESK_DESC), NULL, NULL);
-    add_poi(mikas_room, "wardrobe", get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_NAME), get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_DESC), NULL, NULL);
+    add_poi(mikas_room, "wardrobe", get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_NAME), get_string_by_id(MAP_POI_MIKAS_ROOM_WARDROBE_DESC), NULL, "examine_mika_wardrobe");
     
     // --- 8. Study (书房) ---
     *study = (Location){0};

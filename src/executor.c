@@ -517,6 +517,15 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         game_state->has_transient_message = true;
         scene_changed = 0; // Stay in bookshelf scene
     }
+    else if (strcmp(action_id, "examine_mika_wardrobe") == 0) {
+        strncpy(game_state->current_story_file, "SCENE_EXAMINE_MIKA_WARDROBE", MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
+    }
+    else if (strcmp(action_id, "examine_hidden_doll") == 0) {
+        strncpy(game_state->transient_message, get_string_by_id(TEXT_FOUND_HIDDEN_DOLL_DESC), MAX_LINE_LENGTH - 1);
+        game_state->has_transient_message = true;
+        scene_changed = 0;
+    }
     
     // --- GENERIC FLAG SETTING ACTIONS (for dynamic values like typewriter_delay, network scope) ---
     else if (strcmp(action_id, "set_font_speed_fast") == 0) {

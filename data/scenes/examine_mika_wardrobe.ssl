@@ -1,0 +1,11 @@
+choices:
+- text_id: TEXT_CHOICE_EXAMINE_CORNER
+  action_id: examine_hidden_doll
+- text_id: TEXT_LEAVE_WARDROBE
+  action_id: enter_mika_room
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EXAMINE_MIKA_WARDROBE_DESC
+location_id: iwakura_mikas_room
+name_text_id: MAP_POI_MIKAS_ROOM_WARDROBE_NAME
+scene_id: SCENE_EXAMINE_MIKA_WARDROBE

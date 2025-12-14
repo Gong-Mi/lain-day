@@ -25,9 +25,8 @@ def load_valid_string_ids(string_ids_header_path):
         content = f.read()
 
     # Regex to find enum members, excluding TEXT_COUNT, TEXT_INVALID, TEXT_EMPTY_LINE
-    # and also handle assigned values like TEXT_ID = 123,
-    # or just TEXT_ID, where value is implicit
-    matches = re.findall(r'^\s*(TEXT_[A-Z0-9_]+|SID_[A-Z0-9_]+)(?:\s*=\s*\d+)?\s*,', content, re.MULTILINE)
+    # Matches any uppercase identifier followed by optional assignment and comma
+    matches = re.findall(r'^\s*([A-Z][A-Z0-9_]+)(?:\s*=\s*\d+)?\s*,', content, re.MULTILINE)
     
     # Filter out TEXT_COUNT, TEXT_INVALID, TEXT_EMPTY_LINE as they are special
     for match in matches:
