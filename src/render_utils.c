@@ -164,15 +164,6 @@ void render_current_scene(const StoryScene* scene, const struct GameState* game_
     }
     printf("========================================\n");
 
-    for (int i = 0; i < scene->dialogue_line_count; i++) {
-    #ifdef USE_STRING_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG:   Printing DialogueLine: speaker=%d, text_id=%d (%s)\n",
-                scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id,
-                get_string_by_id(scene->dialogue_lines[i].text_id));
-    #endif
-        print_colored_line(scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id, (GameState*)game_state); // Cast to GameState*
-    }
-
     // --- Check for character presence ---
     const CharacterMika* mika = get_mika_module();
     // Don't print this if the current scene is about Mika's room, as it would be redundant.
@@ -182,6 +173,15 @@ void render_current_scene(const StoryScene* scene, const struct GameState* game_
         printf(ANSI_COLOR_YELLOW "\n你看到姐姐美香也在这里。\n" ANSI_COLOR_RESET);
     }
     // --- End check for character presence ---
+
+    for (int i = 0; i < scene->dialogue_line_count; i++) {
+    #ifdef USE_STRING_DEBUG_LOGGING
+        fprintf(stderr, "DEBUG:   Printing DialogueLine: speaker=%d, text_id=%d (%s)\n",
+                scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id,
+                get_string_by_id(scene->dialogue_lines[i].text_id));
+    #endif
+        print_colored_line(scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id, (GameState*)game_state); // Cast to GameState*
+    }
 
     if (scene->choice_count > 0) {
         printf("\n--- Choices ---\n");
