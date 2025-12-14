@@ -96,6 +96,11 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     memset(game_state, 0, sizeof(GameState));
+    
+    // Initialize Doll States (Default)
+    game_state->doll_state_lain_room = DOLL_STATE_NORMAL;
+    game_state->doll_state_mika_room = DOLL_STATE_NORMAL;
+
     // Copy initialized paths to game_state
     memcpy(&game_state->paths, &paths, sizeof(GamePaths));
 

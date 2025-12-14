@@ -136,6 +136,14 @@ int load_player_state(const char* path, GameState* game_state) {
         game_state->time_of_day = encode_time_with_ecc(default_start_time_units);
     }
 
+    const cJSON *doll_lain = cJSON_GetObjectItemCaseSensitive(root, "doll_state_lain_room");
+    if (cJSON_IsNumber(doll_lain)) game_state->doll_state_lain_room = (int8_t)doll_lain->valueint;
+    else game_state->doll_state_lain_room = DOLL_STATE_NORMAL;
+
+    const cJSON *doll_mika = cJSON_GetObjectItemCaseSensitive(root, "doll_state_mika_room");
+    if (cJSON_IsNumber(doll_mika)) game_state->doll_state_mika_room = (int8_t)doll_mika->valueint;
+    else game_state->doll_state_mika_room = DOLL_STATE_NORMAL;
+
     DecodedTimeResult time_check = decode_time_with_ecc(game_state->time_of_day);
     if (time_check.status == DOUBLE_BIT_ERROR_DETECTED) {
         hash_table_set(game_state->flags, "TIME_GLITCH_ACTIVE", "1");
@@ -204,6 +212,8 @@ int save_game_state(const char* path, const GameState* game_state) {
     cJSON_AddNumberToObject(root, "credit_level", p_state->credit_level);
     cJSON_AddStringToObject(root, "current_story_file", game_state->current_story_file);
     cJSON_AddNumberToObject(root, "time_of_day", game_state->time_of_day);
+    cJSON_AddNumberToObject(root, "doll_state_lain_room", game_state->doll_state_lain_room);
+    cJSON_AddNumberToObject(root, "doll_state_mika_room", game_state->doll_state_mika_room);
 
     cJSON *inv = cJSON_CreateObject();
     if (inv) {

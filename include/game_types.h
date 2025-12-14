@@ -25,6 +25,15 @@
 #define MAX_ITEMS 64
 #define MAX_ACTIONS 128
 
+// --- Doll States ---
+#define DOLL_STATE_NONE          0 // 不存在/未知
+#define DOLL_STATE_NORMAL        1 // 普通
+#define DOLL_STATE_DAMAGED       2 // 有伤
+#define DOLL_STATE_CHIPPED       3 // 有芯片
+#define DOLL_STATE_SPOKEN        4 // 说话了
+#define DOLL_STATE_CORPSE        5 // 前周期尸体
+#define DOLL_STATE_DAMAGED_CHIPPED 6 // 有伤且有芯片
+
 // --- Forward Declarations for Circular Dependencies ---
 struct GameState;
 struct Connection;
@@ -158,6 +167,8 @@ typedef struct GameState {
     int navi_progress_style;
     char transient_message[MAX_LINE_LENGTH];
     bool has_transient_message;
+    int8_t doll_state_lain_room; // State of the doll in Lain's room
+    int8_t doll_state_mika_room; // State of the doll in Mika's room
     GamePaths paths; // Add GamePaths struct here
 } GameState;
 
