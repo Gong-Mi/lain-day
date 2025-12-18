@@ -19,6 +19,9 @@ int create_shinjuku_layout(Location* all_locations, int starting_index) {
     init_location(shinjuku_station, "shinjuku_station", get_string_by_id(TEXT_SCENE_NAME_MIYANOSAKA_STATION), get_string_by_id(MAP_LOCATION_SHINJUKU_STATION_DESC)); // Reusing string ID for now
     add_connection_to_location(shinjuku_station, "explore_site", "shinjuku_abandoned_site", NULL, NULL, "SCENE_SHINJUKU_ABANDONED_SITE");
     add_connection_to_location(shinjuku_station, "home", "chisa_home", NULL, NULL, NULL); // Connection to Chisa's home
+    
+    add_poi_to_location(shinjuku_station, "nagoya_restaurant", get_string_by_id(MAP_POI_SHINJUKU_NAGOYA_RESTAURANT_NAME), get_string_by_id(MAP_POI_SHINJUKU_NAGOYA_RESTAURANT_DESC), NULL);
+    add_poi_to_location(shinjuku_station, "bbq_stall", get_string_by_id(MAP_POI_SHINJUKU_BBQ_STALL_NAME), get_string_by_id(MAP_POI_SHINJUKU_BBQ_STALL_DESC), NULL);
 
     // --- Shinjuku Abandoned Site (新宿的废弃工地) ---
     init_location(shinjuku_abandoned_site, "shinjuku_abandoned_site", get_string_by_id(TEXT_SCENE_NAME_SHINJUKU_ABANDONED_SITE), get_string_by_id(MAP_LOCATION_SHINJUKU_ABANDONED_SITE_DESC));

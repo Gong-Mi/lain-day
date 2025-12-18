@@ -14,6 +14,12 @@ option(CHARACTER_FUYUKO_MIRA_ALIVE "Include Fuyuko Mira (Doctor) in the game bui
 option(CHARACTER_LAINS_SISTER_MIRA_ALIVE "Include Mira (Lain's Sister) in the game build" ON)
 
 # --- Feature Toggles ---
+option(ENABLE_FULL_GRAPHICS "Enable full-screen graphical image viewer using ANSI/RGB" ON)
+
+if(ENABLE_FULL_GRAPHICS)
+    add_definitions(-DENABLE_FULL_GRAPHICS)
+endif()
+
 # MASTER_DEBUG_SWITCH:
 # This is the master switch for all debug-related options.
 # If set to OFF, all other debug-specific toggles below will be ignored,
@@ -106,7 +112,7 @@ include_directories(external/cJSON) # Add cJSON include path
 
 
 # --- Auto-generate character.json data header ---
-set(CHARACTER_JSON_FILE "${PROJECT_SOURCE_DIR}/character.json")
+set(CHARACTER_JSON_FILE "${PROJECT_SOURCE_DIR}/data/character.json")
 set(GENERATED_CHARACTER_DATA_H "${PROJECT_BINARY_DIR}/include/character_data.h")
 
 # Add custom command to generate the header file
@@ -156,7 +162,10 @@ add_custom_target(generate_station_data_header ALL DEPENDS ${GENERATED_STATION_D
 
 # --- Auto-generate string_ids.h from strings.json and strings_extra/*.json ---
 set(STRINGS_JSON_FILE "${PROJECT_SOURCE_DIR}/data/strings.json")
-file(GLOB STRINGS_EXTRA_FILES "${PROJECT_SOURCE_DIR}/data/strings_extra/*.json")
+file(GLOB STRINGS_EXTRA_FILES
+    "${PROJECT_SOURCE_DIR}/data/strings_extra/*.json"
+    "${PROJECT_SOURCE_DIR}/data/strings_extra/generated_placeholders.json"
+)
 
 set(GENERATED_STRINGS_H "${PROJECT_BINARY_DIR}/include/string_ids.h")
 set(GENERATED_STRINGS_NAMES_H "${PROJECT_BINARY_DIR}/include/string_id_names.h")
@@ -266,6 +275,8 @@ set(GAME_ENGINE_SOURCES
 
         src/systems/navi_alpha.c
         src/systems/train_system.c
+        src/systems/mystery_system.c
+        src/systems/image_view_system.c
 
         external/linenoise/linenoise.c
     external/linenoise/stringbuf.c
@@ -330,13 +341,13 @@ target_compile_definitions(lain_day_c PUBLIC
 # --- Installation Rules ---
 install(TARGETS lain_day_c DESTINATION bin)
 install(FILES 
-    character.json
+    data/character.json
     items.json
     actions.json
     DESTINATION share/${PROJECT_NAME}
 )
 install(DIRECTORY map/ DESTINATION share/${PROJECT_NAME}/map PATTERN ".*" EXCLUDE PATTERN "*~" EXCLUDE)
-install(DIRECTORY story/ DESTINATION share/${PROJECT_NAME}/story PATTERN ".*" EXCLUDE PATTERN "*~" EXCLUDE)
+install(DIRECTORY data/story/ DESTINATION share/${PROJECT_NAME}/story PATTERN ".*" EXCLUDE PATTERN "*~" EXCLUDE)
 install(DIRECTORY world/ DESTINATION share/${PROJECT_NAME}/world PATTERN ".*" EXCLUDE PATTERN "*~" EXCLUDE)
 
 

@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_TAKANAWA_GATEWAY
+  action_id: return_from_takanawa_gateway # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_TAKANAWA_GATEWAY_DESC
+location_id: takanawa_gateway
+name_text_id: TEXT_SCENE_NAME_TAKANAWA_GATEWAY
+scene_id: SCENE_TAKANAWA_GATEWAY

@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_TAKADANOBABA
+  action_id: return_from_takadanobaba # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_TAKADANOBABA_DESC
+location_id: takadanobaba
+name_text_id: TEXT_SCENE_NAME_TAKADANOBABA
+scene_id: SCENE_TAKADANOBABA

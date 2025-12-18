@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_SHIMBASHI
+  action_id: return_from_shimbashi # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_SHIMBASHI_DESC
+location_id: shimbashi
+name_text_id: TEXT_SCENE_NAME_SHIMBASHI
+scene_id: SCENE_SHIMBASHI

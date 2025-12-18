@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_SHINAGAWA
+  action_id: return_from_shinagawa # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_SHINAGAWA_DESC
+location_id: shinagawa
+name_text_id: TEXT_SCENE_NAME_SHINAGAWA
+scene_id: SCENE_SHINAGAWA

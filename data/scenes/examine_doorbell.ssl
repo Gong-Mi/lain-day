@@ -1,0 +1,9 @@
+choices:
+- text_id: TEXT_CHOICE_RETURN
+  action_id: return_from_examine_doorbell
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_EXAMINE_DOORBELL_DESC
+location_id: iwakura_front_yard
+name_text_id: TEXT_SCENE_NAME_EXAMINE_DOORBELL
+scene_id: SCENE_EXAMINE_DOORBELL

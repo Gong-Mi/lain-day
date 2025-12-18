@@ -5,5 +5,11 @@
     "TEXT_CHOICE_GO_TO_BATHROOM": "前往浴室",
     "TEXT_CHOICE_GO_TO_STUDY": "前往书房",
     "TEXT_CHOICE_GO_UPSTAIRS": "上楼",
-    "TEXT_CHOICE_GO_OUTSIDE_FROM_LOWER_HALLWAY": "前往前院"
+    "TEXT_CHOICE_GO_OUTSIDE_FROM_LOWER_HALLWAY": "前往前院",
+    "TEXT_SCENE_NAME_EXAMINE_MAILBOX": "检查邮箱",
+    "TEXT_EXAMINE_MAILBOX_DESC": "邮筒有些老旧，上面还有几道划痕。似乎很久没人打开过了。",
+    "TEXT_SCENE_NAME_EXAMINE_DOORBELL": "检查门铃",
+    "TEXT_EXAMINE_DOORBELL_DESC": "一个普通的门铃，看起来功能正常。",
+    "TEXT_SCENE_NAME_EXAMINE_SHOE_RACK": "检查鞋架",
+    "TEXT_EXAMINE_SHOE_RACK_DESC": "一个简单的木质鞋架，上面放着几双鞋子。看起来都很干净。"
 }

@@ -20,6 +20,8 @@ int create_roppongi_layout(Location* all_locations, int starting_index) {
     // Connection to Ebisu Station (Train System) - assuming "ebisu" is the ID from station_coordinates.json
     add_connection_to_location(roppongi_street, "go_to_station", "ebisu", NULL, NULL, NULL); 
     add_connection_to_location(roppongi_street, "go_to_school", "roppongi_school_gate", NULL, NULL, NULL);
+    
+    add_poi_to_location(roppongi_street, "night_club", get_string_by_id(MAP_POI_ROPPONGI_NIGHT_CLUB_NAME), get_string_by_id(MAP_POI_ROPPONGI_NIGHT_CLUB_DESC), NULL);
 
     // --- School Gate ---
     init_location(school_gate, "roppongi_school_gate", get_string_by_id(MAP_LOCATION_ROPPONGI_SCHOOL_GATE_NAME), get_string_by_id(MAP_LOCATION_ROPPONGI_SCHOOL_GATE_DESC));

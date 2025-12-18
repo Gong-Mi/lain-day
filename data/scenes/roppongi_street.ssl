@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_ROPPONGI_STREET
+  action_id: return_from_roppongi_street # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_ROPPONGI_STREET_DESC
+location_id: roppongi_street
+name_text_id: TEXT_SCENE_NAME_ROPPONGI_STREET
+scene_id: SCENE_ROPPONGI_STREET

@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_NIPPORI
+  action_id: return_from_nippori # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_NIPPORI_DESC
+location_id: nippori
+name_text_id: TEXT_SCENE_NAME_NIPPORI
+scene_id: SCENE_NIPPORI

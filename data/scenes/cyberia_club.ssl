@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_CYBERIA_CLUB
+  action_id: return_from_cyberia_club # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_CYBERIA_CLUB_DESC
+location_id: cyberia_club
+name_text_id: TEXT_SCENE_NAME_CYBERIA_CLUB
+scene_id: SCENE_CYBERIA_CLUB

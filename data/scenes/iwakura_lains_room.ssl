@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_IWAKURA_LAINS_ROOM
+  action_id: return_from_iwakura_lains_room # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_IWAKURA_LAINS_ROOM_DESC
+location_id: iwakura_lains_room
+name_text_id: TEXT_SCENE_NAME_IWAKURA_LAINS_ROOM
+scene_id: SCENE_IWAKURA_LAINS_ROOM

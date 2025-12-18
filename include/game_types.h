@@ -169,6 +169,7 @@ typedef struct GameState {
     bool has_transient_message;
     int8_t doll_state_lain_room; // State of the doll in Lain's room
     int8_t doll_state_mika_room; // State of the doll in Mika's room
+    char mika_location_storage[MAX_NAME_LENGTH]; // Storage for Mika's location string
     GamePaths paths; // Add GamePaths struct here
 } GameState;
 

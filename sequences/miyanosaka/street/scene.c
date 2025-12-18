@@ -13,6 +13,8 @@ int create_miyanosaka_street_layout(Location* all_locations, int starting_index)
     init_location(miyanosaka_street, "miyanosaka_street", get_string_by_id(MAP_LOCATION_MIYANOSAKA_STREET_NAME), get_string_by_id(MAP_LOCATION_MIYANOSAKA_STREET_DESC));
     
     add_poi_to_location(miyanosaka_street, "vending_machine", get_string_by_id(MAP_POI_MIYANOSAKA_STREET_VENDING_MACHINE_NAME), get_string_by_id(MAP_POI_MIYANOSAKA_STREET_VENDING_MACHINE_DESC), NULL);
+    add_poi_to_location(miyanosaka_street, "bakery", get_string_by_id(MAP_POI_MIYANOSAKA_BAKERY_NAME), get_string_by_id(MAP_POI_MIYANOSAKA_BAKERY_DESC), NULL);
+    add_poi_to_location(miyanosaka_street, "convenience_store", get_string_by_id(MAP_POI_MIYANOSAKA_CONVENIENCE_STORE_NAME), get_string_by_id(MAP_POI_MIYANOSAKA_CONVENIENCE_STORE_DESC), NULL);
     
     add_connection_to_location(miyanosaka_street, "iwakura_residence", "iwakura_front_yard", NULL, NULL, "SCENE_00_ENTRY");
     add_connection_to_location(miyanosaka_street, "train_station", "miyanosaka_station", NULL, NULL, NULL);

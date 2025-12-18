@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_TAMACHI
+  action_id: return_from_tamachi # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_TAMACHI_DESC
+location_id: tamachi
+name_text_id: TEXT_SCENE_NAME_TAMACHI
+scene_id: SCENE_TAMACHI

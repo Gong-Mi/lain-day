@@ -168,3 +168,14 @@ void mika_return_to_schedule(void) {
     fprintf(stderr, "DEBUG: Mika has been returned to schedule-based positioning.\n");
 #endif
 }
+
+void restore_mika_state(const char* location_id, bool is_manual) {
+    if (location_id) {
+        g_mika_module.current_location_id = location_id; // Note: Ensure string lifecycle management if passing dynamic strings
+        // In this project, location IDs are typically string literals or from persistent storage
+    }
+    g_mika_module.is_manually_positioned = is_manual;
+#ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Mika state restored: Loc=%s, Manual=%d\n", location_id ? location_id : "NULL", is_manual);
+#endif
+}

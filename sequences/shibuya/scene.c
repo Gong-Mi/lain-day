@@ -23,6 +23,8 @@ int create_shibuya_layout(Location* all_locations, int starting_index) {
 
     // POIs
     add_poi_to_location(shibuya_street, "crossing", get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSING_NAME), get_string_by_id(MAP_POI_SHIBUYA_STREET_CROSSING_DESC), NULL);
+    add_poi_to_location(shibuya_street, "100_yen_shop", get_string_by_id(MAP_POI_SHIBUYA_100YEN_SHOP_NAME), get_string_by_id(MAP_POI_SHIBUYA_100YEN_SHOP_DESC), NULL);
+    add_poi_to_location(shibuya_street, "instrument_shop", get_string_by_id(MAP_POI_SHIBUYA_INSTRUMENT_SHOP_NAME), get_string_by_id(MAP_POI_SHIBUYA_INSTRUMENT_SHOP_DESC), NULL);
 
     return SHIBUYA_LAYOUT_ROOM_COUNT;
 }

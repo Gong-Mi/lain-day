@@ -65,8 +65,8 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(front_yard->description, get_string_by_id(MAP_LOCATION_FRONT_YARD_DESC));
     add_connection(front_yard, "house", "iwakura_lower_hallway", NULL, NULL, "SCENE_IWAKURA_LOWER_HALLWAY");
     add_connection(front_yard, "street", "miyanosaka_street", NULL, NULL, NULL);
-    add_poi(front_yard, "mailbox", get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_NAME), get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_DESC), NULL, NULL);
-    add_poi(front_yard, "doorbell", get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_NAME), get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_DESC), NULL, NULL);
+    add_poi(front_yard, "mailbox", get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_NAME), get_string_by_id(MAP_POI_FRONT_YARD_MAILBOX_DESC), "SCENE_EXAMINE_MAILBOX", NULL);
+    add_poi(front_yard, "doorbell", get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_NAME), get_string_by_id(MAP_POI_FRONT_YARD_DOORBELL_DESC), "SCENE_EXAMINE_DOORBELL", NULL);
 
     // --- 2. Lower Hallway (下走廊) ---
     *lower_hallway = (Location){0};
@@ -78,7 +78,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     add_connection(lower_hallway, "bathroom", "iwakura_bathroom", NULL, NULL, "SCENE_02_DOWNSTAIRS");
     add_connection(lower_hallway, "upstairs", "iwakura_upper_hallway", NULL, NULL, "SCENE_IWAKURA_UPPER_HALLWAY");
     add_connection(lower_hallway, "study", "iwakura_study", NULL, NULL, "SCENE_02_DOWNSTAIRS");
-    add_poi(lower_hallway, "shoe_rack", get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_DESC), NULL, NULL);
+    add_poi(lower_hallway, "shoe_rack", get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_DESC), "SCENE_EXAMINE_SHOE_RACK", NULL);
     add_poi(lower_hallway, "telephone", get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_DESC), NULL, NULL);
     add_poi(lower_hallway, "umbrella_stand", get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_DESC), NULL, NULL);
 

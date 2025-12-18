@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_MEGURO
+  action_id: return_from_meguro # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_MEGURO_DESC
+location_id: meguro
+name_text_id: TEXT_SCENE_NAME_MEGURO
+scene_id: SCENE_MEGURO

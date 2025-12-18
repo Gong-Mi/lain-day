@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_ROPPONGI_SCHOOL_GATE
+  action_id: return_from_roppongi_school_gate # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_ROPPONGI_SCHOOL_GATE_DESC
+location_id: roppongi_school_gate
+name_text_id: TEXT_SCENE_NAME_ROPPONGI_SCHOOL_GATE
+scene_id: SCENE_ROPPONGI_SCHOOL_GATE

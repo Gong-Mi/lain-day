@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_AKIHABARA
+  action_id: return_from_akihabara # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_AKIHABARA_DESC
+location_id: akihabara
+name_text_id: TEXT_SCENE_NAME_AKIHABARA
+scene_id: SCENE_AKIHABARA

@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_MIYANOSAKA_STATION
+  action_id: return_from_miyanosaka_station # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_MIYANOSAKA_STATION_DESC
+location_id: miyanosaka_station
+name_text_id: TEXT_SCENE_NAME_MIYANOSAKA_STATION
+scene_id: SCENE_MIYANOSAKA_STATION

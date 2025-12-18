@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_CHISA_HOME
+  action_id: return_from_chisa_home # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_CHISA_HOME_DESC
+location_id: chisa_home
+name_text_id: TEXT_SCENE_NAME_CHISA_HOME
+scene_id: SCENE_CHISA_HOME

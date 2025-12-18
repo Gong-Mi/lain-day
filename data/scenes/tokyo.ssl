@@ -1,0 +1,10 @@
+
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_TOKYO
+  action_id: return_from_tokyo # Placeholder action ID
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_PLACEHOLDER_TOKYO_DESC
+location_id: tokyo
+name_text_id: TEXT_SCENE_NAME_TOKYO
+scene_id: SCENE_TOKYO

@@ -41,4 +41,7 @@ void mika_move_to(const char* location_id);
 // Resets Mika's positioning to be controlled by her schedule.
 void mika_return_to_schedule(void);
 
+// Restores Mika's state from a save file.
+void restore_mika_state(const char* location_id, bool is_manual);
+
 #endif // CHARACTER_MIKA_H
