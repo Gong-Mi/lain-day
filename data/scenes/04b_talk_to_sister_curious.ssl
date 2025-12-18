@@ -16,6 +16,6 @@ dialogue:
   text_id: TEXT_SISTER_FIXED_DESC3
 - speaker: SPEAKER_NONE
   text_id: TEXT_SISTER_FIXED_DESC4
-location_id: ''
+location_id: 'iwakura_upper_hallway'
 name_text_id: TEXT_SCENE_NAME_04B_TALK_TO_SISTER_CURIOUS
 scene_id: SCENE_04B_TALK_TO_SISTER_CURIOUS
