@@ -206,6 +206,10 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         strncpy(game_state->current_story_file, "SCENE_02_DOWNSTAIRS", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     }
+    else if (strcmp(action_id, "upstairs") == 0) {
+        strncpy(game_state->current_story_file, "SCENE_IWAKURA_UPPER_HALLWAY", MAX_PATH_LENGTH - 1);
+        scene_changed = 1;
+    }
     else if (strcmp(action_id, "lains_room") == 0) {
         strncpy(game_state->current_story_file, "SCENE_01_LAIN_ROOM", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
