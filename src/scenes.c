@@ -37,6 +37,7 @@
 #include "SCENE_DAD_HUB_data.h"
 #include "SCENE_DAD_DAY_0_data.h"
 #include "SCENE_PC_NAVI_DESKTOP_data.h"
+#include "SCENE_IWAKURA_MIKAS_ROOM_CORNER_data.h"
 
 // A function pointer type for scene initializers
 typedef void (*SceneInitFunc)(StoryScene*);
@@ -79,6 +80,7 @@ static const struct {
     {"SCENE_DAD_DAY_0", init_scene_scene_dad_day_0_from_data},
 #endif
     {"SCENE_PC_NAVI_DESKTOP", init_scene_scene_pc_navi_desktop_from_data},
+    {"SCENE_IWAKURA_MIKAS_ROOM_CORNER", init_scene_scene_iwakura_mikas_room_corner_from_data},
 };
 
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(scene_registrations[0]);

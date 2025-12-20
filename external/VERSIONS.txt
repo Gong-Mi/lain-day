@@ -16,3 +16,8 @@ This file lists the exact versions (Git commit SHAs) of external submodules used
 - Repository: https://github.com/DaveGamble/cJSON.git
 - Commit SHA: c859b25da02955fef659d658b8f324b5cde87be3
 - Version Tag: v1.7.15-48-gc859b25
+
+## ciha
+- Repository: https://github.com/Gong-Mi/CIHA
+- Commit SHA: ba4e15657d5e971cd85e3c4b930bedbf182d72d2
+- Version Tag: heads/main

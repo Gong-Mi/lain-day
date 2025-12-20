@@ -170,6 +170,7 @@ typedef struct GameState {
     int8_t doll_state_lain_room; // State of the doll in Lain's room
     int8_t doll_state_mika_room; // State of the doll in Mika's room
     char mika_location_storage[MAX_NAME_LENGTH]; // Storage for Mika's location string
+    int mika_sanity_level; // Mika's current sanity level (0-3)
     GamePaths paths; // Add GamePaths struct here
 } GameState;
 

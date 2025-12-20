@@ -13,7 +13,9 @@ def generate_string_ids_h(json_paths, header_path, names_header_path, names_c_pa
                 data = json.load(f)
                 for key, value in data.items():
                     if key in merged_data and merged_data[key] != value:
-                        print(f"Warning: Duplicate string ID '{key}' found in {json_path}. Overwriting previous value.")
+                        print(f"WARNING: Duplicate string ID '{key}' found in {json_path}.", file=sys.stderr)
+                        print(f"    Old value: '{merged_data[key]}'", file=sys.stderr)
+                        print(f"    New value: '{value}' (Overwriting)", file=sys.stderr)
                     merged_data[key] = value
                     
         except FileNotFoundError:

@@ -150,57 +150,23 @@ int load_player_state(const char* path, GameState* game_state) {
     if (cJSON_IsObject(mika_state_json)) {
         const cJSON *loc = cJSON_GetObjectItemCaseSensitive(mika_state_json, "current_location");
         const cJSON *manual = cJSON_GetObjectItemCaseSensitive(mika_state_json, "is_manually_positioned");
+        const cJSON *sanity_json = cJSON_GetObjectItemCaseSensitive(mika_state_json, "sanity_level");
         
-        // We need to store the location string persistently because restore_mika_state expects a pointer 
-        // that will last (normally a string literal, but here dynamic).
-        // For now, we'll use a hack or rely on string interning if available, 
-        // BUT Mika module stores `const char*`. 
-        // ISSUE: If we pass `loc->valuestring` directly, it might be freed when `root` is deleted?
-        // Wait, `load_player_state` deletes `root` at the end.
-        // `g_mika_module.current_location_id` expects a pointer.
-        // We need to copy this string into GameState or similar persistent storage if it's dynamic.
-        // However, location IDs in this game are usually from a fixed set (string table or string literals).
-        // Let's assume we can intern it or find a persistent match.
-        // Simple fix for now: We should probably store this in GameState if we want to be safe, 
-        // or ensure string table has it. 
-        // Actually, let's look at `game_state->current_story_file`. It's a char array.
-        // We should add a buffer for Mika's location in GameState or assume it matches a static string.
-        // Since we don't have a global "location ID registry" to return a static pointer easily without lookup...
-        // We will assume for now that restore_mika_state can handle a copy if we change Mika module 
-        // OR we add a field in GameState to hold this string.
-        
-        // Let's use `game_state->mika_location_buffer` if we add it, or just risk it? 
-        // No, risky. 
-        // Let's just pass `loc->valuestring` and accept that `restore_mika_state` in `mika.c` 
-        // might assign it to a `const char*`. If that pointer becomes invalid, we crash.
-        // `cJSON_Delete(root)` WILL free `loc->valuestring`.
-        
-        // SOLUTION: We must copy the string.
-        // Since `mika.c` stores `const char*`, we can't easily malloc there without leaking or adding cleanup.
-        // Let's Add `mika_location_buffer` to `GameState` temporarily? 
-        // Or simpler: Just rely on the fact that `mika.c` is the only user.
-        // Let's Allocate a persistent string using strdup? But who frees it?
-        // Let's Modify `GameState` to store `mika_current_location` char array.
-        // Wait, I can't modify GameState header easily in this single `replace` call without breaking flow.
-        
-        // Alternative: Use `hash_table_set(game_state->flags, "mika_location", ...)` 
-        // and let Mika read from flags? No, that's circular.
-        
-        // Let's stick to the plan: I will assume `restore_mika_state` copies the string? 
-        // Looking at `mika.c`: `g_mika_module.current_location_id = location_id;`
-        // It does NOT copy.
-        
-        // OK, I need to add `char mika_location_storage[MAX_NAME_LENGTH]` to `GameState`.
-        // Then I can strcpy into that, and pass that pointer to Mika.
-        // I will do that in a separate step. For now, let's write the code assuming `game_state->mika_location_storage` exists.
-        
+        int sanity_val = 0;
+        if (cJSON_IsNumber(sanity_json)) {
+            sanity_val = sanity_json->valueint;
+        }
+
         if (cJSON_IsString(loc) && cJSON_IsBool(manual)) {
              strncpy(game_state->mika_location_storage, loc->valuestring, MAX_NAME_LENGTH - 1);
-             restore_mika_state(game_state->mika_location_storage, cJSON_IsTrue(manual));
+             restore_mika_state(game_state->mika_location_storage, cJSON_IsTrue(manual), sanity_val);
+        } else {
+             // Fallback if partially missing
+             restore_mika_state("iwakura_mikas_room", false, sanity_val);
         }
     } else {
         // Default
-        restore_mika_state("iwakura_mikas_room", false);
+        restore_mika_state("iwakura_mikas_room", false, 0);
     }
 
     DecodedTimeResult time_check = decode_time_with_ecc(game_state->time_of_day);
@@ -280,6 +246,7 @@ int save_game_state(const char* path, const GameState* game_state) {
         cJSON *mika_obj = cJSON_CreateObject();
         cJSON_AddStringToObject(mika_obj, "current_location", mika->current_location_id ? mika->current_location_id : "unknown");
         cJSON_AddBoolToObject(mika_obj, "is_manually_positioned", mika->is_manually_positioned);
+        cJSON_AddNumberToObject(mika_obj, "sanity_level", mika->sanity_level);
         cJSON_AddItemToObject(root, "mika_state", mika_obj);
     }
 

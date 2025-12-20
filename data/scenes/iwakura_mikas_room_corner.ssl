@@ -1,0 +1,11 @@
+scene_id: SCENE_IWAKURA_MIKAS_ROOM_CORNER
+name_text_id: TEXT_SCENE_NAME_MIKA_CORNER
+location_id: iwakura_mikas_room
+dialogue:
+- speaker: SPEAKER_NONE
+  text_id: TEXT_MIKA_CORNER_DESC
+- speaker: SPEAKER_MIKA
+  text_id: TEXT_MIKA_CORNER_MUMBLE
+choices:
+- text_id: TEXT_CHOICE_RETURN_FROM_IWAKURA_MIKAS_ROOM
+  action_id: return_from_iwakura_mikas_room

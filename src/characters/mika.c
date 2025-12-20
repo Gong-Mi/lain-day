@@ -5,177 +5,181 @@
 #include "ecc_time.h"
 #include <string.h>
 #include <stdio.h>
-#include <pthread.h>
+#include <stdlib.h> // for rand()
 
-// --- Mika's Daily Schedule ---
+// --- Mika's Daily Schedule Definitions ---
 
-static const ScheduleEntry MIKA_SCHEDULE[] = {
-    // Times are in 1/16s units from the start of the day (00:00)
+// Normal Routine (Sanity 0 & 1)
+static const ScheduleEntry MIKA_SCHEDULE_NORMAL[] = {
     { (0 * 60 * 60 * 16), "iwakura_mikas_room" },           // 00:00 - 07:59 (Sleeping)
+    { (7 * 60 * 60 * 16), "iwakura_bathroom" },             // 07:00 - 07:59 (Getting ready) - NEW
     { (8 * 60 * 60 * 16), "iwakura_living_dining_kitchen" },// 08:00 - 08:59 (Breakfast)
-    { (9 * 60 * 60 * 16), "off_map" },                      // 09:00 - 16:59 (At school/away)
-    { (17 * 60 * 60 * 16), "iwakura_mikas_room" },          // 17:00 - 19:59 (In her room)
-    { (20 * 60 * 60 * 16), "iwakura_living_dining_kitchen" },// 20:00 - 21:59 (In living room)
-    { (22 * 60 * 60 * 16), "iwakura_mikas_room" },          // 22:00 onwards (In her room)
+    { (9 * 60 * 60 * 16), "off_map" },                      // 09:00 - 16:59 (School/Away)
+    { (17 * 60 * 60 * 16), "iwakura_mikas_room" },          // 17:00 - 19:59 (Room)
+    { (20 * 60 * 60 * 16), "iwakura_living_dining_kitchen" },// 20:00 - 21:59 (Dinner/TV)
+    { (22 * 60 * 60 * 16), "iwakura_mikas_room" },          // 22:00 onwards (Sleep)
 };
-static const int MIKA_SCHEDULE_ENTRIES = sizeof(MIKA_SCHEDULE) / sizeof(ScheduleEntry);
+static const int MIKA_SCHEDULE_NORMAL_COUNT = sizeof(MIKA_SCHEDULE_NORMAL) / sizeof(ScheduleEntry);
+
+// Paranoid Routine (Sanity 2) - Breaking patterns
+static const ScheduleEntry MIKA_SCHEDULE_PARANOID[] = {
+    { (0 * 60 * 60 * 16), "iwakura_mikas_room" },           // Night: Hiding in room
+    { (10 * 60 * 60 * 16), "iwakura_bathroom" },            // 10:00: Hiding in bathroom (should be at school)
+    { (12 * 60 * 60 * 16), "shibuya_street" },              // 12:00: Wandering in Shibuya
+    { (16 * 60 * 60 * 16), "iwakura_lower_hallway" },       // 16:00: Staring at the phone in hallway
+    { (18 * 60 * 60 * 16), "iwakura_mikas_room" },          // 18:00: Back in room, locked
+};
+static const int MIKA_SCHEDULE_PARANOID_COUNT = sizeof(MIKA_SCHEDULE_PARANOID) / sizeof(ScheduleEntry);
 
 
-// --- Private Functions (Logic moved from other parts of the engine) ---
+// --- Private Functions ---
 
-// Logic moved from src/conditions.c
 static bool mika_is_room_accessible_impl(struct GameState* game_state, const struct Connection* connection) {
-    if (game_state == NULL) {
-        return false;
-    }
+    if (!game_state) return false;
 
-    // Check for the key (override time restriction)
+    // Key override
     for (int i = 0; i < game_state->player_state.inventory_count; i++) {
         if (strcmp(game_state->player_state.inventory[i].name, "key_mika_room") == 0) {
-            return true; // Access granted by key
+            return true;
         }
     }
 
-    uint32_t encoded_time;
-
-    // Accessing time safely is complex here without direct access to the mutex.
-    // For now, we assume this function is called from a context where time is stable.
-    // A better implementation would involve passing the mutex or a timestamp.
-    encoded_time = game_state->time_of_day;
-    
+    // Time-based access
+    uint32_t encoded_time = game_state->time_of_day;
     DecodedTimeResult decoded_result = decode_time_with_ecc(encoded_time);
 
-    if (decoded_result.status == DOUBLE_BIT_ERROR_DETECTED) {
-        return false; // Door is definitely locked if time is glitching
-    }
+    if (decoded_result.status == DOUBLE_BIT_ERROR_DETECTED) return false;
 
     uint32_t current_time_units = decoded_result.data;
-    const uint32_t start_time_units = 17 * 60 * 60 * 16; // 17:00 (Using literal value for clarity)
-    const uint32_t end_time_units = 21 * 60 * 60 * 16;   // 21:00
     const uint32_t units_in_a_day = 24 * 60 * 60 * 16;
-    
     uint32_t time_units_in_day = current_time_units % units_in_a_day;
 
-    // Door is open between 17:00 and 21:00
-    return (time_units_in_day >= start_time_units && time_units_in_day < end_time_units);
+    // Normal State: Open 17:00 - 21:00
+    // Broken State: Always locked
+    CharacterMika* mika = get_mika_module();
+    if (mika->sanity_level >= MIKA_SANITY_BROKEN) {
+        return false; 
+    }
+
+    // Convert to hours for easier logic
+    int hour = (time_units_in_day / 16) / 3600;
+    return (hour >= 17 && hour < 21);
 }
 
-// Logic moved from src/executor.c
 static void mika_on_talk_impl(struct GameState* game_state) {
+    CharacterMika* mika = get_mika_module();
+    
+    // Dispatch based on Sanity Level first
+    if (mika->sanity_level == MIKA_SANITY_BROKEN) {
+        printf("Mika stares at the wall, mumbling something about the prophecy.\n");
+        return;
+    }
+    
+    // Standard mood-based dispatch
     const char* sister_mood = hash_table_get(game_state->flags, "sister_mood");
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: mika_on_talk_impl: current sister_mood: %s\n", sister_mood ? sister_mood : "NULL");
-#endif
-    if (sister_mood != NULL) {
-        if (strcmp(sister_mood, "cold") == 0) {
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: mika_on_talk_impl: Executing 'talk_to_sister_cold'\n");
-#endif
-            execute_action("talk_to_sister_cold", game_state);
-        } else if (strcmp(sister_mood, "curious") == 0) {
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: mika_on_talk_impl: Executing 'talk_to_sister_curious'\n");
-#endif
-            execute_action("talk_to_sister_curious", game_state);
-        } else {
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: mika_on_talk_impl: Executing 'talk_to_sister_default'\n");
-#endif
-            execute_action("talk_to_sister_default", game_state);
-        }
+    if (sister_mood) {
+        if (strcmp(sister_mood, "cold") == 0) execute_action("talk_to_sister_cold", game_state);
+        else if (strcmp(sister_mood, "curious") == 0) execute_action("talk_to_sister_curious", game_state);
+        else execute_action("talk_to_sister_default", game_state);
     } else {
-#ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: mika_on_talk_impl: sister_mood is NULL. Executing 'talk_to_sister_default'\n");
-#endif
         execute_action("talk_to_sister_default", game_state);
     }
-    // After the conversation is initiated, Mika moves. This is a script-driven move.
-    // Mika's movement should be handled by schedule or explicit plot events.
 }
 
+// --- Module Instance ---
 
-// --- Module Definition ---
-
-// The single instance of the Mika module's data and function pointers.
 static CharacterMika g_mika_module;
 
-// --- Public API Implementation ---
+// --- Public API ---
 
 void init_mika_module() {
     g_mika_module.on_talk = mika_on_talk_impl;
     g_mika_module.is_room_accessible = mika_is_room_accessible_impl;
-    // Initial location is null; it will be set by the first schedule update.
     g_mika_module.current_location_id = "UNKNOWN_LOCATION"; 
     g_mika_module.is_manually_positioned = false;
+    g_mika_module.sanity_level = MIKA_SANITY_NORMAL;
 }
 
-const CharacterMika* get_mika_module() {
+CharacterMika* get_mika_module() {
     return &g_mika_module;
+}
+
+void mika_set_sanity(MikaSanityLevel level) {
+    g_mika_module.sanity_level = level;
+#ifdef USE_DEBUG_LOGGING
+    fprintf(stderr, "DEBUG: Mika Sanity set to %d\n", level);
+#endif
 }
 
 void mika_move_to(const char* location_id) {
     if (location_id) {
         g_mika_module.current_location_id = location_id;
-        g_mika_module.is_manually_positioned = true; // Mark that a script is controlling her position
-#ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: Mika script-moved to location: %s\n", location_id);
-#endif
+        g_mika_module.is_manually_positioned = true;
     }
 }
 
-void mika_update_location_by_schedule(struct GameState* game_state) {
-    if (!game_state) return;
+// Pure logic function: Returns scheduled location based on time and sanity
+const char* mika_calculate_scheduled_location(uint32_t time_units_in_day, MikaSanityLevel sanity) {
+    const char* new_location_id = "off_map"; // Default
 
-    // If Mika's position is being controlled by a script, don't update from schedule.
-    if (g_mika_module.is_manually_positioned) {
-        return;
+    if (sanity >= MIKA_SANITY_BROKEN) {
+        return "iwakura_mikas_room"; // Always in room when broken
     }
 
-    // Decode time to get absolute time units
-    DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
-    if (decoded_result.status == DOUBLE_BIT_ERROR_DETECTED) {
-        // If time is glitching, maybe Mika disappears or stays put.
-        // For now, we'll have her disappear from the map.
-        g_mika_module.current_location_id = "off_map";
-        return;
+    const ScheduleEntry* schedule;
+    int count;
+
+    if (sanity == MIKA_SANITY_PARANOID) {
+        schedule = MIKA_SCHEDULE_PARANOID;
+        count = MIKA_SCHEDULE_PARANOID_COUNT;
+    } else {
+        // Normal & Irritated share the base schedule
+        schedule = MIKA_SCHEDULE_NORMAL;
+        count = MIKA_SCHEDULE_NORMAL_COUNT;
     }
 
-    // Calculate the time of day in our 1/16s units
-    const uint32_t units_in_a_day = 24 * 60 * 60 * 16;
-    uint32_t time_units_in_day = decoded_result.data % units_in_a_day;
-
-    // Find the correct schedule entry by iterating backwards
-    const char* new_location_id = NULL;
-    for (int i = MIKA_SCHEDULE_ENTRIES - 1; i >= 0; --i) {
-        if (time_units_in_day >= MIKA_SCHEDULE[i].start_time_units) {
-            new_location_id = MIKA_SCHEDULE[i].location_id;
+    // Iterate backwards to find the active slot
+    for (int i = count - 1; i >= 0; --i) {
+        if (time_units_in_day >= schedule[i].start_time_units) {
+            new_location_id = schedule[i].location_id;
             break;
         }
     }
+    
+    return new_location_id;
+}
 
-    // Update location only if it has changed
-    if (new_location_id && (!g_mika_module.current_location_id || strcmp(g_mika_module.current_location_id, new_location_id) != 0)) {
-        g_mika_module.current_location_id = new_location_id;
+const char* mika_update_location_by_schedule(struct GameState* game_state) {
+    if (!game_state) return NULL;
+    if (g_mika_module.is_manually_positioned) return g_mika_module.current_location_id;
+
+    DecodedTimeResult decoded_result = decode_time_with_ecc(game_state->time_of_day);
+    if (decoded_result.status == DOUBLE_BIT_ERROR_DETECTED) {
+        g_mika_module.current_location_id = "off_map";
+        return "off_map";
+    }
+
+    const uint32_t units_in_a_day = 24 * 60 * 60 * 16;
+    uint32_t time_units_in_day = decoded_result.data % units_in_a_day;
+
+    const char* new_loc = mika_calculate_scheduled_location(time_units_in_day, g_mika_module.sanity_level);
+    
+    // Update module state
+    if (new_loc && (!g_mika_module.current_location_id || strcmp(g_mika_module.current_location_id, new_loc) != 0)) {
+        g_mika_module.current_location_id = new_loc;
 #ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: Mika location updated by schedule to: %s\n", new_location_id);
+        fprintf(stderr, "DEBUG: Mika moved to %s (Sanity: %d)\n", new_loc, g_mika_module.sanity_level);
 #endif
     }
+    return g_mika_module.current_location_id;
 }
 
 void mika_return_to_schedule(void) {
     g_mika_module.is_manually_positioned = false;
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Mika has been returned to schedule-based positioning.\n");
-#endif
 }
 
-void restore_mika_state(const char* location_id, bool is_manual) {
-    if (location_id) {
-        g_mika_module.current_location_id = location_id; // Note: Ensure string lifecycle management if passing dynamic strings
-        // In this project, location IDs are typically string literals or from persistent storage
-    }
+void restore_mika_state(const char* location_id, bool is_manual, int sanity_level) {
+    if (location_id) g_mika_module.current_location_id = location_id;
     g_mika_module.is_manually_positioned = is_manual;
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Mika state restored: Loc=%s, Manual=%d\n", location_id ? location_id : "NULL", is_manual);
-#endif
+    g_mika_module.sanity_level = (MikaSanityLevel)sanity_level;
 }

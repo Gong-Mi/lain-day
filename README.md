@@ -1,5 +1,7 @@
 # lain-day
 
+![Logo](experiments/ansi_renderer/e.jpeg)
+
 > "我并非在回到过去。我是在进行一次‘数字考古’，挖掘被现代图形技术所遮蔽的、独特的审美和体验。"
 
 `lain-day` 是一个在真实的终端（Terminal）环境中运行的交互式小说游戏。它的灵感来源于动画《玲音》（*Serial Experiments Lain*）的深层主题，旨在探索一种复古未来主义（Retrofuturism）的叙事方式。
@@ -60,6 +62,8 @@
 ## 核心玩法与命令
 
 游戏通过一个类似 `shell` 的界面进行交互。玩家通过输入命令来探索世界、与物品互动和推进故事。
+
+> **提示**：游戏未来可能支持关键词点击跳转功能，以便更快捷地进行交互。
 
 -   **`arls` (Area List Scan):** 这是最核心的环境扫描命令。它会显示当前地点的描述、所有可观察的“兴趣点”（Points of Interest），以及所有可用的“连接”（Connections）或出口。
 -   **`exper <id>` (Experiment):** 用于与“兴趣点”进行互动。`id` 通常通过 `arls` 命令获得。例如，如果 `arls` 显示一个 `id` 为 `navi_computer` 的兴趣点，输入 `exper navi_computer` 就会尝试与之互动。

@@ -1,6 +1,6 @@
 {
-    "TEXT_EXAMINE_MIKA_WARDROBE_DESC": "衣柜里挂满了各种时髦的衣服，散发着淡淡的香水味。但在衣柜的最底层，被一堆旧衣服遮住的角落里，似乎有什么东西。",
     "TEXT_CHOICE_EXAMINE_CORNER": "检查角落",
-    "TEXT_FOUND_HIDDEN_DOLL_DESC": "你拨开那些旧衣服，发现了一个布娃娃。它看起来有些陈旧，和你床边那一堆布娃娃里的某一个简直一模一样。为什么美香会藏着这个？",
-    "TEXT_LEAVE_WARDROBE": "关上衣柜"
+    "TEXT_SCENE_NAME_MIKA_CORNER": "美香的房间 - 角落",
+    "TEXT_MIKA_CORNER_DESC": "美香，窝在角落。\n一手里拿着剪刀，一手抱着“佩可”。\n眼圈很重，眼神紧张。",
+    "TEXT_MIKA_CORNER_MUMBLE": "“出去...”"
 }

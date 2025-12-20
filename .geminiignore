@@ -2,3 +2,4 @@
 # 你也可以使用通配符
 external/*
 !external/VERSIONS.txt
+!external/ciha
