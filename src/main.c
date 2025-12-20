@@ -234,9 +234,24 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        disable_raw_mode();
+        // Give a tiny moment for any pending input (like mouse release) to arrive before flushing
+        usleep(50000); 
+        flush_input_buffer();
         clear_screen(); // Clear logo before showing session prompt
 
+        // Switch SIGWINCH to SA_RESTART for the rest of the game.
+        struct sigaction sa_restart;
+        memset(&sa_restart, 0, sizeof(sa_restart));
+        sa_restart.sa_handler = handle_sigwinch;
+        sa_restart.sa_flags = SA_RESTART; 
+        sigaction(SIGWINCH, &sa_restart, NULL);
+
         // --- Intro Sequence ---
+        // Turn off echo so user can type their name ahead of time, but it won't 
+        // mess up the cinematic with characters like "^[[A".
+        set_terminal_echo(false);
+
         printf("\n\n");
         printf(ANSI_COLOR_CYAN "   CLOSE THE WORLD,\n" ANSI_COLOR_RESET);
         usleep(600000);
@@ -256,14 +271,10 @@ int main(int argc, char *argv[]) {
         printf(ANSI_COLOR_GREEN        "   [ OK ]     CONNECTION ESTABLISHED.\n" ANSI_COLOR_RESET);
         usleep(200000);
         printf("\n");
+        
+        set_terminal_echo(true); // Turn echo back on for session input
         // ----------------------
 
-        disable_raw_mode();
-        // Give a tiny moment for any pending input to arrive before flushing
-        usleep(50000); 
-        flush_input_buffer();
-
-        // Switch SIGWINCH to SA_RESTART for the rest of the game.
 
     }
 
@@ -299,11 +310,12 @@ int main(int argc, char *argv[]) {
                     free(line);
 
                     if (strlen(session_name) == 0) {
-                        printf("\n%s\n", get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY));
+                        // \033[A: Move up, \r: carriage return, \033[K: clear line
+                        printf("\033[A\r\033[K" ANSI_COLOR_RED "%s" ANSI_COLOR_RESET "\n", get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY));
                         continue;
                     }
                     if (!is_valid_session_name(session_name)) {
-                        printf("%s\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME));
+                        printf("\033[A\r\033[K" ANSI_COLOR_RED "%s" ANSI_COLOR_RESET "\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME));
                         session_name[0] = '\0';
                         continue;
                     }
