@@ -312,15 +312,30 @@ int main(int argc, char *argv[]) {
 
                     if (strlen(session_name) == 0) {
                         session_error_count++;
-                        // \033[A: Move up, \r: carriage return, \033[K: clear line
-                        printf("\033[A\r\033[K" ANSI_COLOR_RED "%s (Errors: %d)" ANSI_COLOR_RESET "\n", 
+                        if (session_error_count > 1) {
+                            // Move up 2 lines: 1 for the prompt, 1 for the previous error
+                            printf("\033[2A\r\033[K");
+                        } else {
+                            // First error: just move up 1 line to cover the prompt
+                            printf("\033[A\r\033[K");
+                        }
+                        printf(ANSI_COLOR_RED "%s (Errors: %d)" ANSI_COLOR_RESET "\n", 
                                get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY), session_error_count);
+                        printf("\r\033[K"); // Clear the line where the new prompt will appear
+                        fflush(stdout);
                         continue;
                     }
                     if (!is_valid_session_name(session_name)) {
                         session_error_count++;
-                        printf("\033[A\r\033[K" ANSI_COLOR_RED "%s (Errors: %d)" ANSI_COLOR_RESET "\n", 
+                        if (session_error_count > 1) {
+                            printf("\033[2A\r\033[K");
+                        } else {
+                            printf("\033[A\r\033[K");
+                        }
+                        printf(ANSI_COLOR_RED "%s (Errors: %d)" ANSI_COLOR_RESET "\n", 
                                get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME), session_error_count);
+                        printf("\r\033[K");
+                        fflush(stdout);
                         session_name[0] = '\0';
                         continue;
                     }
