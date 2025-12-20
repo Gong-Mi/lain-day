@@ -11,39 +11,46 @@
 #include <fcntl.h>
 #include <locale.h> // Required for setlocale()
 #include <signal.h> // For signal handling
+#include <pthread.h>
 
-#include "game_paths.h"
-#include "build_info.h"
 #include "game_types.h"
+#include "game_paths.h"
+#include "scenes.h"
+#include "event_system.h"
+#include "time_utils.h"
+#include "render_utils.h"
+#include "string_table.h"
 #include "data_loader.h"
 #include "map_loader.h"
 #include "executor.h"
-#include "string_table.h"
-#include "scenes.h"
-#include "ansi_colors.h"
-#include "project_status.h"
-#include "flag_system.h"
-#include "time_utils.h"
 #include "characters/mika.h"
-#include "linenoise.h"
-#include "character_data.h"
-#include "items_data.h"
-#include "event_system.h"
 #include "ecc_time.h"
-#include "render_utils.h"
+#include "project_status.h"
+#include "build_info.h"
+#include "linenoise.h"
+#include "cmap.h"
+#include "flag_system.h"
 #include "logo_raw_data.h"
+#include "character_data.h"
 
 // --- Global State ---
 static uint32_t scene_entry_time = 0;
+volatile sig_atomic_t g_needs_redraw = 0;
 
 // --- Function Prototypes ---
 void handle_signal(int sig);
+void handle_sigwinch(int sig);
 void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index);
 int is_numeric(const char* str);
 bool is_valid_session_name(const char* name); // Added prototype for session name validation
 static bool process_events(GameState* game_state, StoryScene* current_scene);
 
 // --- Signal Handling ---
+void handle_sigwinch(int sig) {
+    (void)sig;
+    g_needs_redraw = 1;
+}
+
 void handle_signal(int sig) {
     (void)sig; // Suppress unused variable warning
     restore_terminal_state();
@@ -90,6 +97,14 @@ int main(int argc, char *argv[]) {
     // Register signal handlers
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
+    
+    // Use sigaction for SIGWINCH to ensure SA_RESTART is NOT set,
+    // so that read() is interrupted and we can redraw immediately.
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = handle_sigwinch;
+    sa.sa_flags = 0; // Explicitly NO SA_RESTART
+    sigaction(SIGWINCH, &sa, NULL);
 
     printf("Lain-day C version starting...\n");
     printf("Build Info - OS: %s, Arch: %s\n", BUILD_OS, BUILD_ARCH);
@@ -158,7 +173,25 @@ int main(int argc, char *argv[]) {
         char mouse_buf[32];
         int mouse_idx = 0;
 
-        while (read(STDIN_FILENO, &c, 1) == 1) {
+        while (1) {
+            if (g_needs_redraw) {
+                g_needs_redraw = 0;
+                clear_screen();
+                bounds = render_image_adaptively(LOGO_DATA, LOGO_WIDTH, LOGO_HEIGHT);
+                printf("\n\nPress any key or click the image to start...");
+                fflush(stdout);
+            }
+
+            ssize_t n = read(STDIN_FILENO, &c, 1);
+            
+            if (n == -1) {
+                if (errno == EINTR) {
+                    continue; // Loop back to check g_needs_redraw
+                }
+                break; // Real error
+            }
+            if (n == 0) break; // EOF (e.g. pipe closed)
+
             if (state == 0) {
                 if (c == '\x1b') {
                     state = 1;
@@ -312,6 +345,11 @@ int main(int argc, char *argv[]) {
         get_next_input(input_buffer, sizeof(input_buffer), argc, argv, &arg_index);
 
         pthread_mutex_lock(&time_mutex);
+
+        if (g_needs_redraw) {
+            dirty = true;
+            g_needs_redraw = 0;
+        }
 
         if (process_events(game_state, &current_scene)) {
             dirty = true;

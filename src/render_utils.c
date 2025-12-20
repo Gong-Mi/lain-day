@@ -213,67 +213,69 @@ void render_current_scene(const StoryScene* scene, const struct GameState* game_
 // Function to render an image adaptively to the terminal size
 ImageBounds render_image_adaptively(const uint8_t* data, int width, int height) {
     struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-
-    int term_width = w.ws_col;
-    int term_height = w.ws_row;
-
-    // Adjust for font aspect ratio (approximately 2:1 height:width for typical characters)
-    // We want to fit the image into term_width x (term_height - padding)
-    // Let's reserve some lines for prompt
-    int max_display_height = term_height - 6; 
-    if (max_display_height < 10) max_display_height = 10;
-
-    // Calculate scaling factors
-    // We want to output '  ' (2 spaces) per pixel to approximate a square pixel.
-    // So visual width is 2 * width.
+    int term_width = 80;
+    int term_height = 24;
     
-    // Target dimensions
-    int target_width = term_width / 2; // We use 2 chars per pixel
-    int target_height = max_display_height;
+    if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &w) == 0 && w.ws_col > 0) {
+        term_width = w.ws_col;
+        term_height = w.ws_row;
+    }
 
-    // Calculate scale to fit
-    float scale_w = (float)width / target_width;
-    float scale_h = (float)height / target_height;
+    // Safety margins to avoid auto-wrap and leave room for prompt
+    int avail_w = term_width - 2;
+    int avail_h = term_height - 4;
+
+    if (avail_w < 2) avail_w = 2;
+    if (avail_h < 2) avail_h = 2;
+
+    // We use 2 spaces per pixel, so target pixel width is avail_w / 2
+    float scale_w = (float)width / (avail_w / 2);
+    float scale_h = (float)height / avail_h;
     
-    // Use the larger scale to fit both dimensions (fit inside)
+    // Use larger scale to fit inside
     float scale = (scale_w > scale_h) ? scale_w : scale_h;
+    if (scale < 1.0f) scale = 1.0f; // Limit to 1:1, or upscale? Let's stay 1:1 max for now.
     
-    // If image is smaller than target, we might not want to upscale too much, 
-    // but for "adaptive" usually we want it large. Let's stick to fit.
-    if (scale < 1.0f) scale = 1.0f; // Don't upscale, just center? Or allow upscale?
-    // Let's allow downscaling only for now to ensure quality, or simple nearest neighbor.
-    
-    int render_width = width / scale;
-    int render_height = height / scale;
+    int render_w = (int)(width / scale);
+    int render_h = (int)(height / scale);
 
-    // Simple nearest neighbor sampling
-    for (int y = 0; y < render_height; y++) {
-        for (int x = 0; x < render_width; x++) {
-            // Map render coordinate to source coordinate
-            int src_x = (int)(x * scale);
-            int src_y = (int)(y * scale);
+    // Centering offsets
+    int ox = (term_width - (render_w * 2)) / 2;
+    int oy = (term_height - 2 - render_h) / 2; // -2 for prompt room
+    if (oy < 0) oy = 0;
+    if (ox < 0) ox = 0;
+
+    // Vertical padding
+    for (int i = 0; i < oy; i++) printf("\n");
+
+    for (int y = 0; y < render_h; y++) {
+        // Horizontal padding
+        for (int i = 0; i < ox; i++) printf(" ");
+        
+        for (int x = 0; x < render_w; x++) {
+            int sx = (int)(x * scale);
+            int sy = (int)(y * scale);
             
-            if (src_x >= width) src_x = width - 1;
-            if (src_y >= height) src_y = height - 1;
+            if (sx >= width) sx = width - 1;
+            if (sy >= height) sy = height - 1;
 
-            int index = (src_y * width + src_x) * 3;
+            int index = (sy * width + sx) * 3;
             uint8_t r = data[index];
             uint8_t g = data[index+1];
             uint8_t b = data[index+2];
 
-            // Print ANSI RGB background code with 2 spaces
             printf("\x1b[48;2;%d;%d;%dm  ", r, g, b);
         }
-        printf("\x1b[0m\n"); // Reset color at end of row
+        printf("\x1b[0m\n"); // Reset color and new line
     }
-    printf("\x1b[0m"); // Ensure reset
+    printf("\x1b[0m\n");
+    fflush(stdout);
     
     ImageBounds bounds;
-    bounds.start_x = 1;
-    bounds.start_y = 1;
-    bounds.end_x = 1 + (render_width * 2);
-    bounds.end_y = 1 + render_height;
+    bounds.start_x = ox + 1;
+    bounds.start_y = oy + 1;
+    bounds.end_x = ox + (render_w * 2);
+    bounds.end_y = oy + render_h;
     return bounds;
 }
 
