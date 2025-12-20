@@ -32,6 +32,7 @@
 #include "flag_system.h"
 #include "logo_raw_data.h"
 #include "character_data.h"
+#include "ansi_colors.h"
 
 // --- Global State ---
 static uint32_t scene_entry_time = 0;
@@ -236,6 +237,29 @@ int main(int argc, char *argv[]) {
         disable_raw_mode();
         flush_input_buffer();
         clear_screen(); // Clear logo before showing session prompt
+
+        // --- Intro Sequence ---
+        printf("\n\n");
+        printf(ANSI_COLOR_CYAN "   CLOSE THE WORLD,\n" ANSI_COLOR_RESET);
+        usleep(600000);
+        printf(ANSI_COLOR_MAGENTA "           OPEN THE NExT.\n" ANSI_COLOR_RESET);
+        usleep(800000);
+        printf("\n");
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [ SYSTEM ] INITIALIZING PROTOCOLS...\n" ANSI_COLOR_RESET);
+        usleep(300000);
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [ NET ]    CONNECTING TO DEFAULT GATEWAY...\n" ANSI_COLOR_RESET);
+        usleep(600000);
+        printf(ANSI_COLOR_RED          "   [ ERROR ]  CONNECTION REFUSED (TIMEOUT).\n" ANSI_COLOR_RESET);
+        usleep(400000);
+        printf(ANSI_COLOR_YELLOW       "   [ WARN ]   REROUTING VIA BACKUP GATEWAY (IPv4)...\n" ANSI_COLOR_RESET);
+        usleep(500000);
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [ NET ]    HANDSHAKE INITIATED...\n" ANSI_COLOR_RESET);
+        usleep(300000);
+        printf(ANSI_COLOR_GREEN        "   [ OK ]     CONNECTION ESTABLISHED.\n" ANSI_COLOR_RESET);
+        usleep(200000);
+        printf("\n");
+        // ----------------------
+
     }
 
     if (is_test_mode) {
