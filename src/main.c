@@ -391,6 +391,7 @@ int main(int argc, char *argv[]) {
                 if (transition_to_scene(game_state->current_story_file, &current_scene, game_state)) {
                     scene_entry_time = decode_time_with_ecc(game_state->time_of_day).data;
                 } else {
+                    fprintf(stderr, "CRITICAL ERROR: Failed to transition to scene '%s'. Scene ID not found or invalid. Terminating game to prevent undefined state.\n", game_state->current_story_file);
                     game_is_running = false;
                 }
             }
