@@ -299,9 +299,18 @@ void exit_fullscreen_mode() {
 }
 
 static struct termios orig_termios;
+static bool terminal_state_captured = false;
+
+void init_terminal_state() {
+    if (!terminal_state_captured) {
+        if (tcgetattr(STDIN_FILENO, &orig_termios) == 0) {
+            terminal_state_captured = true;
+        }
+    }
+}
 
 void enable_raw_mode() {
-    tcgetattr(STDIN_FILENO, &orig_termios);
+    init_terminal_state(); // Ensure we have it
     struct termios raw = orig_termios;
     raw.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
@@ -310,16 +319,51 @@ void enable_raw_mode() {
 }
 
 void disable_raw_mode() {
-    printf("\x1b[?1000l\x1b[?1006l"); // Disable mouse tracking
-    fflush(stdout);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+    if (terminal_state_captured) {
+        printf("\x1b[?1000l\x1b[?1006l"); // Disable mouse tracking
+        fflush(stdout);
+        tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+    }
+}
+
+void set_terminal_echo(bool enabled) {
+    if (!terminal_state_captured) init_terminal_state();
+    struct termios t;
+    if (tcgetattr(STDIN_FILENO, &t) == 0) {
+        if (enabled) t.c_lflag |= ECHO;
+        else t.c_lflag &= ~ECHO;
+        tcsetattr(STDIN_FILENO, TCSANOW, &t);
+    }
 }
 
 void flush_input_buffer() {
     tcflush(STDIN_FILENO, TCIFLUSH);
+
+    // Robustly drain any remaining input using select/read
+    fd_set readfds;
+    struct timeval tv;
+    char buffer[256];
+    int n;
+
+    while (1) {
+        FD_ZERO(&readfds);
+        FD_SET(STDIN_FILENO, &readfds);
+        tv.tv_sec = 0;
+        tv.tv_usec = 10000; // 10ms timeout
+
+        if (select(STDIN_FILENO + 1, &readfds, NULL, NULL, &tv) > 0) {
+            n = read(STDIN_FILENO, buffer, sizeof(buffer));
+            if (n <= 0) break;
+        } else {
+            break;
+        }
+    }
 }
 
 void restore_terminal_state() {
     disable_raw_mode();
     exit_fullscreen_mode();
+    // Force reset attributes, show cursor, and return to column 0
+    printf("\x1b[0m\x1b[?25h\r"); 
+    fflush(stdout);
 }

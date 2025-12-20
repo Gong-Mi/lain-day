@@ -88,6 +88,8 @@ static bool process_events(GameState* game_state, StoryScene* current_scene) {
 // --- Main Function ---
 int main(int argc, char *argv[]) {
     setlocale(LC_ALL, ""); // Set locale for proper multibyte character handling
+    init_terminal_state(); // Capture clean terminal state early!
+    
     g_argc = argc;
     g_argv = argv;
     init_mika_module();
