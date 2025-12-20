@@ -3,7 +3,7 @@ choices:
   action_id: lains_room
 - text_id: TEXT_CHOICE_ENTER_MIKAS_ROOM
   action_id: enter_mika_room
-- text_id: TEXT_CHOICE_GO_DOWNSTAIRS_FROM_UPPER_HALLWAY
+- text_id: TEXT_CHOICE_GO_DOWNSTAIRS
   action_id: downstairs
 dialogue:
 - speaker: SPEAKER_NONE

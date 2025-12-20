@@ -1,10 +1,16 @@
 
 choices:
-- text_id: TEXT_CHOICE_RETURN_FROM_IWAKURA_LAINS_ROOM
-  action_id: upper_hallway # Matches connection in scene.c
+- text_id: TEXT_SCENE_NAME_01A_EXAMINE_NAVI
+  action_id: use_phone_navi
+- text_id: TEXT_CHOICE_RETURN_TO_UPPER_HALLWAY
+  action_id: upper_hallway
 dialogue:
 - speaker: SPEAKER_NONE
-  text_id: TEXT_PLACEHOLDER_IWAKURA_LAINS_ROOM_DESC
+  text_id: TEXT_LAIN_ROOM_DESC1
+- speaker: SPEAKER_NONE
+  text_id: TEXT_LAIN_ROOM_DESC2
+- speaker: SPEAKER_NONE
+  text_id: TEXT_LAIN_ROOM_DESC3
 location_id: iwakura_lains_room
 name_text_id: TEXT_SCENE_NAME_IWAKURA_LAINS_ROOM
 scene_id: SCENE_IWAKURA_LAINS_ROOM
