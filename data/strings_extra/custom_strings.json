@@ -15,5 +15,6 @@
   "MAP_POI_LAIN_ROOM_PC_DESC": "一台更强大、更专业的NAVI，嗡嗡作响，似乎连接着更深层的网络。",
   
   "TEXT_ERROR_INVALID_SESSION_NAME": "错误：会话名称包含非法字符。请使用字母、数字、下划线或连字符。",
-  "TEXT_ERROR_SESSION_NAME_EMPTY": "错误：会话名称不能为空。请重新输入。"
+  "TEXT_ERROR_SESSION_NAME_EMPTY": "错误：会话名称不能为空。请重新输入。",
+  "TEXT_CHOICE_RETURN_TO_LOWER_HALLWAY": "回到下层走廊"
 }

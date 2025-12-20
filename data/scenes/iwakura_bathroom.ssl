@@ -1,10 +1,9 @@
-
 choices:
-- text_id: TEXT_CHOICE_RETURN_FROM_IWAKURA_BATHROOM
-  action_id: return_from_iwakura_bathroom # Placeholder action ID
+- text_id: TEXT_CHOICE_RETURN_TO_LOWER_HALLWAY
+  action_id: hallway
 dialogue:
 - speaker: SPEAKER_NONE
-  text_id: TEXT_PLACEHOLDER_IWAKURA_BATHROOM_DESC
+  text_id: MAP_LOCATION_BATHROOM_DESC
 location_id: iwakura_bathroom
 name_text_id: TEXT_SCENE_NAME_IWAKURA_BATHROOM
 scene_id: SCENE_IWAKURA_BATHROOM

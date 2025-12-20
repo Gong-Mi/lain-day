@@ -25,14 +25,15 @@ def load_valid_string_ids(string_ids_header_path):
         content = f.read()
 
     # Regex to find enum members, excluding TEXT_COUNT, TEXT_INVALID, TEXT_EMPTY_LINE
-    # Matches any uppercase identifier followed by optional assignment and comma
-    matches = re.findall(r'^\s*([A-Z][A-Z0-9_]+)(?:\s*=\s*\d+)?\s*,', content, re.MULTILINE)
+    # Matches any uppercase identifier followed by optional assignment and optional comma
+    matches = re.findall(r'^\s*([A-Z][A-Z0-9_]+)(?:\s*=\s*\d+)?\s*,?', content, re.MULTILINE)
     
     # Filter out TEXT_COUNT, TEXT_INVALID, TEXT_EMPTY_LINE as they are special
     for match in matches:
         if match not in ["TEXT_COUNT", "TEXT_INVALID"]:
             VALID_STRING_IDS.add(match.strip())
     
+    print(f"DEBUG: Loaded IDs: {sorted(list(VALID_STRING_IDS))}")
     print(f"Loaded {len(VALID_STRING_IDS)} valid string IDs.")
 
 
