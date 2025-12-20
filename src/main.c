@@ -234,20 +234,7 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        disable_raw_mode();
-        // Give a tiny moment for any pending input (like mouse release) to arrive before flushing
-        usleep(50000); 
-        flush_input_buffer();
         clear_screen(); // Clear logo before showing session prompt
-
-        // Switch SIGWINCH to SA_RESTART for the rest of the game.
-        // This prevents linenoise from being interrupted by resize, 
-        // which avoids repeating prompts and losing input focus.
-        struct sigaction sa_restart;
-        memset(&sa_restart, 0, sizeof(sa_restart));
-        sa_restart.sa_handler = handle_sigwinch;
-        sa_restart.sa_flags = SA_RESTART; 
-        sigaction(SIGWINCH, &sa_restart, NULL);
 
         // --- Intro Sequence ---
         printf("\n\n");
@@ -270,6 +257,13 @@ int main(int argc, char *argv[]) {
         usleep(200000);
         printf("\n");
         // ----------------------
+
+        disable_raw_mode();
+        // Give a tiny moment for any pending input to arrive before flushing
+        usleep(50000); 
+        flush_input_buffer();
+
+        // Switch SIGWINCH to SA_RESTART for the rest of the game.
 
     }
 
