@@ -38,6 +38,14 @@
 #include "SCENE_DAD_DAY_0_data.h"
 #include "SCENE_PC_NAVI_DESKTOP_data.h"
 #include "SCENE_IWAKURA_MIKAS_ROOM_CORNER_data.h"
+#include "SCENE_IWAKURA_FRONT_YARD_data.h"
+#include "SCENE_EXAMINE_MAILBOX_data.h"
+#include "SCENE_EXAMINE_DOORBELL_data.h"
+#include "SCENE_EXAMINE_SHOE_RACK_data.h"
+#include "SCENE_IWAKURA_BATHROOM_data.h"
+#include "SCENE_IWAKURA_STUDY_data.h"
+#include "SCENE_IWAKURA_LAINS_ROOM_data.h"
+#include "SCENE_IWAKURA_MIKAS_ROOM_data.h"
 
 // A function pointer type for scene initializers
 typedef void (*SceneInitFunc)(StoryScene*);
@@ -81,6 +89,14 @@ static const struct {
 #endif
     {"SCENE_PC_NAVI_DESKTOP", init_scene_scene_pc_navi_desktop_from_data},
     {"SCENE_IWAKURA_MIKAS_ROOM_CORNER", init_scene_scene_iwakura_mikas_room_corner_from_data},
+    {"SCENE_IWAKURA_FRONT_YARD", init_scene_scene_iwakura_front_yard_from_data},
+    {"SCENE_EXAMINE_MAILBOX", init_scene_scene_examine_mailbox_from_data},
+    {"SCENE_EXAMINE_DOORBELL", init_scene_scene_examine_doorbell_from_data},
+    {"SCENE_EXAMINE_SHOE_RACK", init_scene_scene_examine_shoe_rack_from_data},
+    {"SCENE_IWAKURA_BATHROOM", init_scene_scene_iwakura_bathroom_from_data},
+    {"SCENE_IWAKURA_STUDY", init_scene_scene_iwakura_study_from_data},
+    {"SCENE_IWAKURA_LAINS_ROOM", init_scene_scene_iwakura_lains_room_from_data},
+    {"SCENE_IWAKURA_MIKAS_ROOM", init_scene_scene_iwakura_mikas_room_from_data},
 };
 
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(scene_registrations[0]);

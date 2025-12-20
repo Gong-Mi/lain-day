@@ -73,11 +73,11 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(lower_hallway->id, "iwakura_lower_hallway");
     strcpy(lower_hallway->name, get_string_by_id(MAP_LOCATION_LOWER_HALLWAY_NAME));
     strcpy(lower_hallway->description, get_string_by_id(MAP_LOCATION_LOWER_HALLWAY_DESC));
-    add_connection(lower_hallway, "outside", "iwakura_front_yard", NULL, NULL, "SCENE_00_ENTRY");
+    add_connection(lower_hallway, "outside", "iwakura_front_yard", NULL, NULL, "SCENE_IWAKURA_FRONT_YARD");
     add_connection(lower_hallway, "living_area", "iwakura_living_dining_kitchen", NULL, NULL, "SCENE_02_DOWNSTAIRS");
-    add_connection(lower_hallway, "bathroom", "iwakura_bathroom", NULL, NULL, "SCENE_02_DOWNSTAIRS");
+    add_connection(lower_hallway, "bathroom", "iwakura_bathroom", NULL, NULL, "SCENE_IWAKURA_BATHROOM");
     add_connection(lower_hallway, "upstairs", "iwakura_upper_hallway", NULL, NULL, "SCENE_IWAKURA_UPPER_HALLWAY");
-    add_connection(lower_hallway, "study", "iwakura_study", NULL, NULL, "SCENE_02_DOWNSTAIRS");
+    add_connection(lower_hallway, "study", "iwakura_study", NULL, NULL, "SCENE_IWAKURA_STUDY");
     add_poi(lower_hallway, "shoe_rack", get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_SHOE_RACK_DESC), "SCENE_EXAMINE_SHOE_RACK", NULL);
     add_poi(lower_hallway, "telephone", get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_TELEPHONE_DESC), NULL, NULL);
     add_poi(lower_hallway, "umbrella_stand", get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_NAME), get_string_by_id(MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_DESC), NULL, NULL);
@@ -111,8 +111,8 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(upper_hallway->name, get_string_by_id(MAP_LOCATION_UPPER_HALLWAY_NAME));
     strcpy(upper_hallway->description, get_string_by_id(MAP_LOCATION_UPPER_HALLWAY_DESC));
     add_connection(upper_hallway, "downstairs", "iwakura_lower_hallway", NULL, NULL, "SCENE_IWAKURA_LOWER_HALLWAY");
-    add_connection(upper_hallway, "lains_room", "iwakura_lains_room", NULL, NULL, "SCENE_01_LAIN_ROOM");
-    add_connection(upper_hallway, "enter_mika_room", "iwakura_mikas_room", get_mika_module()->is_room_accessible, "SCENE_MIKA_ROOM_LOCKED", NULL); // Target scene handled by executor
+    add_connection(upper_hallway, "lains_room", "iwakura_lains_room", NULL, NULL, "SCENE_IWAKURA_LAINS_ROOM");
+    add_connection(upper_hallway, "enter_mika_room", "iwakura_mikas_room", get_mika_module()->is_room_accessible, "SCENE_MIKA_ROOM_LOCKED", "SCENE_IWAKURA_MIKAS_ROOM"); 
     add_poi(upper_hallway, "painting", get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_NAME), get_string_by_id(MAP_POI_UPPER_HALLWAY_PAINTING_DESC), NULL, NULL);
 
     // --- 6. Lain's Room (Lain的房间) ---
