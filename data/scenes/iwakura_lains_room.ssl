@@ -1,7 +1,7 @@
 
 choices:
 - text_id: TEXT_CHOICE_RETURN_FROM_IWAKURA_LAINS_ROOM
-  action_id: return_from_iwakura_lains_room # Placeholder action ID
+  action_id: upper_hallway # Matches connection in scene.c
 dialogue:
 - speaker: SPEAKER_NONE
   text_id: TEXT_PLACEHOLDER_IWAKURA_LAINS_ROOM_DESC

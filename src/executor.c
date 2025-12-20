@@ -211,7 +211,7 @@ int execute_action(const char* action_id, struct GameState* game_state) {
         scene_changed = 1;
     }
     else if (strcmp(action_id, "lains_room") == 0) {
-        strncpy(game_state->current_story_file, "SCENE_01_LAIN_ROOM", MAX_PATH_LENGTH - 1);
+        strncpy(game_state->current_story_file, "SCENE_IWAKURA_LAINS_ROOM", MAX_PATH_LENGTH - 1);
         scene_changed = 1;
     }
     else if (strcmp(action_id, "use_phone_navi") == 0) {
