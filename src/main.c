@@ -235,8 +235,19 @@ int main(int argc, char *argv[]) {
         }
 
         disable_raw_mode();
+        // Give a tiny moment for any pending input (like mouse release) to arrive before flushing
+        usleep(50000); 
         flush_input_buffer();
         clear_screen(); // Clear logo before showing session prompt
+
+        // Switch SIGWINCH to SA_RESTART for the rest of the game.
+        // This prevents linenoise from being interrupted by resize, 
+        // which avoids repeating prompts and losing input focus.
+        struct sigaction sa_restart;
+        memset(&sa_restart, 0, sizeof(sa_restart));
+        sa_restart.sa_handler = handle_sigwinch;
+        sa_restart.sa_flags = SA_RESTART; 
+        sigaction(SIGWINCH, &sa_restart, NULL);
 
         // --- Intro Sequence ---
         printf("\n\n");
@@ -287,14 +298,14 @@ int main(int argc, char *argv[]) {
         } else {
             while (session_name[0] == '\0') {
                 char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
+                
                 if (line != NULL) {
-                    // Remove leading/trailing spaces if necessary, but here we just copy
                     strncpy(session_name, line, MAX_NAME_LENGTH - 1);
                     session_name[MAX_NAME_LENGTH - 1] = '\0';
                     free(line);
 
                     if (strlen(session_name) == 0) {
-                        printf("%s\n", get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY));
+                        printf("\n%s\n", get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY));
                         continue;
                     }
                     if (!is_valid_session_name(session_name)) {
@@ -303,6 +314,7 @@ int main(int argc, char *argv[]) {
                         continue;
                     }
                 } else {
+                    // Real EOF or error (not interrupted by signal anymore due to SA_RESTART)
                     fprintf(stderr, "Error: Failed to read session name.\n");
                     return 1;
                 }
@@ -465,6 +477,7 @@ void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* 
         retval = select(STDIN_FILENO + 1, &readfds, NULL, NULL, &tv);
 
         if (retval > 0) {
+            errno = 0;
             char *line = linenoise(get_string_by_id(TEXT_PROMPT_INPUT_ARROW));
             if (line != NULL) {
                 if (strlen(line) > 0) {
@@ -473,7 +486,11 @@ void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* 
                 strncpy(buffer, line, buffer_size - 1);
                 free(line);
             } else {
-                strncpy(buffer, "quit", buffer_size - 1);
+                if (errno == EINTR) {
+                    buffer[0] = '\0'; // Not a quit, just interrupted
+                } else {
+                    strncpy(buffer, "quit", buffer_size - 1);
+                }
             }
         }
     }
