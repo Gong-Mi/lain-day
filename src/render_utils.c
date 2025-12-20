@@ -305,13 +305,18 @@ void init_terminal_state() {
     if (!terminal_state_captured) {
         if (tcgetattr(STDIN_FILENO, &orig_termios) == 0) {
             terminal_state_captured = true;
+            // Ensure our "original" state has sane output flags just in case
+            // we captured it while the terminal was already messy.
+            orig_termios.c_oflag |= (OPOST | ONLCR);
+            orig_termios.c_lflag |= (ECHO | ICANON | ISIG);
         }
     }
 }
 
 void enable_raw_mode() {
-    init_terminal_state(); // Ensure we have it
+    init_terminal_state(); // Ensure we have a sane base
     struct termios raw = orig_termios;
+    // Minimal raw mode: just disable echo and line buffering
     raw.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
     printf("\x1b[?1000h\x1b[?1006h"); // Enable mouse tracking
@@ -322,6 +327,8 @@ void disable_raw_mode() {
     if (terminal_state_captured) {
         printf("\x1b[?1000l\x1b[?1006l"); // Disable mouse tracking
         fflush(stdout);
+        
+        // Restore to the sane original state
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
     }
 }
@@ -332,12 +339,15 @@ void set_terminal_echo(bool enabled) {
     if (tcgetattr(STDIN_FILENO, &t) == 0) {
         if (enabled) t.c_lflag |= ECHO;
         else t.c_lflag &= ~ECHO;
+        // Ensure output processing remains ON during intro
+        t.c_oflag |= (OPOST | ONLCR);
         tcsetattr(STDIN_FILENO, TCSANOW, &t);
     }
 }
 
 void flush_input_buffer() {
     tcflush(STDIN_FILENO, TCIFLUSH);
+    // ... rest of robust flush stays same ...
 
     // Robustly drain any remaining input using select/read
     fd_set readfds;
