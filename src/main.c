@@ -270,7 +270,15 @@ int main(int argc, char *argv[]) {
         printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_CYAN " NET " ANSI_COLOR_BRIGHT_BLACK "]    HANDSHAKE INITIATED...\n" ANSI_COLOR_RESET);
         usleep(300000);
         printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_GREEN " OK " ANSI_COLOR_BRIGHT_BLACK "]     CONNECTION ESTABLISHED.\n" ANSI_COLOR_RESET);
-        usleep(200000);
+        usleep(300000);
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_RED " WARN " ANSI_COLOR_BRIGHT_BLACK "]   TARGET_IDENTITY IS NULL (null).\n" ANSI_COLOR_RESET);
+        usleep(400000);
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_YELLOW " WARN " ANSI_COLOR_BRIGHT_BLACK "]   ATTEMPTING SESSION RECOVERY...\n" ANSI_COLOR_RESET);
+        usleep(600000);
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_RED " ERROR " ANSI_COLOR_BRIGHT_BLACK "]  NO ARCHIVE HISTORY FOUND.\n" ANSI_COLOR_RESET);
+        usleep(400000);
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_YELLOW " WARN " ANSI_COLOR_BRIGHT_BLACK "]   INITIALIZING WORKSPACE...\n" ANSI_COLOR_RESET);
+        usleep(300000);
         printf("\n");
         
         set_terminal_echo(true); // Turn echo back on for session input
