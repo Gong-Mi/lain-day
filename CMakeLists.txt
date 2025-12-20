@@ -20,6 +20,8 @@ if(ENABLE_FULL_GRAPHICS)
     add_definitions(-DENABLE_FULL_GRAPHICS)
 endif()
 
+add_definitions(-DUSE_UTF8)
+
 # MASTER_DEBUG_SWITCH:
 # This is the master switch for all debug-related options.
 # If set to OFF, all other debug-specific toggles below will be ignored,
@@ -280,6 +282,7 @@ set(GAME_ENGINE_SOURCES
 
         external/linenoise/linenoise.c
     external/linenoise/stringbuf.c
+    external/linenoise/utf8.c
 
         ${SEQUENCE_SOURCES}
 

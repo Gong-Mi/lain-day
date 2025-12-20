@@ -10,6 +10,7 @@
 #include <sys/select.h>
 #include <fcntl.h>
 #include <locale.h> // Required for setlocale()
+#include <signal.h> // For signal handling
 
 #include "game_paths.h"
 #include "build_info.h"
@@ -30,15 +31,25 @@
 #include "event_system.h"
 #include "ecc_time.h"
 #include "render_utils.h"
+#include "logo_raw_data.h"
 
 // --- Global State ---
 static uint32_t scene_entry_time = 0;
 
 // --- Function Prototypes ---
+void handle_signal(int sig);
 void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index);
 int is_numeric(const char* str);
 bool is_valid_session_name(const char* name); // Added prototype for session name validation
 static bool process_events(GameState* game_state, StoryScene* current_scene);
+
+// --- Signal Handling ---
+void handle_signal(int sig) {
+    (void)sig; // Suppress unused variable warning
+    restore_terminal_state();
+    printf("\nLain-day C version terminated by signal.\n");
+    exit(0);
+}
 
 // --- Event Handling ---
 static bool process_events(GameState* game_state, StoryScene* current_scene) {
@@ -75,6 +86,10 @@ int main(int argc, char *argv[]) {
     pthread_t time_thread_id;
     pthread_mutex_init(&time_mutex, NULL);
     init_event_queue();
+
+    // Register signal handlers
+    signal(SIGINT, handle_signal);
+    signal(SIGTERM, handle_signal);
 
     printf("Lain-day C version starting...\n");
     printf("Build Info - OS: %s, Arch: %s\n", BUILD_OS, BUILD_ARCH);
@@ -130,6 +145,66 @@ int main(int argc, char *argv[]) {
         arg_index++;
     }
 
+    if (!is_test_mode && arg_index >= argc) {
+        enter_fullscreen_mode();
+        ImageBounds bounds = render_image_adaptively(LOGO_DATA, LOGO_WIDTH, LOGO_HEIGHT);
+        printf("\n\nPress any key or click the image to start...");
+        fflush(stdout);
+        
+        enable_raw_mode();
+        
+        char c;
+        int state = 0; // 0: start, 1: esc, 2: csi, 3: mouse
+        char mouse_buf[32];
+        int mouse_idx = 0;
+
+        while (read(STDIN_FILENO, &c, 1) == 1) {
+            if (state == 0) {
+                if (c == '\x1b') {
+                    state = 1;
+                } else {
+                    break; // Any regular key
+                }
+            } else if (state == 1) {
+                if (c == '[') {
+                    state = 2;
+                } else {
+                    break; // Alt+Key or other escape sequence
+                }
+            } else if (state == 2) {
+                if (c == '<') {
+                    state = 3;
+                    mouse_idx = 0;
+                } else {
+                    break; // Other CSI sequence (e.g. arrow keys)
+                }
+            } else if (state == 3) {
+                if (c == 'M' || c == 'm') {
+                    mouse_buf[mouse_idx] = '\0';
+                    int btn, x, y;
+                    if (sscanf(mouse_buf, "%d;%d;%d", &btn, &x, &y) == 3) {
+                        // Check for Left Click (btn 0) Press (M)
+                        if (c == 'M' && btn == 0) {
+                             if (x >= bounds.start_x && x <= bounds.end_x &&
+                                 y >= bounds.start_y && y <= bounds.end_y) {
+                                 break; // Valid click on logo
+                             }
+                        }
+                    }
+                    state = 0; // Reset if invalid click or release
+                } else {
+                    if (mouse_idx < (int)sizeof(mouse_buf) - 1) {
+                        mouse_buf[mouse_idx++] = c;
+                    }
+                }
+            }
+        }
+
+        disable_raw_mode();
+        flush_input_buffer();
+        clear_screen(); // Clear logo before showing session prompt
+    }
+
     if (is_test_mode) {
         printf("Test mode enabled. Using default character state without session persistence.\n");
         snprintf(character_session_file_path, MAX_PATH_LENGTH, "test_char.json"); 
@@ -153,39 +228,29 @@ int main(int argc, char *argv[]) {
             printf("Using session name from argument: %s\n", session_name);
             arg_index++;
         } else {
-                do {
-                    char temp_line_buffer[MAX_NAME_LENGTH + 2]; // +2 for newline and null terminator
-                    printf("%s", get_string_by_id(TEXT_PROMPT_SESSION_NAME)); // Use printf for prompt
-                    fflush(stdout); // Ensure prompt is displayed immediately
+            while (session_name[0] == '\0') {
+                char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
+                if (line != NULL) {
+                    // Remove leading/trailing spaces if necessary, but here we just copy
+                    strncpy(session_name, line, MAX_NAME_LENGTH - 1);
+                    session_name[MAX_NAME_LENGTH - 1] = '\0';
+                    free(line);
 
-                    if (fgets(temp_line_buffer, sizeof(temp_line_buffer), stdin) != NULL) {
-                        // Remove trailing newline character if present
-                        size_t len = strlen(temp_line_buffer);
-                        if (len > 0 && temp_line_buffer[len - 1] == '\n') {
-                            temp_line_buffer[len - 1] = '\0';
-                        }
-                        
-                        strncpy(session_name, temp_line_buffer, MAX_NAME_LENGTH - 1);
-                        session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
-
-                        if (strlen(session_name) == 0) { // Check for empty input specifically
-                            printf("%s\n", get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY));
-                            fflush(stdout);
-                            continue; // Ask again
-                        }
-                        if (!is_valid_session_name(session_name)) {
-                            printf("%s\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME));
-                            fflush(stdout);
-                            session_name[0] = '\0'; // Clear to re-enter loop
-                            continue;
-                        }
-                    } else {
-                         fprintf(stderr, "Error: Failed to read session name, or EOF received.\n");
-                         fflush(stderr);
-                         return 1; // Exit game
+                    if (strlen(session_name) == 0) {
+                        printf("%s\n", get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY));
+                        continue;
                     }
-                } while (session_name[0] == '\0'); // Loop until valid name is entered
+                    if (!is_valid_session_name(session_name)) {
+                        printf("%s\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME));
+                        session_name[0] = '\0';
+                        continue;
+                    }
+                } else {
+                    fprintf(stderr, "Error: Failed to read session name.\n");
+                    return 1;
+                }
             }
+        }
         
             // No need for separate empty check here, handled in loop
             // if (strlen(session_name) == 0) {
@@ -312,6 +377,7 @@ int main(int argc, char *argv[]) {
     cleanup_game_state(game_state);
     pthread_mutex_destroy(&time_mutex);
 
+    restore_terminal_state();
     printf("\nLain-day C version exiting.\n");
     return 0;
 }
@@ -367,7 +433,9 @@ bool is_valid_session_name(const char* name) {
         return false;
     }
     for (int i = 0; name[i] != '\0'; i++) {
-        if (!isalnum((unsigned char)name[i]) && name[i] != '_' && name[i] != '-') {
+        unsigned char c = (unsigned char)name[i];
+        // Allow alphanumeric, underscore, hyphen, and UTF-8 multi-byte characters
+        if (!isalnum(c) && c != '_' && c != '-' && c < 128) {
             return false; // Found an invalid character
         }
     }

@@ -2,5 +2,8 @@
     "TEXT_CHOICE_EXAMINE_CORNER": "检查角落",
     "TEXT_SCENE_NAME_MIKA_CORNER": "美香的房间 - 角落",
     "TEXT_MIKA_CORNER_DESC": "美香，窝在角落。\n一手里拿着剪刀，一手抱着“佩可”。\n眼圈很重，眼神紧张。",
-    "TEXT_MIKA_CORNER_MUMBLE": "“出去...”"
+    "TEXT_MIKA_CORNER_MUMBLE": "“出去...”",
+    "TEXT_EXAMINE_MIKA_WARDROBE_DESC": "普通的木质衣柜。里面挂满了校服和休闲装。",
+    "TEXT_LEAVE_WARDROBE": "离开衣柜",
+    "TEXT_FOUND_HIDDEN_DOLL_DESC": "在几件厚外套后面，你发现了一个藏得很深的旧娃娃。"
 }

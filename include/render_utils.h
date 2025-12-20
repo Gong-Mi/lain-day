@@ -13,7 +13,23 @@ void clear_screen();
 
 void render_scene_description(const char* description); // Added
 void render_text(const char* text); // Added
+typedef struct {
+    int start_x;
+    int start_y;
+    int end_x;
+    int end_y;
+} ImageBounds;
+
 void render_poi_name(const char* name); // Added
+ImageBounds render_image_adaptively(const uint8_t* data, int width, int height); // Updated return type
+
+void enter_fullscreen_mode();
+void exit_fullscreen_mode();
+
+void enable_raw_mode();
+void disable_raw_mode();
+void flush_input_buffer();
+void restore_terminal_state();
 
 // Main scene rendering function
 void render_current_scene(const StoryScene* scene, const struct GameState* game_state);
