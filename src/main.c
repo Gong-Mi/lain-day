@@ -301,6 +301,7 @@ int main(int argc, char *argv[]) {
             printf("Using session name from argument: %s\n", session_name);
             arg_index++;
         } else {
+            int session_error_count = 0;
             while (session_name[0] == '\0') {
                 char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
                 
@@ -310,12 +311,16 @@ int main(int argc, char *argv[]) {
                     free(line);
 
                     if (strlen(session_name) == 0) {
+                        session_error_count++;
                         // \033[A: Move up, \r: carriage return, \033[K: clear line
-                        printf("\033[A\r\033[K" ANSI_COLOR_RED "%s" ANSI_COLOR_RESET "\n", get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY));
+                        printf("\033[A\r\033[K" ANSI_COLOR_RED "%s (Errors: %d)" ANSI_COLOR_RESET "\n", 
+                               get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY), session_error_count);
                         continue;
                     }
                     if (!is_valid_session_name(session_name)) {
-                        printf("\033[A\r\033[K" ANSI_COLOR_RED "%s" ANSI_COLOR_RESET "\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME));
+                        session_error_count++;
+                        printf("\033[A\r\033[K" ANSI_COLOR_RED "%s (Errors: %d)" ANSI_COLOR_RESET "\n", 
+                               get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME), session_error_count);
                         session_name[0] = '\0';
                         continue;
                     }
