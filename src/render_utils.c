@@ -88,6 +88,7 @@ void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState*
 
 void clear_screen() {
     printf("\033[2J\033[H");
+    fflush(stdout);
 }
 
 void print_game_time(uint32_t time_of_day) {
