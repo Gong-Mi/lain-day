@@ -9,7 +9,7 @@ VALID_STRING_IDS = set() # This will be populated from generated string_ids.h
 VALID_SPEAKER_IDS = {
     "SPEAKER_NONE", "SPEAKER_LAIN", "SPEAKER_MOM", "SPEAKER_DAD", 
     "SPEAKER_ALICE", "SPEAKER_CHISA", "SPEAKER_MIKA", "SPEAKER_GHOST", 
-    "SPEAKER_DOCTOR", "SPEAKER_NAVI", "SPEAKER_PARENT"
+    "SPEAKER_DOCTOR", "SPEAKER_NAVI", "SPEAKER_SHU", "SPEAKER_PARENT"
 }
 VALID_ACTION_IDS = set() # This will need to be dynamically loaded or hardcoded
 VALID_LOCATION_IDS = set() # This will need to be dynamically loaded or hardcoded
@@ -130,6 +130,7 @@ def parse_and_validate_ssl(ssl_path, generated_c_header_path, generated_c_source
         f.write("    .location_id = \"{}\",\n".format(scene_data.get('location_id', '')))
         f.write("    .dialogue_line_count = 0,\n")
         f.write("    .choice_count = 0,\n")
+        f.write("    .is_takeover = {},\n".format("true" if scene_data.get('is_takeover', False) else "false"))
         f.write("};\n\n")
 
         # init_scene_..._from_data function
@@ -143,7 +144,15 @@ def parse_and_validate_ssl(ssl_path, generated_c_header_path, generated_c_source
             for i, line in enumerate(scene_data['dialogue']):
                 speaker_id = line['speaker']
                 text_id = line['text_id']
-                f.write("    scene->dialogue_lines[{}] = (DialogueLine){{ {}, {} }};\n".format(i, speaker_id, text_id))
+                
+                # Parse timing fields (default to 0)
+                delay_sec = float(line.get('delay', 0))
+                duration_sec = float(line.get('duration', 0))
+                
+                delay_ms = int(delay_sec * 1000)
+                duration_ms = int(duration_sec * 1000)
+
+                f.write("    scene->dialogue_lines[{}] = (DialogueLine){{ {}, {}, {}, {} }};\n".format(i, speaker_id, text_id, delay_ms, duration_ms))
         
         # For choices
         if 'choices' in scene_data and scene_data['choices']:
@@ -151,9 +160,10 @@ def parse_and_validate_ssl(ssl_path, generated_c_header_path, generated_c_source
             for i, choice in enumerate(scene_data['choices']):
                 text_id = choice['text_id']
                 action_id = choice['action_id']
+                delay_ms = int(float(choice.get('delay', 0)) * 1000)
                 
                 # Basic choice initialization
-                f.write("    scene->choices[{}] = (StoryChoice){{ .text_id = {}, .action_id = \"{}\", .condition_count = 0 }};\n".format(i, text_id, action_id))
+                f.write("    scene->choices[{}] = (StoryChoice){{ .text_id = {}, .action_id = \"{}\", .condition_count = 0, .delay_ms = {} }};\n".format(i, text_id, action_id, delay_ms))
                 
                 # New conditions block
                 if 'conditions' in choice and isinstance(choice['conditions'], list):
@@ -178,6 +188,7 @@ def parse_and_validate_ssl(ssl_path, generated_c_header_path, generated_c_source
                         f.write("        .exact_day = {},\n".format(exact_day))
                         f.write("        .hour_start = {},\n".format(hour_start))
                         f.write("        .hour_end = {},\n".format(hour_end))
+                        f.write("        .required_permission_mask = {},\n".format(condition.get('permission_mask', 0)))
                         f.write("    };\n")
 
         # For auto_events
@@ -206,6 +217,8 @@ def parse_and_validate_ssl(ssl_path, generated_c_header_path, generated_c_source
                         hour_start = hour_is_between[0] if isinstance(hour_is_between, list) and len(hour_is_between) == 2 else -1
                         hour_end = hour_is_between[1] if isinstance(hour_is_between, list) and len(hour_is_between) == 2 else -1
 
+                        permission_mask = condition.get('permission_mask', 0)
+
                         f.write("    scene->auto_events[{}].conditions[{}] = (Condition){{\n".format(i, cond_idx))
                         f.write("        .flag_name = \"{}\",\n".format(flag_name))
                         f.write("        .required_value = \"{}\",\n".format(flag_value))
@@ -214,6 +227,7 @@ def parse_and_validate_ssl(ssl_path, generated_c_header_path, generated_c_source
                         f.write("        .exact_day = {},\n".format(exact_day))
                         f.write("        .hour_start = {},\n".format(hour_start))
                         f.write("        .hour_end = {},\n".format(hour_end))
+                        f.write("        .required_permission_mask = {},\n".format(permission_mask))
                         f.write("    };\n")
 
 

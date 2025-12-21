@@ -12,6 +12,7 @@
 #include <locale.h> // Required for setlocale()
 #include <signal.h> // For signal handling
 #include <pthread.h>
+#include <termios.h> // Added for tcflush
 
 #include "game_types.h"
 #include "game_paths.h"
@@ -456,12 +457,22 @@ int main(int argc, char *argv[]) {
             if (game_is_running) dirty = true;
         }
 
+        // 1. Handle Window Resizing (SIGWINCH)
+        if (g_needs_redraw) {
+            game_state->last_printed_line_idx = -1; // Force a full rebuild of the virtual screen
+            dirty = true;
+            g_needs_redraw = 0;
+        }
+
         if (dirty) {
             if (strcmp(current_scene.scene_id, game_state->current_story_file) != 0) {
                 if (transition_to_scene(game_state->current_story_file, &current_scene, game_state)) {
                     scene_entry_time = decode_time_with_ecc(game_state->time_of_day).data;
+                    // Reset echo and buffer only on scene transition
+                    set_terminal_echo(true); 
+                    flush_input_buffer(); 
                 } else {
-                    fprintf(stderr, "CRITICAL ERROR: Failed to transition to scene '%s'. Scene ID not found or invalid. Terminating game to prevent undefined state.\n", game_state->current_story_file);
+                    fprintf(stderr, "CRITICAL ERROR: Failed to transition to scene '%s'.\n", game_state->current_story_file);
                     game_is_running = false;
                 }
             }
@@ -469,6 +480,26 @@ int main(int argc, char *argv[]) {
                 render_current_scene(&current_scene, game_state);
             }
             dirty = false;
+        }
+
+        // 2. Continuous Input Filtering during Takeover Playback
+        if (current_scene.is_takeover && game_is_running) {
+            uint64_t now = get_current_time_ms();
+            uint64_t elapsed = now - game_state->scene_start_ms;
+            
+            bool dialogue_active = false;
+            for (int i = 0; i < current_scene.dialogue_line_count; i++) {
+                if (current_scene.dialogue_lines[i].delay_ms > elapsed) {
+                    dirty = true;
+                    dialogue_active = true;
+                    break;
+                }
+            }
+            
+            if (dialogue_active) {
+                set_terminal_echo(false);
+                tcflush(STDIN_FILENO, TCIFLUSH); // Aggressively drop input during cinematic
+            }
         }
 
         pthread_mutex_unlock(&time_mutex);

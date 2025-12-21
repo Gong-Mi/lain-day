@@ -1,5 +1,11 @@
 {
     "MAP_LOCATION_SHINJUKU_STATION_DESC": "这是新宿站，一个繁忙的交通枢纽。",
     "MAP_POI_SHINJUKU_ABANDONED_SITE_RUSTY_EQUIPMENT_NAME": "生锈的设备",
-    "MAP_POI_SHINJUKU_ABANDONED_SITE_RUSTY_EQUIPMENT_DESC": "一些废弃的、生锈的建筑设备，看起来很危险。"
+    "MAP_POI_SHINJUKU_ABANDONED_SITE_RUSTY_EQUIPMENT_DESC": "一些废弃的、生锈的建筑设备，看起来很危险。",
+    "TEXT_SCENE_NAME_SHINJUKU_ABANDONED_SITE": "新宿 - 废弃工地",
+    "TEXT_SHINJUKU_ABANDONED_SITE_DIALOGUE1": "这里是一处被围挡遮住的废弃工地。生锈的钢筋裸露在空气中，像是某种远古巨兽的残骸。",
+    "MAP_LOCATION_SHINJUKU_ABANDONED_SITE_DESC": "这里是一处被围挡遮住的废弃工地。由于某种原因，施工已经停止很久了，只剩下生锈的塔吊和散落的建筑材料。",
+    "TEXT_CHOICE_SHINJUKU_EXPLORE": "深入探索工地",
+    "TEXT_CHOICE_SHINJUKU_LEAVE": "离开这里",
+    "TEXT_EXPLORING_SITE_MESSAGE": "你小心翼翼地绕过障碍物，向工地深处走去..."
 }

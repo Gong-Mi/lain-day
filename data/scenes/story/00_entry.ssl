@@ -1,0 +1,42 @@
+scene_id: SCENE_00_ENTRY
+name_text_id: TEXT_SCENE_NAME_00_ENTRY_OUTLINE
+location_id: iwakura_upper_hallway
+is_takeover: true
+
+dialogue:
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_PROLOGUE_LINE_1
+    delay: 0.0
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_PROLOGUE_LINE_2
+    delay: 1.0
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_PROLOGUE_LINE_3
+    delay: 4.0
+    duration: 1.0
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_PROLOGUE_LINE_4
+    delay: 5.0
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_PROLOGUE_LINE_6
+    delay: 10.0
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_PROLOGUE_LINE_7
+    delay: 25.0
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_PROLOGUE_LINE_8
+    delay: 40.0
+
+choices:
+  - text_id: TEXT_CHOICE_OPEN_DOOR_OUTLINE
+    action_id: open_door_broken
+    target_scene: SCENE_01_LAIN_ROOM_BROKEN
+    delay: 0.0
+  - text_id: TEXT_CHOICE_GO_DOWNSTAIRS_OUTLINE
+    action_id: downstairs
+    target_scene: SCENE_02_DOWNSTAIRS
+    delay: 0.0
+  - text_id: TEXT_CHOICE_WAIT_ONE_MINUTE_DOWN_OUTLINE
+    action_id: downstairs
+    target_scene: SCENE_02_DOWNSTAIRS
+    delay: 60.0

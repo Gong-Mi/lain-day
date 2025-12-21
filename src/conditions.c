@@ -33,6 +33,13 @@ bool check_conditions(const struct GameState* game_state, const Condition* condi
             if (cond->hour_end != -1 && current_hour > cond->hour_end) return false;
         }
 
+        // --- Check permission requirements ---
+        if (cond->required_permission_mask != 0) {
+            if ((game_state->player_state.persona_permissions & cond->required_permission_mask) != cond->required_permission_mask) {
+                return false;
+            }
+        }
+
         // --- Check flag requirement ---
         if (cond->flag_name[0] != '\0') {
             const char* current_flag_value = hash_table_get(game_state->flags, cond->flag_name);

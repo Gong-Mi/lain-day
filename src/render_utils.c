@@ -5,6 +5,7 @@
 #include "ecc_time.h"
 #include "characters/mika.h" // Needed for CharacterMika and get_mika_module
 #include "map_loader.h" // Needed for get_location_by_id
+#include "time_utils.h" // Added for get_current_time_ms
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h> // For usleep
@@ -14,6 +15,60 @@
 
 // Helper function prototype
 static void _render_transient_message(GameState* game_state);
+
+// Helper to move cursor to a specific line/column (1-indexed)
+void move_cursor(int row, int col) {
+    printf("\033[%d;%dH", row, col);
+    fflush(stdout);
+}
+
+// Helper to clear a single line
+void clear_line() {
+    printf("\033[2K\r");
+    fflush(stdout);
+}
+
+// Helper to render choices with timing filter
+static int _render_choices_dynamic(const StoryScene* scene, const GameState* game_state, uint64_t elapsed_ms) {
+    int lines_printed = 0;
+    if (scene->choice_count > 0) {
+        printf("--- Choices ---\033[K\n"); lines_printed++;
+        int visible_choice_index = 1;
+        for (int i = 0; i < scene->choice_count; i++) {
+            const StoryChoice* choice = &scene->choices[i];
+            if (elapsed_ms < (uint64_t)choice->delay_ms) continue;
+            if (is_choice_selectable(choice, game_state)) {
+                printf("%d. %s\033[K\n", visible_choice_index++, get_string_by_id(choice->text_id));
+            } else {
+                printf("   %s%s%s\033[K\n", ANSI_COLOR_BRIGHT_BLACK, get_string_by_id(choice->text_id), ANSI_COLOR_RESET);
+            }
+            lines_printed++;
+        }
+        printf("---------------\033[K\n"); lines_printed++;
+    }
+    return lines_printed;
+}
+
+// Helper to print lines with "System Self-Check" style filtering
+static void _print_formatted_system_line(const char* text) {
+    if (text == NULL) return;
+
+    // Filter tags and apply colors matching main.c startup
+    if (strncmp(text, "[OK]", 4) == 0) {
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_GREEN " OK " ANSI_COLOR_BRIGHT_BLACK "]     %s" ANSI_COLOR_RESET, text + 4);
+    } else if (strncmp(text, "[WARN]", 6) == 0) {
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_YELLOW " WARN " ANSI_COLOR_BRIGHT_BLACK "]   %s" ANSI_COLOR_RESET, text + 6);
+    } else if (strncmp(text, "[ERROR]", 7) == 0) {
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_RED " ERROR " ANSI_COLOR_BRIGHT_BLACK "]  %s" ANSI_COLOR_RESET, text + 7);
+    } else if (strncmp(text, "[SYSTEM]", 8) == 0) {
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_CYAN " SYSTEM " ANSI_COLOR_BRIGHT_BLACK "] %s" ANSI_COLOR_RESET, text + 8);
+    } else if (strncmp(text, "[NET]", 5) == 0) {
+        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_CYAN " NET " ANSI_COLOR_BRIGHT_BLACK "]    %s" ANSI_COLOR_RESET, text + 5);
+    } else {
+        printf("%s", text);
+    }
+    printf("\033[K\n"); // Line clearing
+}
 
 void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState* game_state) {
 
@@ -74,13 +129,15 @@ void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState*
         fflush(stdout);
         usleep((useconds_t)(game_state->typewriter_delay * 1000000));
     }
-    printf("\n");
+    printf("\033[K\r\n"); // Erase to end of line before newline
 #else
     // Standard instant print
-    if (speaker_prefix[0] != '\0') {
-        printf("%s%s\n", speaker_prefix, line_text);
+    if (speaker_id == SPEAKER_NONE || speaker_id == SPEAKER_NAVI) {
+        _print_formatted_system_line(line_text);
+    } else if (speaker_prefix[0] != '\0') {
+        printf("%s%s\033[K\r\n", speaker_prefix, line_text);
     } else {
-        printf("%s\n", line_text);
+        printf("%s\033[K\r\n", line_text);
     }
 #endif
     fflush(stdout);
@@ -146,69 +203,104 @@ static void _render_transient_message(GameState* game_state) {
     }
 }
 
-// Function to render the current scene
 void render_current_scene(const StoryScene* scene, const struct GameState* game_state) {
-    #ifdef USE_CLEAR_SCREEN
-    clear_screen(); // Clear screen for each scene render
-    #endif
-    print_game_time(game_state->time_of_day); // Print time at the top-left
-    #ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Entering render_current_scene.\n");
-    fprintf(stderr, "DEBUG: render_current_scene: scene ptr: %p\n", (void*)scene);
-    fprintf(stderr, "DEBUG: Rendering scene: %s (ID: %s)\n", scene->name, scene->scene_id);
-    #endif
-    if (scene == NULL) {
-        printf("Error: Scene is NULL.\n");
+    if (scene == NULL) return;
+
+    uint64_t now_ms = get_current_time_ms();
+    uint64_t elapsed_ms = now_ms - game_state->scene_start_ms;
+    GameState* gs = (GameState*)game_state;
+
+    // --- TAKEOVER MODE: Rigorous Terminal Streaming ---
+    if (scene->is_takeover) {
+        bool all_lines_done = true;
+        for (int i = 0; i < scene->dialogue_line_count; i++) {
+            if (elapsed_ms < (uint64_t)scene->dialogue_lines[i].delay_ms) {
+                all_lines_done = false; break;
+            }
+        }
+
+        // 1. Symbol Filtering: Mimic main.c startup
+        if (!all_lines_done) {
+            set_terminal_echo(false);
+            tcflush(STDIN_FILENO, TCIFLUSH); // Discard ^[[A etc. during playback
+        }
+
+        // A. Initial Entry or Resize: Full Redraw
+        if (gs->last_printed_line_idx == -1) {
+            clear_screen();
+            gs->current_dialogue_rows = 0;
+            for (int i = 0; i < scene->dialogue_line_count; i++) {
+                if (elapsed_ms >= (uint64_t)scene->dialogue_lines[i].delay_ms) {
+                    print_colored_line(scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id, gs);
+                    gs->current_dialogue_rows++;
+                    gs->last_printed_line_idx = i;
+                } else break;
+            }
+            _render_choices_dynamic(scene, gs, elapsed_ms);
+            
+            // Initial prompt position
+            int prompt_row = gs->current_dialogue_rows + (scene->choice_count > 0 ? scene->choice_count + 2 : 0) + 1;
+            move_cursor(prompt_row, 1);
+            return;
+        }
+
+        // B. Incremental Injection with Rigorous Sync
+        for (int i = gs->last_printed_line_idx + 1; i < scene->dialogue_line_count; i++) {
+            const DialogueLine* line = &scene->dialogue_lines[i];
+            if (elapsed_ms >= (uint64_t)line->delay_ms) {
+                printf("\033[s"); // Save absolute cursor pos (at prompt)
+                
+                // Move to insertion point (above choices)
+                move_cursor(gs->current_dialogue_rows + 1, 1);
+                printf("\033[L"); // Insert line (pushes everything down)
+                
+                print_colored_line(line->speaker_id, line->text_id, gs);
+                
+                // SYNC CURSOR: Restore AND shift down by 1 to match the physical movement
+                printf("\033[u\033[B"); 
+                fflush(stdout);
+                
+                gs->current_dialogue_rows++;
+                gs->last_printed_line_idx = i;
+            } else break;
+        }
+
+        // C. Cleanup and Interaction Restoration
+        if (all_lines_done && gs->last_printed_line_idx < scene->dialogue_line_count + 50) {
+            flush_input_buffer(); // Crucial: Final clear of all noise before prompt
+            set_terminal_echo(true);
+            
+            // Final Refresh of choices to ensure state is correct
+            printf("\033[s");
+            move_cursor(gs->current_dialogue_rows + 1, 1);
+            _render_choices_dynamic(scene, gs, elapsed_ms);
+            printf("\033[u");
+            fflush(stdout);
+            
+            gs->last_printed_line_idx = scene->dialogue_line_count + 100; // Fully synced
+        }
         return;
     }
 
+    // --- NORMAL MODE: Standard Scrolling ---
+    #ifdef USE_CLEAR_SCREEN
+    clear_screen();
+    #endif
+    print_game_time(game_state->time_of_day);
     printf("\n========================================\n");
     if (scene->location_id[0] != '\0') {
-        // Look up the localized location name
         Location* loc = get_location_by_id(scene->location_id);
-        if (loc && loc->name[0] != '\0') {
-            printf("Location: %s\n", loc->name);
-        } else {
-            printf("Location: %s\n", scene->location_id);
-        }
+        if (loc && loc->name[0] != '\0') printf("Location: %s\n", loc->name);
+        else printf("Location: %s\n", scene->location_id);
     }
     printf("========================================\n");
 
-    // --- Check for character presence ---
-    const CharacterMika* mika = get_mika_module();
-    // Don't print this if the current scene is about Mika's room, as it would be redundant.
-    if (strcmp(mika->current_location_id, game_state->player_state.location) == 0 &&
-        strcmp(scene->scene_id, "SCENE_MIKA_ROOM_UNLOCKED") != 0) 
-    {
-        printf(ANSI_COLOR_YELLOW "你看到姐姐美香也在这里。\n" ANSI_COLOR_RESET);
-    }
-    // --- End check for character presence ---
-
     for (int i = 0; i < scene->dialogue_line_count; i++) {
-    #ifdef USE_STRING_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG:   Printing DialogueLine: speaker=%d, text_id=%d (%s)\n",
-                scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id,
-                get_string_by_id(scene->dialogue_lines[i].text_id));
-    #endif
-        print_colored_line(scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id, (GameState*)game_state); // Cast to GameState*
+        print_colored_line(scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id, gs);
     }
 
-    if (scene->choice_count > 0) {
-        printf("\n--- Choices ---\n");
-        int visible_choice_index = 1;
-        for (int i = 0; i < scene->choice_count; i++) {
-            const StoryChoice* choice = &scene->choices[i];
-            
-            if (is_choice_selectable(choice, game_state)) {
-                printf("%d. %s\n", visible_choice_index++, get_string_by_id(choice->text_id));
-            } else {
-                // Print disabled choice in gray and without a number
-                printf("   %s%s%s\n", ANSI_COLOR_BRIGHT_BLACK, get_string_by_id(choice->text_id), ANSI_COLOR_RESET);
-            }
-        }
-        printf("---------------\n");
-    }
-    _render_transient_message((GameState*)game_state);
+    _render_choices_dynamic(scene, gs, elapsed_ms);
+    _render_transient_message(gs);
 }
 
 // Function to render an image adaptively to the terminal size

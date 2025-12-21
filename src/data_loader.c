@@ -86,11 +86,23 @@ int load_player_state(const char* path, GameState* game_state) {
         return 0;
     }
 
-    const cJSON *location = cJSON_GetObjectItemCaseSensitive(root, "location");
-    if (cJSON_IsString(location)) strncpy(player_state->location, location->valuestring, MAX_NAME_LENGTH - 1);
+    cJSON* credit_level = cJSON_GetObjectItemCaseSensitive(root, "credit_level");
+    if (cJSON_IsNumber(credit_level)) {
+        player_state->credit_level = credit_level->valueint;
+    }
 
-    const cJSON *credit_level = cJSON_GetObjectItemCaseSensitive(root, "credit_level");
-    if (cJSON_IsNumber(credit_level)) player_state->credit_level = credit_level->valueint;
+    cJSON* persona_perm = cJSON_GetObjectItemCaseSensitive(root, "persona_permissions");
+    if (cJSON_IsNumber(persona_perm)) {
+        player_state->persona_permissions = (uint8_t)persona_perm->valueint;
+    } else {
+        // Default: Lain has full control (RWX), Shu is dormant (0)
+        // Or should it be balanced? Let's start with Lain Normal.
+        // Actually, based on prologue, maybe both exist? 
+        // Let's safe default to Lain RWX (7).
+        player_state->persona_permissions = 7; 
+    }
+
+    cJSON* location = cJSON_GetObjectItemCaseSensitive(root, "location");
 
     const cJSON *typewriter_delay_json = cJSON_GetObjectItemCaseSensitive(root, "typewriter_delay");
     if (cJSON_IsNumber(typewriter_delay_json)) {
@@ -235,6 +247,7 @@ int save_game_state(const char* path, const GameState* game_state) {
 
     cJSON_AddStringToObject(root, "location", p_state->location);
     cJSON_AddNumberToObject(root, "credit_level", p_state->credit_level);
+    cJSON_AddNumberToObject(root, "persona_permissions", p_state->persona_permissions);
     cJSON_AddStringToObject(root, "current_story_file", game_state->current_story_file);
     cJSON_AddNumberToObject(root, "time_of_day", game_state->time_of_day);
     cJSON_AddNumberToObject(root, "doll_state_lain_room", game_state->doll_state_lain_room);

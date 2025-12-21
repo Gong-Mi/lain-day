@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "game_types.h"
 #include "flag_system.h"
+#include "time_utils.h" // Added for get_current_time_ms
 #include <stdlib.h> // For atoi
 
 // All scene init functions are declared here. They are defined in their respective data.c files.
@@ -120,6 +121,9 @@ bool transition_to_scene(const char* target_story_file, StoryScene* scene, GameS
             fprintf(stderr, "DEBUG: Scene '%s' found in dispatch table. Initializing...\n", target_story_file);
 #endif
             scene_registrations[i].func(scene);
+            game_state->scene_start_ms = get_current_time_ms(); // Record scene start time
+            game_state->last_printed_line_idx = -1; // Reset rendering progress
+            game_state->current_dialogue_rows = 0;
 #ifdef USE_DEBUG_LOGGING
             fprintf(stderr, "DEBUG: Successfully initialized scene '%s'.\n", target_story_file);
 #endif

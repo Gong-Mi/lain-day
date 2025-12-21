@@ -1,0 +1,79 @@
+# ==============================================================================
+# LAIN-DAY SSL (SCENE SCRIPT LANGUAGE) REFERENCE TEMPLATE
+# ==============================================================================
+# This template is based on the logic in 'cmake/parse_scenes.py'.
+# Use this structure to ensure your .ssl files are valid and compile correctly.
+# ==============================================================================
+
+# [REQUIRED] Unique Identifier for the scene (Mapped to C Enum/String)
+scene_id: SCENE_EXAMPLE_ID
+
+# [REQUIRED] The display name of the scene (Must be a key from strings.json)
+name_text_id: TEXT_SCENE_NAME_EXAMPLE
+
+# [REQUIRED] The location ID where this scene takes place (Mapped to internal map)
+location_id: iwakura_lains_room
+
+# [OPTIONAL] Description is NOT parsed by the Python script into C code directly in all versions,
+# but usually used for documentation or by some legacy parsers. 
+# In the current C engine, descriptions are often handled via 'dialogue' with SPEAKER_NONE.
+description: |
+  This is a YAML comment block for description.
+  It might not be displayed unless converted to dialogue below.
+
+# ==============================================================================
+# DIALOGUE SECTION
+# ==============================================================================
+dialogue:
+  # A line of dialogue.
+  - speaker: SPEAKER_LAIN         # Must be a valid speaker ID (e.g., SPEAKER_LAIN, SPEAKER_SHU, SPEAKER_NONE)
+    text_id: TEXT_EXAMPLE_DIALOGUE # Must be a key from strings.json
+
+  - speaker: SPEAKER_SHU
+    text_id: TEXT_EXAMPLE_REPLY
+
+# ==============================================================================
+# CHOICES SECTION (Player Interactions)
+# ==============================================================================
+choices:
+  # --- Simple Choice ---
+  - text_id: TEXT_CHOICE_SIMPLE
+    action_id: simple_action      # String ID sent to executor.c
+    target_scene: SCENE_NEXT_ROOM # The scene to load if this choice is picked
+
+  # --- Conditional Choice (Only visible if conditions are met) ---
+  - text_id: TEXT_CHOICE_CONDITIONAL
+    action_id: conditional_action
+    target_scene: SCENE_SECRET_ROOM
+    conditions:
+      # All conditions in this list must be TRUE for the choice to appear (AND logic).
+      
+      # 1. Flag Check
+      - requires_flag: "HAS_MET_CHISA" 
+        flag_value: "1"                # Currently checks string equality
+      
+      # 2. Day Range Check
+      - min_day: 2
+        max_day: 5
+      # - exact_day: 3                 # Alternative: specific day only
+      
+      # 3. Time Range Check (24h format, integer hours)
+      - hour_is_between: [20, 23]      # Visible between 20:00 and 23:00
+      
+      # 4. Permission Check (Bitmask)
+      # 1=Lain, 2=Shu, 4=Ghost, etc. (Check game_types.h)
+      - permission_mask: 1
+
+# ==============================================================================
+# AUTO-EVENTS SECTION (Timer-based or passive triggers)
+# ==============================================================================
+# These events trigger automatically without player input.
+auto_events:
+  - target_scene: SCENE_AUTO_EVENT
+    wait_time: 30                      # Time in seconds to wait before triggering
+    flag_set: "EVENT_TRIGGERED"        # Optional: Set a flag when triggered
+    
+    # Conditions work exactly the same as in choices
+    conditions:
+      - min_day: 2
+        max_day: 2

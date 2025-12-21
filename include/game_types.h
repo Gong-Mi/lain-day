@@ -53,7 +53,23 @@ typedef struct {
     int inventory_count;
     char unlocked_commands[MAX_COMMANDS][MAX_NAME_LENGTH];
     int unlocked_commands_count;
+    
+    // Persona Permissions (RWX Model)
+    // Bits 0-2: Lain (Read, Write, Execute)
+    // Bits 3-5: Shu  (Read, Write, Execute)
+    // Bits 6-7: Special (System Overload, Glitch)
+    uint8_t persona_permissions; 
 } PlayerState;
+
+// Permission Bitmasks
+#define PERM_LAIN_READ  (1 << 0)
+#define PERM_LAIN_WRITE (1 << 1)
+#define PERM_LAIN_EXEC  (1 << 2)
+#define PERM_SHU_READ   (1 << 3)
+#define PERM_SHU_WRITE  (1 << 4)
+#define PERM_SHU_EXEC   (1 << 5)
+#define PERM_SYSTEM_OV  (1 << 6)
+#define PERM_GLITCH     (1 << 7)
 
 typedef struct {
     char id[MAX_NAME_LENGTH];
@@ -83,6 +99,9 @@ typedef struct {
     int exact_day;
     int hour_start;
     int hour_end;
+    
+    // Permission condition (0 means not used)
+    uint8_t required_permission_mask;
 } Condition;
 
 #define MAX_AUTO_EVENTS 4
@@ -102,12 +121,14 @@ typedef struct {
 typedef enum {
     SPEAKER_NONE, SPEAKER_LAIN, SPEAKER_MOM, SPEAKER_DAD, SPEAKER_ALICE,
     SPEAKER_CHISA, SPEAKER_MIKA, SPEAKER_GHOST, SPEAKER_DOCTOR, SPEAKER_NAVI,
-    SPEAKER_PARENT, SPEAKER_COUNT
+    SPEAKER_SHU, SPEAKER_PARENT, SPEAKER_COUNT
 } SpeakerID;
 
 typedef struct {
     SpeakerID speaker_id;
     StringID text_id;
+    uint32_t delay_ms;
+    uint32_t duration_ms;
 } DialogueLine;
 
 typedef struct {
@@ -115,6 +136,7 @@ typedef struct {
     char action_id[MAX_NAME_LENGTH];
     Condition conditions[MAX_CONDITIONS_PER_CHOICE];
     int condition_count;
+    uint32_t delay_ms; // Added: Delay before the choice becomes visible
 } StoryChoice;
 
 typedef struct {
@@ -127,6 +149,7 @@ typedef struct {
     int choice_count;
     AutoEvent auto_events[MAX_AUTO_EVENTS];
     int auto_event_count;
+    bool is_takeover; // New: If true, skip header and choices during rendering
 } StoryScene;
 
 
@@ -184,6 +207,9 @@ typedef struct GameState {
     char mika_location_storage[MAX_NAME_LENGTH]; // Storage for Mika's location string
     int mika_sanity_level; // Mika's current sanity level (0-3)
     GamePaths paths; // Add GamePaths struct here
+    uint64_t scene_start_ms; // Real-time timestamp (ms) when the current scene started
+    int last_printed_line_idx; // Index of the last dialogue line printed to terminal
+    int current_dialogue_rows; // Number of dialogue lines currently on screen
 } GameState;
 
 // Global game state and configuration

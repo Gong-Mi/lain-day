@@ -11,10 +11,13 @@ extern pthread_mutex_t time_mutex;
 // Flag to signal the time thread to stop
 extern volatile bool game_is_running;
 
-// Function run by the time thread to update game time
+// Thread function
 void* time_thread_func(void* arg);
 
-// Functions to interpret game time
+// Real-time functions
+uint64_t get_current_time_ms();
+
+// Time interpretation functions
 int get_total_game_days(uint32_t time_of_day);
 int get_hour_of_day(uint32_t time_of_day);
 int get_minute_of_hour(uint32_t time_of_day);

@@ -3,6 +3,9 @@
 #include "event_system.h"
 #include <unistd.h>
 #include <stdio.h>
+#include <time.h> // Added for clock_gettime
+
+// ... (Rest of the file)
 
 // Mutex for protecting game_state->time_of_day
 pthread_mutex_t time_mutex;
@@ -11,6 +14,14 @@ pthread_mutex_t time_mutex;
 volatile bool game_is_running = true;
 
 #define TIME_INCREMENT_PER_SECOND (1 * 16)
+
+// --- Real-time Functions ---
+
+uint64_t get_current_time_ms() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+}
 
 // Function run by the time thread to update game time
 void* time_thread_func(void* arg) {
