@@ -759,3 +759,45 @@ bool execute_command(const char* input, GameState* game_state) {
         return false; // No re-render needed for unrecognized command
     }
 }
+
+#include "conditions.h"
+
+bool check_and_trigger_auto_events(GameState* game_state, StoryScene* current_scene, uint32_t scene_entry_time) {
+    if (!game_state || !current_scene) return false;
+
+    DecodedTimeResult current_time_decoded = decode_time_with_ecc(game_state->time_of_day);
+    if (current_time_decoded.status == DOUBLE_BIT_ERROR_DETECTED) return false;
+    
+    uint32_t current_time = current_time_decoded.data;
+    uint32_t elapsed_time = (current_time >= scene_entry_time) ? (current_time - scene_entry_time) : 0;
+    // Convert to seconds (16 units = 1 second)
+    uint32_t elapsed_seconds = elapsed_time / 16;
+
+    for (int i = 0; i < current_scene->auto_event_count; i++) {
+        AutoEvent* event = &current_scene->auto_events[i];
+        
+        // Prevent looping: if this event sets a flag, and that flag is ALREADY set, skip it.
+        if (strlen(event->flag_to_set) > 0) {
+             const char* val = hash_table_get(game_state->flags, event->flag_to_set);
+             if (val != NULL && strcmp(val, "1") == 0) {
+                 continue; 
+             }
+        }
+
+        // Check wait time
+        if (elapsed_seconds < (uint32_t)event->wait_time) {
+            continue; 
+        }
+
+        // Check conditions
+        if (check_conditions(game_state, event->conditions, event->condition_count)) {
+            // Trigger!
+            if (strlen(event->flag_to_set) > 0) {
+                 hash_table_set(game_state->flags, event->flag_to_set, "1");
+            }
+            strncpy(game_state->current_story_file, event->target_scene_id, MAX_PATH_LENGTH - 1);
+            return true;
+        }
+    }
+    return false;
+}

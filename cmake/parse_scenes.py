@@ -180,6 +180,42 @@ def parse_and_validate_ssl(ssl_path, generated_c_header_path, generated_c_source
                         f.write("        .hour_end = {},\n".format(hour_end))
                         f.write("    };\n")
 
+        # For auto_events
+        if 'auto_events' in scene_data and scene_data['auto_events']:
+            f.write("    scene->auto_event_count = {};\n".format(len(scene_data['auto_events'])))
+            for i, event in enumerate(scene_data['auto_events']):
+                target_scene = event.get('target_scene', '')
+                wait_time = event.get('wait_time', 0)
+                flag_set = event.get('flag_set', '')
+                
+                f.write("    strncpy(scene->auto_events[{}].target_scene_id, \"{}\", MAX_NAME_LENGTH - 1);\n".format(i, target_scene))
+                f.write("    scene->auto_events[{}].wait_time = {};\n".format(i, wait_time))
+                f.write("    strncpy(scene->auto_events[{}].flag_to_set, \"{}\", MAX_NAME_LENGTH - 1);\n".format(i, flag_set))
+
+                if 'conditions' in event and isinstance(event['conditions'], list):
+                    conditions = event['conditions']
+                    f.write("    scene->auto_events[{}].condition_count = {};\n".format(i, len(conditions)))
+                    for cond_idx, condition in enumerate(conditions):
+                        flag_name = condition.get('requires_flag', '')
+                        flag_value = condition.get('flag_value', '')
+                        min_day = condition.get('min_day', -1)
+                        max_day = condition.get('max_day', -1)
+                        exact_day = condition.get('exact_day', -1)
+                        
+                        hour_is_between = condition.get('hour_is_between', [-1, -1])
+                        hour_start = hour_is_between[0] if isinstance(hour_is_between, list) and len(hour_is_between) == 2 else -1
+                        hour_end = hour_is_between[1] if isinstance(hour_is_between, list) and len(hour_is_between) == 2 else -1
+
+                        f.write("    scene->auto_events[{}].conditions[{}] = (Condition){{\n".format(i, cond_idx))
+                        f.write("        .flag_name = \"{}\",\n".format(flag_name))
+                        f.write("        .required_value = \"{}\",\n".format(flag_value))
+                        f.write("        .min_day = {},\n".format(min_day))
+                        f.write("        .max_day = {},\n".format(max_day))
+                        f.write("        .exact_day = {},\n".format(exact_day))
+                        f.write("        .hour_start = {},\n".format(hour_start))
+                        f.write("        .hour_end = {},\n".format(hour_end))
+                        f.write("    };\n")
+
 
         # Resolve scene name using StringID
         f.write("    strcpy(scene->name, get_string_by_id({}));\n".format(scene_data['name_text_id']))

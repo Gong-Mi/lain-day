@@ -27,3 +27,11 @@ dialogue:
 location_id: iwakura_upper_hallway
 name_text_id: TEXT_SCENE_NAME_00_ENTRY
 scene_id: SCENE_00_ENTRY
+auto_events:
+- target_scene: SCENE_00A_WAIT_ONE_MINUTE_ENDPROLOGUE
+  wait_time: 60
+  flag_set: door_opened_by_ghost
+  conditions:
+  - min_day: 2
+    max_day: 2
+    hour_is_between: [18, 23]

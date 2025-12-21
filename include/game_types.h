@@ -85,6 +85,16 @@ typedef struct {
     int hour_end;
 } Condition;
 
+#define MAX_AUTO_EVENTS 4
+
+typedef struct {
+    char target_scene_id[MAX_NAME_LENGTH];
+    int wait_time; // In seconds, 0 means instant
+    char flag_to_set[MAX_NAME_LENGTH]; // Optional flag to set when triggered, value "1"
+    Condition conditions[MAX_CONDITIONS_PER_CHOICE];
+    int condition_count;
+} AutoEvent;
+
 typedef struct {
     char location_id[MAX_NAME_LENGTH];
 } FrontMatter;
@@ -115,6 +125,8 @@ typedef struct {
     int dialogue_line_count;
     StoryChoice choices[MAX_CHOICES_PER_SCENE];
     int choice_count;
+    AutoEvent auto_events[MAX_AUTO_EVENTS];
+    int auto_event_count;
 } StoryScene;
 
 

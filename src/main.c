@@ -66,18 +66,10 @@ static bool process_events(GameState* game_state, StoryScene* current_scene) {
     while (poll_event(&e)) {
         if (e.type == TIME_TICK_EVENT) {
             mika_update_location_by_schedule(game_state);
-            if (strcmp(current_scene->scene_id, "SCENE_00_ENTRY") == 0) {
-                DecodedTimeResult current_time_decoded = decode_time_with_ecc(game_state->time_of_day);
-                if (current_time_decoded.status != DOUBLE_BIT_ERROR_DETECTED) {
-                    if ((current_time_decoded.data - scene_entry_time) >= (60 * 16)) {
-                        const char* flag_val = hash_table_get(game_state->flags, "door_opened_by_ghost");
-                        if (flag_val == NULL || strcmp(flag_val, "1") != 0) {
-                            hash_table_set(game_state->flags, "door_opened_by_ghost", "1");
-                            strncpy(game_state->current_story_file, "SCENE_00A_WAIT_ONE_MINUTE_ENDPROLOGUE", MAX_PATH_LENGTH - 1);
-                            scene_has_changed = true;
-                        }
-                    }
-                }
+            
+            // Check for any auto-triggered events defined in the scene data
+            if (check_and_trigger_auto_events(game_state, current_scene, scene_entry_time)) {
+                scene_has_changed = true;
             }
         }
         if (scene_has_changed) break;
