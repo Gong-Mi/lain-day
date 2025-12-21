@@ -1,15 +1,19 @@
-choices:
-- text_id: TEXT_CHOICE_ASK_DAD_HELP
-  action_id: dad_ask_help
-- text_id: TEXT_CHOICE_TELL_DAD_NOTHING
-  action_id: dad_reply_no
-- text_id: TEXT_CHOICE_RETURN_TO_LIVING_ROOM
-  action_id: living_area
-dialogue:
-- speaker: SPEAKER_NONE
-  text_id: TEXT_DAD_HUB_DESC
-- speaker: SPEAKER_DAD
-  text_id: TEXT_DAD_HUB_QUESTION
-location_id: iwakura_living_dining_kitchen
-name_text_id: TEXT_SCENE_NAME_DAD_HUB
 scene_id: SCENE_DAD_HUB
+name_text_id: TEXT_SCENE_NAME_DAD_HUB
+location_id: iwakura_living_dining_kitchen
+description: "TEXT_DAD_HUB_DESC"
+
+dialogue:
+  - speaker: SPEAKER_DAD
+    text_id: TEXT_DAD_HUB_QUESTION
+
+choices:
+  - text_id: TEXT_CHOICE_ASK_DAD_HELP
+    action_id: dad_ask_help
+    target_scene: SCENE_02C_DAD_ASK_HELP
+  - text_id: TEXT_CHOICE_TELL_DAD_NOTHING
+    action_id: dad_reply_no
+    target_scene: SCENE_02B_DAD_REPLY_NO
+  - text_id: TEXT_CHOICE_RETURN_TO_LIVING_ROOM
+    action_id: living_area
+    target_scene: SCENE_02_DOWNSTAIRS

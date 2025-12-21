@@ -1,0 +1,20 @@
+scene_id: SCENE_00_NEGOTIATION
+name_text_id: TEXT_SCENE_NAME_00_NEGOTIATION
+location_id: iwakura_upper_hallway
+description: |
+  门前。两个意识在碰撞。
+  一个是想要维持现状的仓岩玲音，一个是想要铲除干扰的“束”。
+
+dialogue:
+  - speaker: SPEAKER_LAIN
+    text_id: TEXT_NEGOTIATION_LAIN
+  - speaker: SPEAKER_SHU
+    text_id: TEXT_NEGOTIATION_SHU
+
+choices:
+  - text_id: TEXT_CHOICE_NEGOTIATION_SHU
+    action_id: prologue_go_downstairs
+    target_scene: SCENE_02_DOWNSTAIRS
+  - text_id: TEXT_CHOICE_NEGOTIATION_LAIN
+    action_id: lains_room
+    target_scene: SCENE_01_LAIN_ROOM

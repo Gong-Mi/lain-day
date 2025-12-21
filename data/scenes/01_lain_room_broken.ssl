@@ -1,0 +1,25 @@
+scene_id: SCENE_01_LAIN_ROOM_BROKEN
+name_text_id: TEXT_SCENE_NAME_01_LAIN_ROOM_BROKEN
+location_id: iwakura_lains_room
+description: |
+  门开了。
+  
+  房间里没有开灯，只有几台显示器发出的荧荧绿光。
+  墙上的海报似乎在微微晃动，电子设备的嗡嗡声比平时大得多，甚至有些刺耳。
+  
+  这里的空气不再属于现实世界。
+  你感觉到“束”正在你耳边低语。
+
+dialogue:
+  - speaker: SPEAKER_NAVI
+    text_id: TEXT_NAVI_GLITCH_WELCOME
+  - speaker: SPEAKER_LAIN
+    text_id: TEXT_LAIN_REPLY_BROKEN
+
+choices:
+  - text_id: TEXT_CHOICE_USE_NAVI_PROLOGUE
+    action_id: use_desktop_navi
+    target_scene: SCENE_PC_NAVI_DESKTOP
+  - text_id: TEXT_CHOICE_LEAVE_ROOM_PROLOGUE
+    action_id: upper_hallway
+    target_scene: SCENE_00_ENTRY

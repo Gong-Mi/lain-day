@@ -1,19 +1,15 @@
-choices:
-- text_id: TEXT_CHOICE_MOM_REPLY_FINE
-  action_id: mom_reply_fine
-- text_id: TEXT_CHOICE_MOM_REPLY_SILENT
-  action_id: mom_reply_silent
-dialogue:
-- speaker: SPEAKER_NONE
-  text_id: TEXT_TALK_TO_MOM_NORMAL_DESC1
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_MOM
-  text_id: TEXT_TALK_TO_MOM_NORMAL_MOM_QUOTE1
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_NONE
-  text_id: TEXT_TALK_TO_MOM_NORMAL_DESC2
-location_id: iwakura_living_dining_kitchen
-name_text_id: TEXT_SCENE_NAME_02D_TALK_TO_MOM_NORMAL
 scene_id: SCENE_02D_TALK_TO_MOM_NORMAL
+name_text_id: TEXT_SCENE_NAME_MOM_NORMAL
+location_id: iwakura_living_dining_kitchen
+description: |
+  美穗（母亲）甚至没有抬头。
+  她只是机械地询问着你的情况，完全没有察觉到眼前的女儿已经被另一个意识占据了。
+
+dialogue:
+  - speaker: SPEAKER_MOM
+    text_id: TEXT_MOM_ASK_LAIN
+
+choices:
+  - text_id: TEXT_CHOICE_RETURN_TO_LOWER_HALLWAY
+    action_id: downstairs
+    target_scene: SCENE_02_DOWNSTAIRS

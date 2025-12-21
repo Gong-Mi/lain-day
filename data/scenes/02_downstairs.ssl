@@ -1,33 +1,39 @@
-choices:
-- action_id: talk_to_dad
-  text_id: TEXT_CHOICE_TALK_TO_DAD
-- action_id: talk_to_mom
-  text_id: TEXT_CHOICE_TALK_TO_MOM
-- action_id: get_milk
-  text_id: TEXT_CHOICE_GET_MILK
-- action_id: upstairs
-  text_id: TEXT_CHOICE_RETURN_TO_UPSTAIRS
-dialogue:
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_NONE
-  text_id: TEXT_DOWNSTAIRS_DESC1
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_NONE
-  text_id: TEXT_DOWNSTAIRS_DESC2
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_NONE
-  text_id: TEXT_DOWNSTAIRS_DESC3
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_NONE
-  text_id: TEXT_DOWNSTAIRS_DESC4
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_NONE
-  text_id: TEXT_DOWNSTAIRS_DESC5
-location_id: iwakura_living_dining_kitchen
-name_text_id: TEXT_SCENE_NAME_02_DOWNSTAIRS
 scene_id: SCENE_02_DOWNSTAIRS
+name_text_id: TEXT_SCENE_NAME_02_DOWNSTAIRS
+location_id: iwakura_living_dining_kitchen
+
+dialogue:
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_DOWNSTAIRS_DESC1
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_EMPTY_LINE
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_DOWNSTAIRS_DESC2
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_EMPTY_LINE
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_DOWNSTAIRS_DESC3
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_EMPTY_LINE
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_DOWNSTAIRS_DESC4
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_EMPTY_LINE
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_DOWNSTAIRS_DESC5
+  - speaker: SPEAKER_MIKA
+    text_id: TEXT_MIKA_OBSERVING
+
+choices:
+  - text_id: TEXT_CHOICE_TALK_TO_DAD
+    action_id: talk_to_dad
+    target_scene: SCENE_DAD_HUB
+  - text_id: TEXT_CHOICE_TALK_TO_MOM
+    action_id: talk_to_mom
+    target_scene: SCENE_02D_TALK_TO_MOM_NORMAL
+  - text_id: TEXT_CHOICE_GET_MILK
+    action_id: get_milk
+    target_scene: SCENE_02J_GET_MILK_ENDPROLOGUE
+  - text_id: TEXT_CHOICE_RETURN_TO_UPSTAIRS
+    action_id: upstairs
+    target_scene: SCENE_IWAKURA_UPPER_HALLWAY

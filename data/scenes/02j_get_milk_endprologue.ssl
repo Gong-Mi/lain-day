@@ -1,35 +1,12 @@
-choices:
-- action_id: start_chapter_one
-  text_id: TEXT_CHOICE_START_CHAPTER_ONE
-dialogue:
-- speaker: SPEAKER_NONE
-  text_id: TEXT_GET_MILK_TITLE
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_NONE
-  text_id: TEXT_GET_MILK_DESC1
-- speaker: SPEAKER_NONE
-  text_id: TEXT_GET_MILK_DESC2
-- speaker: SPEAKER_NONE
-  text_id: TEXT_GET_MILK_DESC3
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_PARENT
-  text_id: TEXT_GET_MILK_PARENT_QUOTE1
-- speaker: SPEAKER_PARENT
-  text_id: TEXT_GET_MILK_PARENT_QUOTE2
-- speaker: SPEAKER_PARENT
-  text_id: TEXT_GET_MILK_PARENT_QUOTE3
-- speaker: SPEAKER_PARENT
-  text_id: TEXT_GET_MILK_PARENT_QUOTE4
-- speaker: SPEAKER_NONE
-  text_id: TEXT_EMPTY_LINE
-- speaker: SPEAKER_NONE
-  text_id: TEXT_GET_MILK_DESC4
-- speaker: SPEAKER_NONE
-  text_id: TEXT_GET_MILK_DESC5
-- speaker: SPEAKER_NONE
-  text_id: TEXT_GET_MILK_DESC6
-location_id: iwakura_living_dining_kitchen
-name_text_id: TEXT_SCENE_NAME_02J_GET_MILK_ENDPROLOGUE
 scene_id: SCENE_02J_GET_MILK_ENDPROLOGUE
+name_text_id: TEXT_SCENE_NAME_GET_MILK
+location_id: iwakura_living_dining_kitchen
+description: |
+  你走向冰箱，拿出一盒牛奶。这只是你出现在这里的借口。
+  
+  当你转身准备上楼时，身后再次传来了父母刻意压低的争吵声。循环又开始了。
+
+choices:
+  - text_id: TEXT_CHOICE_RETURN_TO_ROOM_END
+    action_id: start_chapter_one
+    target_scene: SCENE_03_CHAPTER_ONE_INTRO

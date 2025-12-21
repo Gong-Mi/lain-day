@@ -8,6 +8,8 @@
 
 // All scene init functions are declared here. They are defined in their respective data.c files.
 #include "SCENE_00_ENTRY_data.h"
+#include "SCENE_00_NEGOTIATION_data.h"
+#include "SCENE_01_LAIN_ROOM_BROKEN_data.h"
 #include "SCENE_00A_WAIT_ONE_MINUTE_ENDPROLOGUE_data.h"
 #include "SCENE_01_LAIN_ROOM_data.h"
 #include "SCENE_01A_EXAMINE_NAVI_data.h"
@@ -57,6 +59,8 @@ static const struct {
     SceneInitFunc func;
 } scene_registrations[] = {
     {"SCENE_00_ENTRY", init_scene_scene_00_entry_from_data},
+    {"SCENE_00_NEGOTIATION", init_scene_scene_00_negotiation_from_data},
+    {"SCENE_01_LAIN_ROOM_BROKEN", init_scene_scene_01_lain_room_broken_from_data},
     {"SCENE_00A_WAIT_ONE_MINUTE_ENDPROLOGUE", init_scene_scene_00a_wait_one_minute_endprologue_from_data},
     {"SCENE_01_LAIN_ROOM", init_scene_scene_01_lain_room_from_data},
     {"SCENE_01A_EXAMINE_NAVI", init_scene_scene_01a_examine_navi_from_data},
