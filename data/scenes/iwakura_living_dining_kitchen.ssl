@@ -1,7 +1,7 @@
 
 choices:
 - text_id: TEXT_CHOICE_RETURN_FROM_IWAKURA_LIVING_DINING_KITCHEN
-  action_id: return_from_iwakura_living_dining_kitchen # Placeholder action ID
+  action_id: hallway
 dialogue:
 - speaker: SPEAKER_NONE
   text_id: TEXT_PLACEHOLDER_IWAKURA_LIVING_DINING_KITCHEN_DESC

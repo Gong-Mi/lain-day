@@ -87,7 +87,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(living_dining_kitchen->id, "iwakura_living_dining_kitchen");
     strcpy(living_dining_kitchen->name, get_string_by_id(MAP_LOCATION_LIVING_DINING_KITCHEN_NAME));
     strcpy(living_dining_kitchen->description, get_string_by_id(MAP_LOCATION_LIVING_DINING_KITCHEN_DESC));
-    add_connection(living_dining_kitchen, "hallway", "iwakura_lower_hallway", NULL, NULL, "SCENE_02_DOWNSTAIRS");
+    add_connection(living_dining_kitchen, "hallway", "iwakura_lower_hallway", NULL, NULL, "SCENE_IWAKURA_LOWER_HALLWAY");
     add_poi(living_dining_kitchen, "sofa", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_SOFA_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_SOFA_DESC), NULL, NULL);
     add_poi(living_dining_kitchen, "tv", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_DESC), NULL, NULL);
     add_poi(living_dining_kitchen, "dining_table", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_DESC), NULL, NULL);
@@ -98,7 +98,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(bathroom->id, "iwakura_bathroom");
     strcpy(bathroom->name, get_string_by_id(MAP_LOCATION_BATHROOM_NAME));
     strcpy(bathroom->description, get_string_by_id(MAP_LOCATION_BATHROOM_DESC));
-    add_connection(bathroom, "hallway", "iwakura_lower_hallway", NULL, NULL, "SCENE_02_DOWNSTAIRS");
+    add_connection(bathroom, "hallway", "iwakura_lower_hallway", NULL, NULL, "SCENE_IWAKURA_LOWER_HALLWAY");
     add_poi(bathroom, "sink", get_string_by_id(MAP_POI_BATHROOM_SINK_NAME), get_string_by_id(MAP_POI_BATHROOM_SINK_DESC), NULL, NULL);
     add_poi(bathroom, "bathtub", get_string_by_id(MAP_POI_BATHROOM_BATHTUB_NAME), get_string_by_id(MAP_POI_BATHROOM_BATHTUB_DESC), NULL, NULL);
     // Add new POIs for mirror and shower
@@ -143,7 +143,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     strcpy(study->id, "iwakura_study");
     strcpy(study->name, get_string_by_id(MAP_LOCATION_STUDY_NAME));
     strcpy(study->description, get_string_by_id(MAP_LOCATION_STUDY_DESC));
-    add_connection(study, "hallway", "iwakura_lower_hallway", NULL, NULL, "SCENE_02_DOWNSTAIRS");
+    add_connection(study, "hallway", "iwakura_lower_hallway", NULL, NULL, "SCENE_IWAKURA_LOWER_HALLWAY");
     add_poi(study, "bookshelf", get_string_by_id(MAP_POI_STUDY_BOOKSHELF_NAME), get_string_by_id(MAP_POI_STUDY_BOOKSHELF_DESC), NULL, NULL);
     add_poi(study, "desk", get_string_by_id(MAP_POI_STUDY_DESK_NAME), get_string_by_id(MAP_POI_STUDY_DESK_DESC), NULL, NULL);
     

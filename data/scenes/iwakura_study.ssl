@@ -1,7 +1,7 @@
 
 choices:
 - text_id: TEXT_CHOICE_RETURN_FROM_IWAKURA_STUDY
-  action_id: return_from_iwakura_study # Placeholder action ID
+  action_id: hallway
 dialogue:
 - speaker: SPEAKER_NONE
   text_id: TEXT_PLACEHOLDER_IWAKURA_STUDY_DESC
