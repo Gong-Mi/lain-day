@@ -92,6 +92,7 @@ int create_iwakura_house_layout(Location* all_locations, int starting_index) {
     add_poi(living_dining_kitchen, "tv", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_TV_DESC), NULL, NULL);
     add_poi(living_dining_kitchen, "dining_table", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_DESC), NULL, NULL);
     add_poi(living_dining_kitchen, "refrigerator", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_DESC), "SCENE_EXAMINE_FRIDGE", NULL);
+    add_poi(living_dining_kitchen, "dad", get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DAD_NAME), get_string_by_id(MAP_POI_LIVING_DINING_KITCHEN_DAD_DESC), NULL, "talk_to_dad");
 
     // --- 4. Bathroom (浴室) ---
     *bathroom = (Location){0};
