@@ -65,9 +65,9 @@
 //      - 通过 CMake 选项实现了角色的编译时“生死”控制 (CHARACTER_NAME_ALIVE)。
 //      - 采用“条件代码/数据”方案 (Option B)，允许在编译时根据选项决定是否包含角色相关内容。
 
-//  [✓] 11. 调试与显示控制系统 (Debugging and Display Control System)
-//      - 引入了 CMake 级别的精细化调试开关 (`MASTER_DEBUG_SWITCH`, `ENABLE_DEBUG_LOGGING`, `ENABLE_STRING_DEBUG_LOGGING`, `ENABLE_MAP_DEBUG_LOGGING`) 和屏幕清理控制 (`ENABLE_CLEAR_SCREEN`)。
-//      - 所有调试信息已通过条件编译受控。
+//  [✓] 11. 统一调试与日志系统 (Unified Debugging and Logging System)
+//      - 建立了基于 `logger.c` 的持久化日志系统，所有调试信息同步镜像至 `game_debug.log`。
+//      - 引入了 `LOG_DEBUG`, `LOG_MAP_DEBUG` 等分类宏，取代了散乱的 `fprintf` 调用，并支持通过 CMake 实现精细化的编译时控制。
 
 //  [✓] 12. `zlib` 压缩库集成 (`zlib` Compression Library Integration)
 //      - 成功集成了 `external/zlib` 子模块，并在项目中添加了基于 `zlib` 的字符串压缩与解压缩工具函数。
@@ -90,6 +90,20 @@
 //      - 邮件系统集成到 `embedded_navi.c`，允许玩家在NAVI界面中查看邮件。
 //      - **新增邮件删除功能**: 实现 `delete <id>` 命令，支持在内存中标记邮件为已删除，并通过文件重命名（例如，将后缀从 `,U`/`,R` 改为 `,D`）实现删除状态的持久化。列表显示已过滤掉已删除邮件。
 
+//  [✓] 15. 强化 UI 渲染与终端兼容性 (Advanced UI Rendering & Terminal Compatibility)
+//      - **强制清屏机制**: 实现了 `\033[H\033[2J\033[3J` 序列，在换场时彻底清除可见屏幕及滚动回溯缓冲区（Scrollback Buffer）。
+//      - **输入干扰修复**: 自动抑制终端鼠标位置跟踪序列，解决了在 Raw Mode 下鼠标移动产生乱码字符的问题。
+//      - **打字机效果**: 实现了基于 `typewriter_delay` 的动态文本流输出效果。
+//      - **ANSI 图像渲染**: 实现了自适应终端尺寸的全彩图像 (Block Art) 渲染功能，并集成了基于 Python 脚本的自动化图像资源转换流程。
+
+//  [✓] 16. 健壮的会话与路径管理 (Robust Session & Path Management)
+//      - 实现了 `ensure_directory_exists_recursive`，支持自动创建多级会话工作目录。
+//      - 增强了存档加载的健壮性，增加了对 JSON 解析失败和文件读写权限的强制校验与报错提示。
+
+//  [✓] 17. 非阻塞输入与实时主循环 (Non-blocking Input & Real-time Loop)
+//      - 升级 `linenoise` 子模块支持超时机制 (`linenoiseSetTimeout`) 和状态持久化。
+//      - 主循环现支持在等待玩家输入的同时处理后台事件（如时间流逝、自动剧情触发）。
+
 // =====================================================================================
 // --- 未完成功能 (UNIMPLEMENTED FEATURES / TODO) ---
 // =====================================================================================
@@ -102,11 +116,7 @@
 
 //  [ ] 3. 高级模拟终端命令 (Advanced Terminal Commands)
 //      - `examine <poi>`: 查看兴趣点的详细描述。
-//      - `ls`, `cd`, `cat`: 与 `world/` 模拟文件系统交互的命令。
-
-//  [ ] 4. UI/渲染增强 (UI/Rendering Enhancements)
-//      - 实现 'character.json' 中定义的 `typewriter_delay` 打字机效果。
-//      - 实现 ANSI Block Art 的渲染功能。
+//      - `ls`, `cd`, `cat`: 与 `world/` 模拟文件系统交互的命令。 (已在 `navi_shell.c` 中初步集成框架)
 
 
 // =====================================================================================
