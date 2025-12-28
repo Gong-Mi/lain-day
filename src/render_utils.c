@@ -483,12 +483,10 @@ void enable_raw_mode() {
     raw.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
     
-    /* 
     if (is_mouse_supported()) {
         printf("\x1b[?1000h\x1b[?1006h"); // Enable mouse tracking
         fflush(stdout);
     }
-    */
 }
 
 void disable_raw_mode() {

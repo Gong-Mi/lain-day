@@ -102,8 +102,7 @@ int main(int argc, char *argv[]) {
     enable_raw_mode();
     linenoiseSetKeyCallback(handle_key_event, game_state);
     
-    // TEMPORARILY DISABLED MOUSE SUPPORT TO FIX INPUT ISSUE
-    // if (is_mouse_supported()) linenoiseSetMouseSupport(2);
+    if (is_mouse_supported()) linenoiseSetMouseSupport(2);
     
     // Removed timeout to allow proper blocking input in raw mode
     // linenoiseSetTimeout(10); 
@@ -158,16 +157,16 @@ int main(int argc, char *argv[]) {
                 break;
             }
             
-            /* 
-            // MOUSE CHECK DISABLED
             int mx, my, mbtn, mevt;
             if (is_mouse_supported() && linenoiseGetLastMouse(&mx, &my, &mbtn, &mevt)) {
-                // ... mouse logic ...
+                logger_log("Mouse event detected: x=%d, y=%d, btn=%d, evt=%c", mx, my, mbtn, mevt);
+                // Currently we just use any click to advance if in a state that waits for input
+                // or handle specific UI element clicks here.
+                input_handled = true;
+                input_buffer[0] = '\0'; // Treat click as empty input/advance
                 if (line) { free(line); line = NULL; }
             } 
-            else */ 
-            
-            if (line != NULL) {
+            else if (line != NULL) {
                 strncpy(input_buffer, line, sizeof(input_buffer)-1);
                 free(line);
                 input_handled = true;
