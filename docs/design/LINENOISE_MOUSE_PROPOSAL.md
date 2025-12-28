@@ -86,18 +86,12 @@ See `linenoise.h` for the full API. Key functions include:
     *   `1`: Enabled (swallows events, does not interrupt input).
     *   `2`: Enabled (interrupts input, causing `linenoise` to return current buffer).
 *   `linenoiseGetLastMouse(int *x, int *y, int *button, int *event_type)`: Retrieve details of the last mouse event.
-    *   `x`, `y`: 1-based coordinates.
-    *   `button`: Mouse button (0=left, etc.).
-    *   `event_type`: 'M' (Press) or 'm' (Release).
 
-### Non-blocking / Multiplexing API (Planned)
+### Non-blocking / Multiplexing API
 
-To support real-time games where the UI must refresh (e.g., time ticking, animations) while waiting for user input, the following requirements are established:
+This version includes support for real-time game loop integration (enabled in the `mouse-support` branch):
 
-*   **Timeout Support**: `linenoise()` must support a configurable timeout (in milliseconds). If no input is received, it should return a special status without clearing the line.
-*   **State Persistence**: The internal state (current buffer, cursor position, history index) must be persistent across multiple calls to `linenoise()`. This allows the game loop to:
-    1. Call `linenoise()` (Wait for 50ms).
-    2. If timeout, perform game logic (Update Time, Check Events).
-    3. Call `linenoise()` again to resume where the user left off.
-*   **External Refresh**: A new function `linenoiseRefresh()` should be exposed to allow the caller to force a redraw of the prompt and current buffer if the background screen was updated by another thread/event.
-*   **Async-Safe Return**: Define a return value (e.g., a specific pointer or error code) that distinguishes between "User hit Enter", "User cancelled", and "Timeout/Interrupted by event".
+*   **Timeout Support**: `linenoiseSetTimeout(int ms)` allows the input call to return if no key is pressed within the duration. If a timeout occurs, `linenoise` returns `NULL` and `errno` is set to `EAGAIN`.
+*   **State Persistence**: The internal edit state is preserved across calls.
+*   **External Refresh**: `linenoiseRefresh()` forces a redraw of the prompt and current buffer. Used when background events (like time ticking) update the screen.
+*   **Key Callback**: `linenoiseSetKeyCallback()` allows processing of special keys or characters during the input wait.

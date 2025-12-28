@@ -62,39 +62,33 @@ Multi-platform considerations (e.g., Windows, Linux) will only be addressed once
 
 ## Scene Management Architecture and Refactoring Strategy
 
-The game's scene management system is a key component that has evolved significantly. Understanding its current state is crucial for development.
-
 ### Current Architecture
 
 The scene transition mechanism operates as follows:
 
-1.  **Scene Definition:** Scenes are defined as `.ssl` files (which are YAML format) in the `data/scenes/` directory. Each file defines the scene's content (dialogue, choices) and contains a unique string identifier, `scene_id` (e.g., `SCENE_01_LAIN_ROOM`).
+1.  **Scene Definition:** Scenes are defined as `.ssl` files (which are YAML format) in the `data/scenes/` directory. Each file defines the scene's content (dialogue, choices) and contains a unique string identifier, `scene_id` (e.g., `SCENE_01_LAIN_ROOM`). It also supports `is_takeover: true` for smooth terminal streaming.
 
-2.  **Build-Time Code Generation:** At build time, a Python script (`cmake/parse_scenes.py`) processes all `.ssl` files. For each scene, it automatically generates a corresponding C function (e.g., `init_scene_SCENE_01_LAIN_ROOM_from_data`).
+2.  **Build-Time Code Generation:** At build time, a Python script (`cmake/parse_scenes.py`) processes all `.ssl` files. For each scene, it automatically generates a corresponding C function (e.g., `init_scene_SCENE_01_LAIN_ROOM_from_data`) and handles timing data (`delay`, `duration`).
 
-3.  **Dispatch Table:** The `src/scenes.c` file contains a static dispatch table named `scene_registrations`. This table maps the string `scene_id` from the `.ssl` files to the function pointers of the auto-generated C functions.
+...
 
-4.  **Scene Transition:** A transition is initiated when a new `scene_id` is written to the `game_state->current_story_file` field. Note that the field name `current_story_file` is a misnomer from a previous design; it holds a `scene_id`, not a file path. The main game loop detects this change and calls `transition_to_scene`, which uses the `scene_id` to look up the correct function in the dispatch table and load the new scene.
+## Unified Logging and Debugging System
 
-5.  **Conditional Choices:** The visibility of choices within a scene is managed by a flexible condition system. In the `.ssl` files, each choice can have a `conditions` list. At build time, `parse_scenes.py` converts this list into a C array of `Condition` structs. At runtime, the `is_choice_selectable` function calls `check_conditions` to evaluate this array, allowing for complex logic based on game days, time of day, and story flags. This avoids runtime parsing and provides high performance.
+The project uses a unified logging system defined in `include/logger.h`.
 
-### Refactoring Strategy and Development Philosophy
+*   **LOG_DEBUG / LOG_MAP_DEBUG / LOG_STRING_DEBUG**: These macros replace raw `fprintf` calls. They output to `stderr` and are simultaneously mirrored to `game_debug.log` in the root directory.
+*   **Compile-time Control**: Logging can be toggled via CMake options (`ENABLE_DEBUG_LOGGING`, etc.). The definitions are flattened in `CMakeLists.txt` to ensure they are correctly passed to the compiler.
+*   **Persistent Tracing**: The `game_debug.log` is overwritten at the start of each session, providing a clean trace for the current run.
 
-#### The Role of 'Fragile' Identifiers (Fail-Fast Principle)
+## UI Rendering and Terminal Environment
 
-A key development philosophy for this project is "Fail-Fast." This principle is particularly important for a solo developer, as it minimizes the costly context switch of debugging issues long after they were introduced.
+The terminal interface has been optimized for a clean, immersive experience:
 
-The current reliance on string identifiers (`scene_id`) for scene dispatch is a deliberate implementation of this philosophy. The system is intentionally "fragile" in that a misspelled or non-existent `scene_id` should cause an immediate and loud failure during development. This provides instant feedback, allowing errors to be caught and fixed within the creative flow, rather than being discovered later during a separate testing phase. This is considered a feature for development efficiency, not a bug.
+*   **Forced Clear Screen**: On every scene transition, the engine executes a full clear sequence (`\033[H\033[2J\033[3J`). This clears the visible terminal and the scrollback buffer, ensuring no previous history clutters the screen.
+*   **Mouse Tracking Suppression**: Terminal mouse tracking is disabled by default to prevent coordinate sequences from interfering with the input buffer.
+*   **Robust Session Creation**: The boot sequence now uses recursive directory creation (`ensure_directory_exists_recursive`) to handle session workspaces, with mandatory error checking on file writes.
 
-#### Long-Term Refactoring Goal
-
-While the fail-fast approach is crucial during development, the long-term goal for the *runtime* is to enhance robustness and maintainability. Therefore, the refactoring strategy aims to achieve the best of both worlds:
-
-*   **Incremental Transition to Enums:** Gradually introduce C-style enumerations (`enum`) generated from the `scene_id`s. This will provide compile-time safety and improve code-completion and readability, reducing the chance of identifier errors in the first place.
-*   **Preserve Fail-Fast in Debug Builds:** The scene lookup function, even when using enums, should retain its strictness. In debug builds, an invalid scene identifier should still trigger an immediate assertion or crash, preserving the rapid feedback loop.
-*   **Goal:** To evolve the scene management system to be compile-time safe and highly readable through enums, while strictly enforcing the fail-fast discipline during development builds to maximize solo developer efficiency.
-
-### Map and Location Architecture
+## Map and Location Architecture
 
 The game's world map is constructed programmatically at runtime, moving away from a previous placeholder system.
 
