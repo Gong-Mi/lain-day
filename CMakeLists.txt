@@ -279,6 +279,7 @@ set(GAME_ENGINE_SOURCES
         src/systems/train_system.c
         src/systems/mystery_system.c
         src/systems/image_view_system.c
+        src/systems/navi_shell.c # Add shell system
 
         external/linenoise/linenoise.c
     external/linenoise/stringbuf.c

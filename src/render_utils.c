@@ -7,14 +7,19 @@
 #include "map_loader.h" // Needed for get_location_by_id
 #include "time_utils.h" // Added for get_current_time_ms
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h> // For usleep
 #include <sys/ioctl.h> // For ioctl
 #include <stdint.h>  // For uint8_t
 #include <termios.h> // For raw mode
 
+#include <stdarg.h> // Added for va_list
+
 // Helper function prototype
 static void _render_transient_message(GameState* game_state);
+
+static int g_render_line_counter = 0;
 
 // Helper to move cursor to a specific line/column (1-indexed)
 void move_cursor(int row, int col) {
@@ -31,20 +36,36 @@ void clear_line() {
 // Helper to render choices with timing filter
 static int _render_choices_dynamic(const StoryScene* scene, const GameState* game_state, uint64_t elapsed_ms) {
     int lines_printed = 0;
+    GameState* gs = (GameState*)game_state; // Cast to update tracking fields
+
     if (scene->choice_count > 0) {
-        printf("--- Choices ---\033[K\n"); lines_printed++;
+        gs->choices_start_row = g_render_line_counter + 1; // 1-indexed for terminal
+        printf("--- Choices ---\033[K\n"); 
+        lines_printed++;
+        g_render_line_counter++;
+
         int visible_choice_index = 1;
         for (int i = 0; i < scene->choice_count; i++) {
             const StoryChoice* choice = &scene->choices[i];
             if (elapsed_ms < (uint64_t)choice->delay_ms) continue;
+            
             if (is_choice_selectable(choice, game_state)) {
                 printf("%d. %s\033[K\n", visible_choice_index++, get_string_by_id(choice->text_id));
             } else {
                 printf("   %s%s%s\033[K\n", ANSI_COLOR_BRIGHT_BLACK, get_string_by_id(choice->text_id), ANSI_COLOR_RESET);
             }
             lines_printed++;
+            g_render_line_counter++;
         }
-        printf("---------------\033[K\n"); lines_printed++;
+        
+        printf("---------------\033[K\n"); 
+        lines_printed++;
+        g_render_line_counter++;
+        
+        gs->choice_row_count = lines_printed;
+    } else {
+        gs->choices_start_row = 0;
+        gs->choice_row_count = 0;
     }
     return lines_printed;
 }
@@ -76,9 +97,12 @@ void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState*
 
     if (line_text == NULL) {
         printf("\n");
+        g_render_line_counter++;
         fflush(stdout);
         return;
     }
+    
+    g_render_line_counter++;
 
     // Map SpeakerID to name and color
     struct {
@@ -149,6 +173,7 @@ void clear_screen() {
 }
 
 void print_game_time(uint32_t time_of_day) {
+    g_render_line_counter++;
     DecodedTimeResult decoded_result = decode_time_with_ecc(time_of_day);
     
     // Handle uncorrectable errors by showing a glitchy time
@@ -206,6 +231,8 @@ static void _render_transient_message(GameState* game_state) {
 void render_current_scene(const StoryScene* scene, const struct GameState* game_state) {
     if (scene == NULL) return;
 
+    g_render_line_counter = 0;
+
     uint64_t now_ms = get_current_time_ms();
     uint64_t elapsed_ms = now_ms - game_state->scene_start_ms;
     GameState* gs = (GameState*)game_state;
@@ -228,7 +255,8 @@ void render_current_scene(const StoryScene* scene, const struct GameState* game_
         // A. Initial Entry or Resize: Full Redraw
         if (gs->last_printed_line_idx == -1) {
             clear_screen();
-            gs->current_dialogue_rows = 0;
+            print_game_time(gs->time_of_day);
+            gs->current_dialogue_rows = 1; // Start at 1 to account for time line
             for (int i = 0; i < scene->dialogue_line_count; i++) {
                 if (elapsed_ms >= (uint64_t)scene->dialogue_lines[i].delay_ms) {
                     print_colored_line(scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id, gs);
@@ -288,12 +316,15 @@ void render_current_scene(const StoryScene* scene, const struct GameState* game_
     #endif
     print_game_time(game_state->time_of_day);
     printf("\n========================================\n");
+    g_render_line_counter += 2; // \n and separator
     if (scene->location_id[0] != '\0') {
         Location* loc = get_location_by_id(scene->location_id);
         if (loc && loc->name[0] != '\0') printf("Location: %s\n", loc->name);
         else printf("Location: %s\n", scene->location_id);
+        g_render_line_counter++;
     }
     printf("========================================\n");
+    g_render_line_counter++;
 
     for (int i = 0; i < scene->dialogue_line_count; i++) {
         print_colored_line(scene->dialogue_lines[i].speaker_id, scene->dialogue_lines[i].text_id, gs);
@@ -405,20 +436,48 @@ void init_terminal_state() {
     }
 }
 
+bool is_mouse_supported() {
+    if (!isatty(STDIN_FILENO)) return false;
+    const char* term = getenv("TERM");
+    
+    if (!term || strcmp(term, "dumb") == 0) return false;
+
+    // 只要 TERM 包含 xterm, screen, tmux, linux, rxvt，就开启鼠标支持
+    // 因为在移动端（Termux），这些终端几乎都支持鼠标协议
+    if (strstr(term, "xterm") || strstr(term, "screen") || strstr(term, "tmux") || 
+        strstr(term, "linux") || strstr(term, "rxvt")) {
+        return true;
+    }
+
+    // 此外，如果明确定义了现代终端变量，也开启
+    if (getenv("TERM_PROGRAM") || getenv("COLORTERM")) {
+        return true;
+    }
+
+    return false;
+}
+
 void enable_raw_mode() {
+    if (!isatty(STDIN_FILENO)) return;
+
     init_terminal_state(); // Ensure we have a sane base
     struct termios raw = orig_termios;
     // Minimal raw mode: just disable echo and line buffering
     raw.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-    printf("\x1b[?1000h\x1b[?1006h"); // Enable mouse tracking
-    fflush(stdout);
+    
+    if (is_mouse_supported()) {
+        printf("\x1b[?1000h\x1b[?1006h"); // Enable mouse tracking
+        fflush(stdout);
+    }
 }
 
 void disable_raw_mode() {
     if (terminal_state_captured) {
-        printf("\x1b[?1000l\x1b[?1006l"); // Disable mouse tracking
-        fflush(stdout);
+        if (is_mouse_supported()) {
+            printf("\x1b[?1000l\x1b[?1006l"); // Disable mouse tracking
+            fflush(stdout);
+        }
         
         // Restore to the sane original state
         tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);

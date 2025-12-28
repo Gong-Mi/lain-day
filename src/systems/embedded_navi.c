@@ -4,6 +4,7 @@
 #include "../include/systems/embedded_navi.h"
 #include "../include/systems/mail_system.h" // New include
 #include "../include/systems/mystery_system.h" // Mystery App include
+#include "../include/systems/navi_shell.h" // Shell include
 #include "string_table.h"
 #include "render_utils.h"
 #include "linenoise.h"
@@ -79,6 +80,7 @@ static void print_menu() {
     printf("  [2] net        - Network Status / Connect\n");
     printf("  [3] sys        - System Information\n");
     printf("  [4] mystery    - Wired Mysteries (App)\n");
+    printf("  [5] shell      - Terminal Emulator\n");
     printf("  [0] exit       - Log out\n");
     printf("\n");
 }
@@ -239,6 +241,8 @@ void enter_embedded_navi(GameState* game_state) {
             handle_system_info();
         } else if (strcmp(line, "mystery") == 0 || strcmp(line, "4") == 0) {
             enter_mystery_app(game_state);
+        } else if (strcmp(line, "shell") == 0 || strcmp(line, "5") == 0) {
+            enter_navi_shell(game_state);
         } else if (strlen(line) > 0) {
             printf("%sUnknown command: '%s'\n%s", COLOR_NAVI_ERROR, line, ANSI_COLOR_RESET);
             usleep(800000); // Wait a bit so user sees error

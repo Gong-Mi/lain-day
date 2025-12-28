@@ -7,7 +7,6 @@
 #include <stdbool.h>
 #include <libgen.h>
 #include <errno.h>
-#include <sys/select.h>
 #include <fcntl.h>
 #include <locale.h> // Required for setlocale()
 #include <signal.h> // For signal handling
@@ -44,13 +43,35 @@ void handle_signal(int sig);
 void handle_sigwinch(int sig);
 void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index);
 int is_numeric(const char* str);
-bool is_valid_session_name(const char* name); // Added prototype for session name validation
+bool is_valid_session_name(const char* name); 
 static bool process_events(GameState* game_state, StoryScene* current_scene);
+int handle_key_event(int key, void* userdata);
 
 // --- Signal Handling ---
 void handle_sigwinch(int sig) {
     (void)sig;
     g_needs_redraw = 1;
+}
+
+int handle_key_event(int key, void* userdata) {
+    GameState* gs = (GameState*)userdata;
+    bool handled = false;
+    
+    // Page Up / Page Down for scrolling
+    if (key == SPECIAL_PAGE_UP) {
+        if (gs->scroll_offset > 0) {
+            gs->scroll_offset -= 5; // Scroll speed
+            if (gs->scroll_offset < 0) gs->scroll_offset = 0;
+            g_needs_redraw = 1;
+        }
+        handled = true;
+    } else if (key == SPECIAL_PAGE_DOWN) {
+        gs->scroll_offset += 5;
+        g_needs_redraw = 1;
+        handled = true;
+    }
+    
+    return handled ? 1 : 0;
 }
 
 void handle_signal(int sig) {
@@ -108,7 +129,6 @@ int main(int argc, char *argv[]) {
     GamePaths paths;
     init_paths(argv[0], &paths);
 
-    char session_name[MAX_NAME_LENGTH] = {0};
     char character_session_file_path[MAX_PATH_LENGTH] = {0};
     char session_dir_path[MAX_PATH_LENGTH] = {0};
     int arg_index = 1;
@@ -122,6 +142,9 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     memset(game_state, 0, sizeof(GameState));
+    
+    // game_state->session_name is now in game_state
+    game_state->session_name[0] = '\0';
     
     // Initialize Doll States (Default)
     game_state->doll_state_lain_room = DOLL_STATE_NORMAL;
@@ -159,7 +182,11 @@ int main(int argc, char *argv[]) {
     if (!is_test_mode && arg_index >= argc) {
         enter_fullscreen_mode();
         ImageBounds bounds = render_image_adaptively(LOGO_DATA, LOGO_WIDTH, LOGO_HEIGHT);
-        printf("\n\nPress any key or click the image to start...");
+        if (is_mouse_supported()) {
+            printf("\n\nPress any key or click the image to start...");
+        } else {
+            printf("\n\nPress any key to start...");
+        }
         fflush(stdout);
         
         enable_raw_mode();
@@ -174,7 +201,11 @@ int main(int argc, char *argv[]) {
                 g_needs_redraw = 0;
                 clear_screen();
                 bounds = render_image_adaptively(LOGO_DATA, LOGO_WIDTH, LOGO_HEIGHT);
-                printf("\n\nPress any key or click the image to start...");
+                if (is_mouse_supported()) {
+                    printf("\n\nPress any key or click the image to start...");
+                } else {
+                    printf("\n\nPress any key to start...");
+                }
                 fflush(stdout);
             }
 
@@ -201,11 +232,11 @@ int main(int argc, char *argv[]) {
                     break; // Alt+Key or other escape sequence
                 }
             } else if (state == 2) {
-                if (c == '<') {
+                if (c == '<' && is_mouse_supported()) {
                     state = 3;
                     mouse_idx = 0;
                 } else {
-                    break; // Other CSI sequence (e.g. arrow keys)
+                    break; // Other CSI sequence or mouse disabled
                 }
             } else if (state == 3) {
                 if (c == 'M' || c == 'm') {
@@ -301,25 +332,25 @@ int main(int argc, char *argv[]) {
         }
     } else {
         if (argc > arg_index) {
-            strncpy(session_name, argv[arg_index], MAX_NAME_LENGTH - 1);
-            session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
-            if (!is_valid_session_name(session_name)) {
-                printf("%s: %s\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME), session_name);
+            strncpy(game_state->session_name, argv[arg_index], MAX_NAME_LENGTH - 1);
+            game_state->session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
+            if (!is_valid_session_name(game_state->session_name)) {
+                printf("%s: %s\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME), game_state->session_name);
                 return 1; // Exit on invalid argument
             }
-            printf("Using session name from argument: %s\n", session_name);
+            printf("Using session name from argument: %s\n", game_state->session_name);
             arg_index++;
         } else {
             int session_error_count = 0;
-            while (session_name[0] == '\0') {
+            while (game_state->session_name[0] == '\0') {
                 char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
                 
                 if (line != NULL) {
-                    strncpy(session_name, line, MAX_NAME_LENGTH - 1);
-                    session_name[MAX_NAME_LENGTH - 1] = '\0';
+                    strncpy(game_state->session_name, line, MAX_NAME_LENGTH - 1);
+                    game_state->session_name[MAX_NAME_LENGTH - 1] = '\0';
                     free(line);
 
-                    if (strlen(session_name) == 0) {
+                    if (strlen(game_state->session_name) == 0) {
                         session_error_count++;
                         if (session_error_count > 1) {
                             // Move up 2 lines: 1 for the prompt, 1 for the previous error
@@ -334,7 +365,7 @@ int main(int argc, char *argv[]) {
                         fflush(stdout);
                         continue;
                     }
-                    if (!is_valid_session_name(session_name)) {
+                    if (!is_valid_session_name(game_state->session_name)) {
                         session_error_count++;
                         if (session_error_count > 1) {
                             printf("\033[2A\r\033[K");
@@ -345,7 +376,7 @@ int main(int argc, char *argv[]) {
                                get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME), session_error_count);
                         printf("\r\033[K");
                         fflush(stdout);
-                        session_name[0] = '\0';
+                        game_state->session_name[0] = '\0';
                         continue;
                     }
                 } else {
@@ -357,7 +388,7 @@ int main(int argc, char *argv[]) {
         }
         
             // No need for separate empty check here, handled in loop
-            // if (strlen(session_name) == 0) {
+            // if (strlen(game_state->session_name) == 0) {
             //     fprintf(stderr, "Error: Session name cannot be empty.\n");
             //     return 1;
             // }
@@ -365,20 +396,20 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Error: Failed to create session root directory '%s'. Check permissions or path.\n", paths.session_root_dir);
             return 1;
         }
-        snprintf(session_dir_path, MAX_PATH_LENGTH, "%s/%s", paths.session_root_dir, session_name);
+        snprintf(session_dir_path, MAX_PATH_LENGTH, "%s/%s", paths.session_root_dir, game_state->session_name);
         if (!ensure_directory_exists_recursive(session_dir_path, 0755)) {
             fprintf(stderr, "Error: Failed to create session directory '%s'. Check permissions or path.\n", session_dir_path);
             return 1;
         }
         snprintf(character_session_file_path, MAX_PATH_LENGTH, "%s/character.json", session_dir_path);
         if (access(character_session_file_path, F_OK) == -1) {
-            printf(get_string_by_id(TEXT_SESSION_NEW_MESSAGE), session_name);
+            printf(get_string_by_id(TEXT_SESSION_NEW_MESSAGE), game_state->session_name);
             if (!write_string_to_file(CHARACTER_JSON_DATA, character_session_file_path)) {
                 fprintf(stderr, "Error: Failed to write session file.\n");
                 return 1;
             }
         } else {
-            printf("Resuming session '%s'.\n", session_name);
+            printf("Resuming session '%s'.\n", game_state->session_name);
         }
     }
 
@@ -396,6 +427,16 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     printf("Map data loaded.\n");
+
+    // Enable raw mode for mouse tracking and scrolling support
+    enable_raw_mode();
+    // Register key callback for linenoise (scrolling)
+    linenoiseSetKeyCallback(handle_key_event, game_state);
+    
+    // Enable native mouse support in linenoise (Mode 2: interrupt input)
+    if (is_mouse_supported()) {
+        linenoiseSetMouseSupport(2);
+    }
 
     pthread_create(&time_thread_id, NULL, time_thread_func, (void*)game_state);
 
@@ -529,32 +570,48 @@ void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* 
         strncpy(buffer, argv[*arg_index], buffer_size - 1);
         (*arg_index)++;
     } else {
-        fd_set readfds;
-        struct timeval tv;
-        int retval;
+        char dynamic_prompt[128];
+        snprintf(dynamic_prompt, sizeof(dynamic_prompt), "\x1b[1;32m%s@wired_navi\x1b[0m:\x1b[1;34m~\x1b[0m$ ", 
+                 game_state->session_name[0] ? game_state->session_name : "guest");
 
-        FD_ZERO(&readfds);
-        FD_SET(STDIN_FILENO, &readfds);
-
-        tv.tv_sec = 0;
-        tv.tv_usec = 0;
-
-        retval = select(STDIN_FILENO + 1, &readfds, NULL, NULL, &tv);
-
-        if (retval > 0) {
+        while (1) {
             errno = 0;
-            char *line = linenoise(get_string_by_id(TEXT_PROMPT_INPUT_ARROW));
+            char *line = linenoise(dynamic_prompt);
+            
+            // 1. Check if a mouse event occurred during input (Native Support)
+            int mx, my, mbtn, mevt;
+            if (is_mouse_supported() && linenoiseGetLastMouse(&mx, &my, &mbtn, &mevt)) {
+                if (mevt == 'M' && mbtn == 0) { // Left-click press
+                    int click_offset = my - (game_state->choices_start_row + 1);
+                    if (click_offset >= 0 && click_offset < (game_state->choice_row_count - 2)) {
+                        if (line) free(line);
+                        snprintf(buffer, buffer_size, "%d", click_offset + 1);
+                        return;
+                    }
+                }
+                if (line) free(line);
+                // Clean redraw: Move cursor up 1 line and clear it
+                printf("\033[A\r\033[K");
+                fflush(stdout);
+                continue; 
+            }
+
+            // 2. Standard keyboard input handling
             if (line != NULL) {
                 if (strlen(line) > 0) {
-                    // linenoiseHistoryAdd(line); // Temporarily disable history to debug segfault
+                    strncpy(buffer, line, buffer_size - 1);
+                    free(line);
+                    return;
                 }
-                strncpy(buffer, line, buffer_size - 1);
                 free(line);
+                continue;
             } else {
                 if (errno == EINTR) {
-                    buffer[0] = '\0'; // Not a quit, just interrupted
+                    buffer[0] = '\0';
+                    return;
                 } else {
                     strncpy(buffer, "quit", buffer_size - 1);
+                    return;
                 }
             }
         }

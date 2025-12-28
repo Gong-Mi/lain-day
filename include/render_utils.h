@@ -29,6 +29,7 @@ void exit_fullscreen_mode();
 
 void init_terminal_state(); // Added
 
+bool is_mouse_supported();
 void enable_raw_mode();
 void disable_raw_mode();
 void set_terminal_echo(bool enabled);

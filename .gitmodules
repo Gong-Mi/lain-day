@@ -3,7 +3,7 @@
 	url = https://github.com/madler/zlib
 [submodule "external/linenoise"]
 	path = external/linenoise
-	url = https://github.com/msteveb/linenoise.git
+	url = https://github.com/Gong-Mi/linenoise-mouse.git
 [submodule "external/cJSON"]
 	path = external/cJSON
 	url = https://github.com/DaveGamble/cJSON.git

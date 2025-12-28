@@ -8,9 +8,9 @@ This file lists the exact versions (Git commit SHAs) of external submodules used
 - Version Tag: v1.3.1-201-g5a82f71
 
 ## linenoise
-- Repository: https://github.com/msteveb/linenoise.git
-- Commit SHA: 8d89cf3ccbb05b4e1bb5d1e5661dcb360e0e967b
-- Version Tag: heads/master
+- Repository: https://github.com/Gong-Mi/linenoise-mouse.git
+- Commit SHA: a5aa4ee20f6499adea0089f8189aa45bfda80cc4
+- Version Tag: heads/master (Custom fork with SGR Mouse support)
 
 ## cJSON
 - Repository: https://github.com/DaveGamble/cJSON.git

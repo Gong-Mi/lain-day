@@ -207,9 +207,14 @@ typedef struct GameState {
     char mika_location_storage[MAX_NAME_LENGTH]; // Storage for Mika's location string
     int mika_sanity_level; // Mika's current sanity level (0-3)
     GamePaths paths; // Add GamePaths struct here
+    char session_name[MAX_NAME_LENGTH];
     uint64_t scene_start_ms; // Real-time timestamp (ms) when the current scene started
     int last_printed_line_idx; // Index of the last dialogue line printed to terminal
     int current_dialogue_rows; // Number of dialogue lines currently on screen
+    int scroll_offset; // Number of lines scrolled down (0 = top)
+    int content_height; // Total height of the current scene content in lines
+    int choices_start_row; // The terminal row where choices start being displayed
+    int choice_row_count;  // Number of rows used for choices
 } GameState;
 
 // Global game state and configuration

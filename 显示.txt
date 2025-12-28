@@ -1,0 +1,14 @@
+data loaded.
+thj@wired_navi:~$
+
+[DEBUG] Click at Row: 37, Choices Start: 0, Count: 0
+thj@wired_navi:~$
+
+[DEBUG] Click at Row: 37, Choices Start: 0, Count: 0
+thj@wired_navi:~$
+
+[DEBUG] Click at Row: 37, Choices Start: 0, Count: 0
+thj@wired_navi:~$
+
+[DEBUG] Click at Row: 37, Choices Start: 0, Count: 0
+thj@wired_navi:~$
