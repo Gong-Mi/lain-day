@@ -128,6 +128,19 @@ add_custom_command(
 # Create a target for the generated header to ensure it's built
 add_custom_target(generate_character_header ALL DEPENDS ${GENERATED_CHARACTER_DATA_H})
 
+# --- Auto-generate logo_raw_data.h from image ---
+set(LOGO_IMAGE_FILE "${PROJECT_SOURCE_DIR}/experiments/ansi_renderer/e.jpeg")
+set(GENERATED_LOGO_DATA_H "${PROJECT_BINARY_DIR}/include/logo_raw_data.h")
+
+add_custom_command(
+    OUTPUT ${GENERATED_LOGO_DATA_H}
+    COMMAND /data/data/com.termux/files/usr/bin/python3 ${CMAKE_CURRENT_SOURCE_DIR}/tools/image_to_header.py ${LOGO_IMAGE_FILE} ${GENERATED_LOGO_DATA_H}
+    DEPENDS ${LOGO_IMAGE_FILE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/image_to_header.py
+    COMMENT "Generating C header from logo image"
+)
+
+add_custom_target(generate_logo_header ALL DEPENDS ${GENERATED_LOGO_DATA_H})
+
 # --- Auto-generate items.json data header ---
 set(ITEMS_JSON_FILE "${PROJECT_SOURCE_DIR}/data/items.json")
 set(GENERATED_ITEMS_DATA_H "${PROJECT_BINARY_DIR}/include/items_data.h")
@@ -323,12 +336,12 @@ add_executable(boot_debugger tools/boot_debugger.c ${GAME_ENGINE_SOURCES})
 target_link_libraries(boot_debugger PUBLIC zlibstatic pthread)
 
 # Add dependency to ensure header is generated before compiling executables
-add_dependencies(lain_day_c generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes generate_station_data_header)
-add_dependencies(scene_debugger generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes)
+add_dependencies(lain_day_c generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes generate_station_data_header generate_logo_header)
+add_dependencies(scene_debugger generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes generate_logo_header)
 add_dependencies(navi_debugger generate_string_ids_header)
 add_dependencies(map_debugger generate_string_ids_header)
 add_dependencies(debug_mika_schedule generate_string_ids_header)
-add_dependencies(boot_debugger generate_string_ids_header generate_character_header)
+add_dependencies(boot_debugger generate_string_ids_header generate_character_header generate_logo_header)
 
 # Add feature toggle definitions
 # The following compile definitions (USE_TYPEWRITER_EFFECT, USE_DEBUG_LOGGING, etc.)
