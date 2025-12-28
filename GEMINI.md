@@ -78,15 +78,23 @@ The project uses a unified logging system defined in `include/logger.h`.
 
 *   **LOG_DEBUG / LOG_MAP_DEBUG / LOG_STRING_DEBUG**: These macros replace raw `fprintf` calls. They output to `stderr` and are simultaneously mirrored to `game_debug.log` in the root directory.
 *   **Compile-time Control**: Logging can be toggled via CMake options (`ENABLE_DEBUG_LOGGING`, etc.). The definitions are flattened in `CMakeLists.txt` to ensure they are correctly passed to the compiler.
-*   **Persistent Tracing**: The `game_debug.log` is overwritten at the start of each session, providing a clean trace for the current run.
+*   **Persistent Tracing**: The `game_debug.log` is overwritten at the start of each session, providing a clean trace for the current run. (Note: `game_debug.log` is excluded from Git via `.gitignore`).
 
 ## UI Rendering and Terminal Environment
 
 The terminal interface has been optimized for a clean, immersive experience:
 
-*   **Forced Clear Screen**: On every scene transition, the engine executes a full clear sequence (`\033[H\033[2J\033[3J`). This clears the visible terminal and the scrollback buffer, ensuring no previous history clutters the screen.
-*   **Mouse Tracking Suppression**: Terminal mouse tracking is disabled by default to prevent coordinate sequences from interfering with the input buffer.
+*   **Forced Clear Screen**: On every scene transition, the engine executes a full clear sequence (`\033[H\033[2J\033[3J`). This clears the visible terminal and the **scrollback buffer**, ensuring no previous history clutters the screen.
+*   **Mouse/Touch Interaction**: The engine supports terminal mouse tracking using VT200 and SGR protocols (`\x1b[?1000h`, `\x1b[?1006h`). Clicks are captured in the main loop and can be used to advance the story or interact with UI elements.
+*   **Input Integrity**: The engine actively consumes mouse escape sequences to prevent them from leaking into the command prompt as garbage characters.
 *   **Robust Session Creation**: The boot sequence now uses recursive directory creation (`ensure_directory_exists_recursive`) to handle session workspaces, with mandatory error checking on file writes.
+
+## Build-time Resource Management
+
+To keep the repository lightweight and the workflow efficient, heavy or auto-generated assets are managed via the build system:
+
+*   **Logo Generation**: The primary logo (`logo_raw_data.h`) is auto-generated from `e.jpeg` during the CMake build process using `tools/image_to_header.py`. This avoids storing massive C arrays (100k+ lines) in the Git history.
+*   **Flattened Dependencies**: All auto-generated headers (Character data, Items, Strings, Scenes, Logo) are correctly tracked as build dependencies to ensure they are updated when original data files change.
 
 ## Map and Location Architecture
 
