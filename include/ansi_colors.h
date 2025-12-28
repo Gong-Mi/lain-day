@@ -12,6 +12,7 @@
 
 // Bright Colors
 #define ANSI_COLOR_BRIGHT_BLACK   "\x1b[90m" // Gray
+#define ANSI_COLOR_MID_GRAY       "\x1b[38;5;150m" // Retro Phosphor Green
 
 #define ANSI_COLOR_RESET    "\x1b[0m" // Reset to default color
 

@@ -41,5 +41,4 @@ int save_game_state(const char* path, const GameState* game_state);
 void cleanup_game_state(GameState* game_state);
 int load_string_table();
 
-
 #endif //DATA_LOADER_H

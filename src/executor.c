@@ -594,18 +594,18 @@ bool execute_command(const char* input, GameState* game_state) {
     }
     // Command: arls / arls <poi_id>
     else if (strncmp(input, "arls", 4) == 0) {
+        if (game_state->player_state.location[0] == '\0') {
+            printf("Error: Current location unknown. Systems offline.\n");
+            return false;
+        }
+
         char poi_id_buffer[MAX_NAME_LENGTH];
         int scan_result = sscanf(input, "arls %s", poi_id_buffer);
         if (scan_result == 1) { // Command is "arls <something>"
-            const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+            const Location* current_loc = get_location_by_id(game_state->player_state.location);
             if (current_loc) {
                 for (int i = 0; i < current_loc->pois_count; i++) {
                     if (strcmp(current_loc->pois[i].id, poi_id_buffer) == 0) {
-#ifdef USE_DEBUG_LOGGING
-                        fprintf(stderr, "DEBUG: Arls: Found POI '%s'. view_scene_id: '%s'\n", 
-                                current_loc->pois[i].id, 
-                                current_loc->pois[i].view_scene_id ? current_loc->pois[i].view_scene_id : "NULL");
-#endif
                         if (current_loc->pois[i].view_scene_id != NULL) {
                             strncpy(game_state->current_story_file, current_loc->pois[i].view_scene_id, MAX_PATH_LENGTH - 1);
                             return true; // Re-render needed for scene change
@@ -620,22 +620,13 @@ bool execute_command(const char* input, GameState* game_state) {
             return false;
         } else { // Command is just "arls" (no specific POI ID)
             printf("\n--- Area List Scan ---\n");
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "Executor ERROR: Arls: Player location ID is '%s'.\n", game_state->player_state.location);
-#endif
             Location *current_loc = get_location_by_id(game_state->player_state.location);
             if (current_loc) {
-#ifdef USE_DEBUG_LOGGING
-                fprintf(stderr, "DEBUG: Arls: Retrieved location '%s', pois_count: %d. Description (first 50 chars): '%.50s...'\n", current_loc->id, current_loc->pois_count, current_loc->description);
-#endif
                 render_scene_description(current_loc->description);
 
                 if (current_loc->pois_count > 0) {
                     render_text("\n\n Points of Interest: \n\n");
                     for (int i = 0; i < current_loc->pois_count; i++) {
-#ifdef USE_DEBUG_LOGGING
-                        fprintf(stderr, "DEBUG: Arls: Printing POI '%s'.\n", current_loc->pois[i].name);
-#endif
                         render_poi_name(current_loc->pois[i].name);
                         render_text("\n");
                     }
@@ -650,12 +641,9 @@ bool execute_command(const char* input, GameState* game_state) {
                         render_text(conn_buf);
                     }
                 }
+            } else {
+                printf("Location Data Corruption: Unable to locate '%s' in the Wired database.\n", game_state->player_state.location);
             }
-#ifdef USE_DEBUG_LOGGING
-            else {
-                fprintf(stderr, "ERROR: Arls: get_location_by_id returned NULL for ID '%s'. Current location '%s' not found in map data.\n", game_state->player_state.location, game_state->player_state.location);
-            }
-#endif
             printf("----------------------\n");
             return false;
         }
@@ -671,16 +659,14 @@ bool execute_command(const char* input, GameState* game_state) {
         int scan_result = sscanf(input, "exper %s", poi_id_buffer);
 
         if (scan_result == 1) {
-            const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+            const Location* current_loc = get_location_by_id(game_state->player_state.location);
             if (current_loc) {
                 for (int i = 0; i < current_loc->pois_count; i++) {
                     if (strcmp(current_loc->pois[i].id, poi_id_buffer) == 0) {
-                                                    if (current_loc->pois[i].examine_action_id != NULL) {
-                        #ifdef USE_DEBUG_LOGGING
-                                                        fprintf(stderr, "DEBUG: Calling execute_action with examine_action_id: '%s'\n", current_loc->pois[i].examine_action_id);
-                        #endif
-                                                        return execute_action(current_loc->pois[i].examine_action_id, game_state);
-                                                    } else {                            printf("You can't use or interact with the %s in that way.\n", current_loc->pois[i].name);
+                        if (current_loc->pois[i].examine_action_id != NULL) {
+                            return execute_action(current_loc->pois[i].examine_action_id, game_state);
+                        } else {
+                            printf("You can't use or interact with the %s in that way.\n", current_loc->pois[i].name);
                             return false;
                         }
                     }
@@ -699,7 +685,7 @@ bool execute_command(const char* input, GameState* game_state) {
         sscanf(input, "move %s", destination_buffer);
 
         if (strlen(destination_buffer) > 0) {
-            const Location* current_loc = (const Location*)cmap_get(game_state->location_map, game_state->player_state.location);
+            const Location* current_loc = get_location_by_id(game_state->player_state.location);
             if (current_loc) {
                 for (int i = 0; i < current_loc->connection_count; i++) {
                     if (strcmp(current_loc->connections[i].action_id, destination_buffer) == 0) {

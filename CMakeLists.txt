@@ -280,6 +280,7 @@ set(GAME_ENGINE_SOURCES
         src/systems/mystery_system.c
         src/systems/image_view_system.c
         src/systems/navi_shell.c # Add shell system
+        src/systems/boot_system.c # Add boot system
 
         external/linenoise/linenoise.c
     external/linenoise/stringbuf.c
@@ -316,12 +317,17 @@ target_link_libraries(map_debugger PUBLIC zlibstatic pthread)
 add_executable(debug_mika_schedule tools/debug_mika_schedule.c ${GAME_ENGINE_SOURCES})
 target_link_libraries(debug_mika_schedule PUBLIC zlibstatic pthread)
 
+# Boot Sequence debugger tool
+add_executable(boot_debugger tools/boot_debugger.c ${GAME_ENGINE_SOURCES})
+target_link_libraries(boot_debugger PUBLIC zlibstatic pthread)
+
 # Add dependency to ensure header is generated before compiling executables
 add_dependencies(lain_day_c generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes generate_station_data_header)
 add_dependencies(scene_debugger generate_character_header generate_items_header generate_string_ids_header generate_ssl_scenes)
 add_dependencies(navi_debugger generate_string_ids_header)
 add_dependencies(map_debugger generate_string_ids_header)
 add_dependencies(debug_mika_schedule generate_string_ids_header)
+add_dependencies(boot_debugger generate_string_ids_header generate_character_header)
 
 # Add feature toggle definitions
 # The following compile definitions (USE_TYPEWRITER_EFFECT, USE_DEBUG_LOGGING, etc.)

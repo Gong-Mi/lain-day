@@ -3,15 +3,10 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
-#include <sys/stat.h>
 #include <stdbool.h>
-#include <libgen.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <locale.h> // Required for setlocale()
-#include <signal.h> // For signal handling
+#include <locale.h> 
+#include <signal.h> 
 #include <pthread.h>
-#include <termios.h> // Added for tcflush
 
 #include "game_types.h"
 #include "game_paths.h"
@@ -25,84 +20,33 @@
 #include "executor.h"
 #include "characters/mika.h"
 #include "ecc_time.h"
-#include "project_status.h"
-#include "build_info.h"
 #include "linenoise.h"
-#include "cmap.h"
-#include "flag_system.h"
-#include "logo_raw_data.h"
-#include "character_data.h"
-#include "ansi_colors.h"
+#include "string_id_names.h"
+#include "systems/boot_system.h"
 
 // --- Global State ---
 static uint32_t scene_entry_time = 0;
 volatile sig_atomic_t g_needs_redraw = 0;
 
+void handle_signal(int sig) { (void)sig; g_needs_redraw = 1; }
+void handle_sigwinch(int sig) { (void)sig; g_needs_redraw = 1; }
+
+extern const char* g_embedded_strings[TEXT_COUNT];
+
 // --- Function Prototypes ---
-void handle_signal(int sig);
-void handle_sigwinch(int sig);
 void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index);
 int is_numeric(const char* str);
-bool is_valid_session_name(const char* name); 
-static bool process_events(GameState* game_state, StoryScene* current_scene);
+bool is_valid_session_name(const char* name);
 int handle_key_event(int key, void* userdata);
 
-// --- Signal Handling ---
-void handle_sigwinch(int sig) {
-    (void)sig;
-    g_needs_redraw = 1;
+static bool process_events(GameState* gs, StoryScene* scene) {
+    return check_and_trigger_auto_events(gs, scene, scene_entry_time);
 }
 
-int handle_key_event(int key, void* userdata) {
-    GameState* gs = (GameState*)userdata;
-    bool handled = false;
-    
-    // Page Up / Page Down for scrolling
-    if (key == SPECIAL_PAGE_UP) {
-        if (gs->scroll_offset > 0) {
-            gs->scroll_offset -= 5; // Scroll speed
-            if (gs->scroll_offset < 0) gs->scroll_offset = 0;
-            g_needs_redraw = 1;
-        }
-        handled = true;
-    } else if (key == SPECIAL_PAGE_DOWN) {
-        gs->scroll_offset += 5;
-        g_needs_redraw = 1;
-        handled = true;
-    }
-    
-    return handled ? 1 : 0;
-}
-
-void handle_signal(int sig) {
-    (void)sig; // Suppress unused variable warning
-    restore_terminal_state();
-    printf("\nLain-day C version terminated by signal.\n");
-    exit(0);
-}
-
-// --- Event Handling ---
-static bool process_events(GameState* game_state, StoryScene* current_scene) {
-    Event e;
-    bool scene_has_changed = false;
-    while (poll_event(&e)) {
-        if (e.type == TIME_TICK_EVENT) {
-            mika_update_location_by_schedule(game_state);
-            
-            // Check for any auto-triggered events defined in the scene data
-            if (check_and_trigger_auto_events(game_state, current_scene, scene_entry_time)) {
-                scene_has_changed = true;
-            }
-        }
-        if (scene_has_changed) break;
-    }
-    return scene_has_changed;
-}
-
-// --- Main Function ---
 int main(int argc, char *argv[]) {
-    setlocale(LC_ALL, ""); // Set locale for proper multibyte character handling
-    init_terminal_state(); // Capture clean terminal state early!
+    setlocale(LC_ALL, "");
+    init_terminal_state();
+    init_string_table(g_embedded_strings, TEXT_COUNT);
     
     g_argc = argc;
     g_argv = argv;
@@ -111,535 +55,140 @@ int main(int argc, char *argv[]) {
     pthread_mutex_init(&time_mutex, NULL);
     init_event_queue();
 
-    // Register signal handlers
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
-    
-    // Use sigaction for SIGWINCH to ensure SA_RESTART is NOT set,
-    // so that read() is interrupted and we can redraw immediately.
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = handle_sigwinch;
-    sa.sa_flags = 0; // Explicitly NO SA_RESTART
+    sa.sa_flags = 0;
     sigaction(SIGWINCH, &sa, NULL);
 
     printf("Lain-day C version starting...\n");
-    printf("Build Info - OS: %s, Arch: %s\n", BUILD_OS, BUILD_ARCH);
 
-    GamePaths paths;
-    init_paths(argv[0], &paths);
-
-    char character_session_file_path[MAX_PATH_LENGTH] = {0};
-    char session_dir_path[MAX_PATH_LENGTH] = {0};
-    int arg_index = 1;
-    g_arg_index_ptr = &arg_index;
-    bool is_test_mode = false;
-
-    // Allocate and initialize the global game_state pointer
     game_state = malloc(sizeof(GameState));
-    if (game_state == NULL) {
-        fprintf(stderr, "Error: Failed to allocate memory for GameState.\n");
-        return 1;
-    }
+    if (!game_state) return 1;
     memset(game_state, 0, sizeof(GameState));
-    
-    // game_state->session_name is now in game_state
-    game_state->session_name[0] = '\0';
-    
-    // Initialize Doll States (Default)
-    game_state->doll_state_lain_room = DOLL_STATE_NORMAL;
-    game_state->doll_state_mika_room = DOLL_STATE_NORMAL;
+    init_paths(argv[0], &game_state->paths);
 
-    // Copy initialized paths to game_state
-    memcpy(&game_state->paths, &paths, sizeof(GamePaths));
+    // --- 执行开机引导系统 ---
+    char character_file_path[MAX_PATH_LENGTH] = {0};
+    int arg_index = 1;
+    if (!perform_boot_sequence(game_state, argc, argv, &arg_index, character_file_path)) {
+        restore_terminal_state();
+        return 0;
+    }
 
-    // Load string table first as other components depend on it
-    if (!load_string_table()) {
-        fprintf(stderr, "Error: Failed to load the string table.\n");
-        free(game_state);
+    // --- 加载数据 ---
+    if (!load_player_state(character_file_path, game_state)) {
+        fprintf(stderr, "Fatal error loading state.\n");
+        restore_terminal_state();
         return 1;
     }
-    // Copy initialized paths to game_state
-    memcpy(&game_state->paths, &paths, sizeof(GamePaths));
+    load_items_data(game_state);
+    load_map_data(NULL, game_state);
 
-    // Load string table first as other components depend on it
-    if (!load_string_table()) {
-        fprintf(stderr, "Error: Failed to load the string table.\n");
-        free(game_state);
-        return 1;
+    if (game_state->current_story_file[0] == '\0') {
+        strncpy(game_state->current_story_file, "SCENE_00_ENTRY", MAX_PATH_LENGTH - 1);
     }
 
-    while (arg_index < argc && argv[arg_index][0] == '-') {
-        if (strcmp(argv[arg_index], "-d") == 0) {
-            is_test_mode = true;
-            printf("Running in test mode (-d). Temporary session.\n");
-        } else {
-            fprintf(stderr, "Warning: Unknown argument '%s'. Ignoring.\n", argv[arg_index]);
-        }
-        arg_index++;
-    }
-
-    if (!is_test_mode && arg_index >= argc) {
-        enter_fullscreen_mode();
-        ImageBounds bounds = render_image_adaptively(LOGO_DATA, LOGO_WIDTH, LOGO_HEIGHT);
-        if (is_mouse_supported()) {
-            printf("\n\nPress any key or click the image to start...");
-        } else {
-            printf("\n\nPress any key to start...");
-        }
-        fflush(stdout);
-        
-        enable_raw_mode();
-        
-        char c;
-        int state = 0; // 0: start, 1: esc, 2: csi, 3: mouse
-        char mouse_buf[32];
-        int mouse_idx = 0;
-
-        while (1) {
-            if (g_needs_redraw) {
-                g_needs_redraw = 0;
-                clear_screen();
-                bounds = render_image_adaptively(LOGO_DATA, LOGO_WIDTH, LOGO_HEIGHT);
-                if (is_mouse_supported()) {
-                    printf("\n\nPress any key or click the image to start...");
-                } else {
-                    printf("\n\nPress any key to start...");
-                }
-                fflush(stdout);
-            }
-
-            ssize_t n = read(STDIN_FILENO, &c, 1);
-            
-            if (n == -1) {
-                if (errno == EINTR) {
-                    continue; // Loop back to check g_needs_redraw
-                }
-                break; // Real error
-            }
-            if (n == 0) break; // EOF (e.g. pipe closed)
-
-            if (state == 0) {
-                if (c == '\x1b') {
-                    state = 1;
-                } else {
-                    break; // Any regular key
-                }
-            } else if (state == 1) {
-                if (c == '[') {
-                    state = 2;
-                } else {
-                    break; // Alt+Key or other escape sequence
-                }
-            } else if (state == 2) {
-                if (c == '<' && is_mouse_supported()) {
-                    state = 3;
-                    mouse_idx = 0;
-                } else {
-                    break; // Other CSI sequence or mouse disabled
-                }
-            } else if (state == 3) {
-                if (c == 'M' || c == 'm') {
-                    mouse_buf[mouse_idx] = '\0';
-                    int btn, x, y;
-                    if (sscanf(mouse_buf, "%d;%d;%d", &btn, &x, &y) == 3) {
-                        // Check for Left Click (btn 0) Press (M)
-                        if (c == 'M' && btn == 0) {
-                             if (x >= bounds.start_x && x <= bounds.end_x &&
-                                 y >= bounds.start_y && y <= bounds.end_y) {
-                                 break; // Valid click on logo
-                             }
-                        }
-                    }
-                    state = 0; // Reset if invalid click or release
-                } else {
-                    if (mouse_idx < (int)sizeof(mouse_buf) - 1) {
-                        mouse_buf[mouse_idx++] = c;
-                    }
-                }
-            }
-        }
-
-        disable_raw_mode();
-        // Give a tiny moment for any pending input (like mouse release) to arrive before flushing
-        usleep(50000); 
-        flush_input_buffer();
-        clear_screen(); // Clear logo before showing session prompt
-
-        // Switch SIGWINCH to SA_RESTART for the rest of the game.
-        struct sigaction sa_restart;
-        memset(&sa_restart, 0, sizeof(sa_restart));
-        sa_restart.sa_handler = handle_sigwinch;
-        sa_restart.sa_flags = SA_RESTART; 
-        sigaction(SIGWINCH, &sa_restart, NULL);
-
-        // --- Intro Sequence ---
-        // Turn off echo so user can type their name ahead of time, but it won't 
-        // mess up the cinematic with characters like "^[[A".
-        set_terminal_echo(false);
-
-        printf("\r\n\r\n");
-        printf(ANSI_COLOR_CYAN "   CLOSE THE WORLD," ANSI_COLOR_RESET "\r\n");
-        usleep(600000);
-        printf(ANSI_COLOR_MAGENTA "           OPEN THE NExT." ANSI_COLOR_RESET "\r\n");
-        usleep(800000);
-        printf("\r\n");
-        
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_YELLOW " WARN " ANSI_COLOR_BRIGHT_BLACK "]   NO TRUSTED ENVIRONMENT DETECTED." ANSI_COLOR_RESET "\r\n");
-        usleep(400000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_GREEN " OK " ANSI_COLOR_BRIGHT_BLACK "]     SYSTEM INTEGRITY CHECK COMPLETE." ANSI_COLOR_RESET "\r\n");
-        usleep(300000);
-        
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_CYAN " SYSTEM " ANSI_COLOR_BRIGHT_BLACK "] INITIALIZING PROTOCOLS..." ANSI_COLOR_RESET "\r\n");
-        usleep(300000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_CYAN " NET " ANSI_COLOR_BRIGHT_BLACK "]    CONNECTING TO DEFAULT GATEWAY..." ANSI_COLOR_RESET "\r\n");
-        usleep(600000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_RED " ERROR " ANSI_COLOR_BRIGHT_BLACK "]  CONNECTION REFUSED (TIMEOUT)." ANSI_COLOR_RESET "\r\n");
-        usleep(400000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_YELLOW " WARN " ANSI_COLOR_BRIGHT_BLACK "]   REROUTING VIA BACKUP GATEWAY (IPv4)..." ANSI_COLOR_RESET "\r\n");
-        usleep(500000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_CYAN " NET " ANSI_COLOR_BRIGHT_BLACK "]    HANDSHAKE INITIATED..." ANSI_COLOR_RESET "\r\n");
-        usleep(300000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_GREEN " OK " ANSI_COLOR_BRIGHT_BLACK "]     CONNECTION ESTABLISHED." ANSI_COLOR_RESET "\r\n");
-        usleep(300000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_RED " WARN " ANSI_COLOR_BRIGHT_BLACK "]   TARGET_IDENTITY IS NULL (null)." ANSI_COLOR_RESET "\r\n");
-        usleep(400000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_YELLOW " WARN " ANSI_COLOR_BRIGHT_BLACK "]   ATTEMPTING SESSION RECOVERY..." ANSI_COLOR_RESET "\r\n");
-        usleep(600000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_RED " ERROR " ANSI_COLOR_BRIGHT_BLACK "]  NO ARCHIVE HISTORY FOUND." ANSI_COLOR_RESET "\r\n");
-        usleep(400000);
-        printf(ANSI_COLOR_BRIGHT_BLACK "   [" ANSI_COLOR_YELLOW " WARN " ANSI_COLOR_BRIGHT_BLACK "]   INITIALIZING WORKSPACE..." ANSI_COLOR_RESET "\r\n");
-        usleep(300000);
-        printf("\r\n");
-        
-        set_terminal_echo(true); // Turn echo back on for session input
-        // ----------------------
-
-
-    }
-
-    if (is_test_mode) {
-        printf("Test mode enabled. Using default character state without session persistence.\n");
-        snprintf(character_session_file_path, MAX_PATH_LENGTH, "test_char.json"); 
-        if (access(character_session_file_path, F_OK) != -1) {
-             if(remove(character_session_file_path) != 0) {
-                perror("Error deleting existing test_char.json");
-             }
-        }
-        if (!write_string_to_file(CHARACTER_JSON_DATA, character_session_file_path)) {
-            fprintf(stderr, "Error: Failed to write embedded character data to temp file for test mode.\n");
-            return 1;
-        }
-    } else {
-        if (argc > arg_index) {
-            strncpy(game_state->session_name, argv[arg_index], MAX_NAME_LENGTH - 1);
-            game_state->session_name[MAX_NAME_LENGTH - 1] = '\0'; // Ensure null termination
-            if (!is_valid_session_name(game_state->session_name)) {
-                printf("%s: %s\n", get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME), game_state->session_name);
-                return 1; // Exit on invalid argument
-            }
-            printf("Using session name from argument: %s\n", game_state->session_name);
-            arg_index++;
-        } else {
-            int session_error_count = 0;
-            while (game_state->session_name[0] == '\0') {
-                char* line = linenoise(get_string_by_id(TEXT_PROMPT_SESSION_NAME));
-                
-                if (line != NULL) {
-                    strncpy(game_state->session_name, line, MAX_NAME_LENGTH - 1);
-                    game_state->session_name[MAX_NAME_LENGTH - 1] = '\0';
-                    free(line);
-
-                    if (strlen(game_state->session_name) == 0) {
-                        session_error_count++;
-                        if (session_error_count > 1) {
-                            // Move up 2 lines: 1 for the prompt, 1 for the previous error
-                            printf("\033[2A\r\033[K");
-                        } else {
-                            // First error: just move up 1 line to cover the prompt
-                            printf("\033[A\r\033[K");
-                        }
-                        printf(ANSI_COLOR_RED "%s (Errors: %d)" ANSI_COLOR_RESET "\n", 
-                               get_string_by_id(TEXT_ERROR_SESSION_NAME_EMPTY), session_error_count);
-                        printf("\r\033[K"); // Clear the line where the new prompt will appear
-                        fflush(stdout);
-                        continue;
-                    }
-                    if (!is_valid_session_name(game_state->session_name)) {
-                        session_error_count++;
-                        if (session_error_count > 1) {
-                            printf("\033[2A\r\033[K");
-                        } else {
-                            printf("\033[A\r\033[K");
-                        }
-                        printf(ANSI_COLOR_RED "%s (Errors: %d)" ANSI_COLOR_RESET "\n", 
-                               get_string_by_id(TEXT_ERROR_INVALID_SESSION_NAME), session_error_count);
-                        printf("\r\033[K");
-                        fflush(stdout);
-                        game_state->session_name[0] = '\0';
-                        continue;
-                    }
-                } else {
-                    // Real EOF or error (not interrupted by signal anymore due to SA_RESTART)
-                    fprintf(stderr, "Error: Failed to read session name.\n");
-                    return 1;
-                }
-            }
-        }
-        
-            // No need for separate empty check here, handled in loop
-            // if (strlen(game_state->session_name) == 0) {
-            //     fprintf(stderr, "Error: Session name cannot be empty.\n");
-            //     return 1;
-            // }
-        if (!ensure_directory_exists_recursive(paths.session_root_dir, 0755)) {
-            fprintf(stderr, "Error: Failed to create session root directory '%s'. Check permissions or path.\n", paths.session_root_dir);
-            return 1;
-        }
-        snprintf(session_dir_path, MAX_PATH_LENGTH, "%s/%s", paths.session_root_dir, game_state->session_name);
-        if (!ensure_directory_exists_recursive(session_dir_path, 0755)) {
-            fprintf(stderr, "Error: Failed to create session directory '%s'. Check permissions or path.\n", session_dir_path);
-            return 1;
-        }
-        snprintf(character_session_file_path, MAX_PATH_LENGTH, "%s/character.json", session_dir_path);
-        if (access(character_session_file_path, F_OK) == -1) {
-            printf(get_string_by_id(TEXT_SESSION_NEW_MESSAGE), game_state->session_name);
-            if (!write_string_to_file(CHARACTER_JSON_DATA, character_session_file_path)) {
-                fprintf(stderr, "Error: Failed to write session file.\n");
-                return 1;
-            }
-        } else {
-            printf("Resuming session '%s'.\n", game_state->session_name);
-        }
-    }
-
-    if (!load_player_state(character_session_file_path, game_state)) {
-        fprintf(stderr, "Error: Failed to load player state from '%s'.\n", character_session_file_path);
-        return 1;
-    }
-    printf("Player data loaded.\n");
-
-    if (!load_items_data(game_state)) return 1;
-    printf("Items data loaded.\n");
-
-    if (!load_map_data(NULL, game_state)) {
-        fprintf(stderr, "Error: Failed to load map data.\n");
-        return 1;
-    }
-    printf("Map data loaded.\n");
-
-    // Enable raw mode for mouse tracking and scrolling support
+    // --- 进入游戏模式 ---
     enable_raw_mode();
-    // Register key callback for linenoise (scrolling)
     linenoiseSetKeyCallback(handle_key_event, game_state);
-    
-    // Enable native mouse support in linenoise (Mode 2: interrupt input)
-    if (is_mouse_supported()) {
-        linenoiseSetMouseSupport(2);
-    }
+    if (is_mouse_supported()) linenoiseSetMouseSupport(2);
 
     pthread_create(&time_thread_id, NULL, time_thread_func, (void*)game_state);
 
     char input_buffer[MAX_LINE_LENGTH];
     StoryScene current_scene;
     bool dirty = true;
-
-    pthread_mutex_lock(&time_mutex);
-    if (!transition_to_scene(game_state->current_story_file, &current_scene, game_state)) {
-        fprintf(stderr, "Failed to initialize starting scene: %s\n", game_state->current_story_file);
-        pthread_mutex_unlock(&time_mutex);
-        return 1;
-    }
-    scene_entry_time = decode_time_with_ecc(game_state->time_of_day).data;
-    pthread_mutex_unlock(&time_mutex);
+    bool game_is_running = true;
 
     while (game_is_running) {
+        if (dirty) {
+            pthread_mutex_lock(&time_mutex);
+            if (game_state->current_story_file[0] != '\0') {
+                transition_to_scene(game_state->current_story_file, &current_scene, game_state);
+                game_state->current_story_file[0] = '\0';
+            }
+            render_current_scene(&current_scene, game_state);
+            dirty = false;
+            pthread_mutex_unlock(&time_mutex);
+        }
+
         get_next_input(input_buffer, sizeof(input_buffer), argc, argv, &arg_index);
-
+        
         pthread_mutex_lock(&time_mutex);
-
-        if (g_needs_redraw) {
-            dirty = true;
-            g_needs_redraw = 0;
-        }
-
-        if (process_events(game_state, &current_scene)) {
-            dirty = true;
-        }
-
         if (input_buffer[0] != '\0') {
-            if (strcmp(input_buffer, "quit") == 0) {
-                game_is_running = false;
-            } else if (is_numeric(input_buffer)) {
+            if (strcmp(input_buffer, "quit") == 0) game_is_running = false;
+            else if (is_numeric(input_buffer)) {
                 int choice_num = atoi(input_buffer);
                 int visible_choice_count = 0;
-                int target_array_index = -1;
                 for (int i = 0; i < current_scene.choice_count; i++) {
                     if (is_choice_selectable(&current_scene.choices[i], game_state)) {
-                        visible_choice_count++;
-                        if (visible_choice_count == choice_num) {
-                            target_array_index = i;
+                        if (++visible_choice_count == choice_num) {
+                            if (execute_action(current_scene.choices[i].action_id, game_state)) dirty = true;
                             break;
                         }
                     }
                 }
-                if (target_array_index != -1) {
-                    if (execute_action(current_scene.choices[target_array_index].action_id, game_state)) {
-                        dirty = true;
-                    }
-                } else {
-                    printf("Invalid choice.\n");
-                }
             } else {
-                if (execute_command(input_buffer, game_state)) {
-                    dirty = true;
-                }
-            }
-            if (game_is_running) dirty = true;
-        }
-
-        // 1. Handle Window Resizing (SIGWINCH)
-        if (g_needs_redraw) {
-            game_state->last_printed_line_idx = -1; // Force a full rebuild of the virtual screen
-            dirty = true;
-            g_needs_redraw = 0;
-        }
-
-        if (dirty) {
-            if (strcmp(current_scene.scene_id, game_state->current_story_file) != 0) {
-                if (transition_to_scene(game_state->current_story_file, &current_scene, game_state)) {
-                    scene_entry_time = decode_time_with_ecc(game_state->time_of_day).data;
-                    // Reset echo and buffer only on scene transition
-                    set_terminal_echo(true); 
-                    flush_input_buffer(); 
-                } else {
-                    fprintf(stderr, "CRITICAL ERROR: Failed to transition to scene '%s'.\n", game_state->current_story_file);
-                    game_is_running = false;
-                }
-            }
-            if (game_is_running) {
-                render_current_scene(&current_scene, game_state);
-            }
-            dirty = false;
-        }
-
-        // 2. Continuous Input Filtering during Takeover Playback
-        if (current_scene.is_takeover && game_is_running) {
-            uint64_t now = get_current_time_ms();
-            uint64_t elapsed = now - game_state->scene_start_ms;
-            
-            bool dialogue_active = false;
-            for (int i = 0; i < current_scene.dialogue_line_count; i++) {
-                if (current_scene.dialogue_lines[i].delay_ms > elapsed) {
-                    dirty = true;
-                    dialogue_active = true;
-                    break;
-                }
-            }
-            
-            if (dialogue_active) {
-                set_terminal_echo(false);
-                tcflush(STDIN_FILENO, TCIFLUSH); // Aggressively drop input during cinematic
+                if (execute_command(input_buffer, game_state)) dirty = true;
             }
         }
-
+        if (g_needs_redraw) { dirty = true; g_needs_redraw = 0; }
+        if (process_events(game_state, &current_scene)) dirty = true;
         pthread_mutex_unlock(&time_mutex);
-        usleep(50000);
     }
-    
-    pthread_join(time_thread_id, NULL);
-    
-    if (!is_test_mode) {
-        if (!save_game_state(character_session_file_path, game_state)) {
-             fprintf(stderr, "Error saving game state.\n");
-        }
-    }
-    
-    cleanup_game_state(game_state);
-    pthread_mutex_destroy(&time_mutex);
 
+    cleanup_game_state(game_state);
     restore_terminal_state();
     printf("\nLain-day C version exiting.\n");
     return 0;
 }
 
 void get_next_input(char* buffer, int buffer_size, int argc, char* argv[], int* arg_index) {
-    memset(buffer, 0, buffer_size);
-
     if (argc > *arg_index) {
-        strncpy(buffer, argv[*arg_index], buffer_size - 1);
-        (*arg_index)++;
-    } else {
-        char dynamic_prompt[128];
-        snprintf(dynamic_prompt, sizeof(dynamic_prompt), "\x1b[1;32m%s@wired_navi\x1b[0m:\x1b[1;34m~\x1b[0m$ ", 
-                 game_state->session_name[0] ? game_state->session_name : "guest");
-
-        while (1) {
-            errno = 0;
-            char *line = linenoise(dynamic_prompt);
-            
-            // 1. Check if a mouse event occurred during input (Native Support)
+        strncpy(buffer, argv[(*arg_index)++], buffer_size - 1);
+        return;
+    }
+    char prompt[128];
+    snprintf(prompt, sizeof(prompt), "\x1b[1;32m%s@wired_navi\x1b[0m:\x1b[1;34m~\x1b[0m$ ", game_state->session_name);
+    while (1) {
+        char *line = linenoise(prompt);
+        if (line == NULL) { strncpy(buffer, "quit", buffer_size - 1); return; }
+        if (strlen(line) > 0) {
             int mx, my, mbtn, mevt;
             if (is_mouse_supported() && linenoiseGetLastMouse(&mx, &my, &mbtn, &mevt)) {
-                if (mevt == 'M' && mbtn == 0) { // Left-click press
+                if (mevt == 'M' && mbtn == 0) {
                     int click_offset = my - (game_state->choices_start_row + 1);
                     if (click_offset >= 0 && click_offset < (game_state->choice_row_count - 2)) {
-                        if (line) free(line);
                         snprintf(buffer, buffer_size, "%d", click_offset + 1);
-                        return;
+                        free(line); return;
                     }
                 }
-                if (line) free(line);
-                // Clean redraw: Move cursor up 1 line and clear it
-                printf("\033[A\r\033[K");
-                fflush(stdout);
-                continue; 
+                free(line); printf("\033[A\r\033[K"); fflush(stdout); continue;
             }
-
-            // 2. Standard keyboard input handling
-            if (line != NULL) {
-                if (strlen(line) > 0) {
-                    strncpy(buffer, line, buffer_size - 1);
-                    free(line);
-                    return;
-                }
-                free(line);
-                continue;
-            } else {
-                if (errno == EINTR) {
-                    buffer[0] = '\0';
-                    return;
-                } else {
-                    strncpy(buffer, "quit", buffer_size - 1);
-                    return;
-                }
-            }
+            strncpy(buffer, line, buffer_size - 1);
+            free(line); return;
         }
+        free(line);
     }
 }
 
 int is_numeric(const char* str) {
-    if (str == NULL || *str == '\0') {
-        return 0;
-    }
-    for (int i = 0; str[i] != '\0'; i++) {
-        if (!isdigit((unsigned char)str[i])) {
-            return 0;
-        }
-    }
+    if (!str || !*str) return 0;
+    while (*str) { if (!isdigit((unsigned char)*str++)) return 0; }
     return 1;
 }
 
-bool is_valid_session_name(const char* name) {
-    if (name == NULL || *name == '\0') {
-        return false;
+int handle_key_event(int key, void* userdata) {
+    GameState* gs = (GameState*)userdata;
+    if (key == 3000) { // PageUp
+        if (gs->scroll_offset > 0) { gs->scroll_offset--; g_needs_redraw = 1; }
+        return 1;
+    } else if (key == 3001) { // PageDown
+        gs->scroll_offset++; g_needs_redraw = 1;
+        return 1;
     }
-    for (int i = 0; name[i] != '\0'; i++) {
-        unsigned char c = (unsigned char)name[i];
-        // Allow alphanumeric, underscore, hyphen, and UTF-8 multi-byte characters
-        if (!isalnum(c) && c != '_' && c != '-' && c < 128) {
-            return false; // Found an invalid character
-        }
-    }
-    return true; // All characters are valid
+    return 0;
 }
