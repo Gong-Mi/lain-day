@@ -6,6 +6,7 @@
 #include "characters/mika.h" // Needed for CharacterMika and get_mika_module
 #include "map_loader.h" // Needed for get_location_by_id
 #include "time_utils.h" // Added for get_current_time_ms
+#include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -153,22 +154,23 @@ void print_colored_line(SpeakerID speaker_id, StringID text_id, const GameState*
         fflush(stdout);
         usleep((useconds_t)(game_state->typewriter_delay * 1000000));
     }
-    printf("\033[K\r\n"); // Erase to end of line before newline
+    printf("\033[K\n"); // Erase to end of line before newline
 #else
     // Standard instant print
     if (speaker_id == SPEAKER_NONE || speaker_id == SPEAKER_NAVI) {
         _print_formatted_system_line(line_text);
     } else if (speaker_prefix[0] != '\0') {
-        printf("%s%s\033[K\r\n", speaker_prefix, line_text);
+        printf("%s%s\033[K\n", speaker_prefix, line_text);
     } else {
-        printf("%s\033[K\r\n", line_text);
+        printf("%s\033[K\n", line_text);
     }
 #endif
     fflush(stdout);
 }
 
 void clear_screen() {
-    printf("\033[2J\033[H");
+    // \033[H (home) \033[2J (clear screen) \033[3J (clear scrollback)
+    printf("\033[H\033[2J\033[3J");
     fflush(stdout);
 }
 
@@ -189,7 +191,12 @@ void print_game_time(uint32_t time_of_day) {
     int hours = (total_minutes / 60) % 24;
     int minutes = total_minutes % 60;
 
-    printf(ANSI_COLOR_YELLOW "[%02d:%02d]" ANSI_COLOR_RESET "\n", hours, minutes);
+    // --- Time Display with High-Precision Debug Units ---
+    printf(ANSI_COLOR_YELLOW "[%02d:%02d]" ANSI_COLOR_RESET, hours, minutes);
+    
+    // Wrapped in MID_GRAY to keep it subtle but visible
+    printf(ANSI_COLOR_MID_GRAY " [U:%u]" ANSI_COLOR_RESET "\n", raw_units);
+    fflush(stdout);
 }
 
 void print_raw_text(const char* text) {
@@ -226,6 +233,18 @@ static void _render_transient_message(GameState* game_state) {
         memset(game_state->transient_message, 0, MAX_LINE_LENGTH); // Clear message content
         game_state->has_transient_message = false; // Reset flag
     }
+}
+
+void update_time_display_inplace(uint32_t time_of_day) {
+    // 保存当前光标位置
+    printf("\033[s");
+    // 移动到第一行 (时间所在行)
+    move_cursor(1, 1);
+    // 重新打印时间 (覆盖旧的)
+    print_game_time(time_of_day);
+    // 恢复光标位置
+    printf("\033[u");
+    fflush(stdout);
 }
 
 void render_current_scene(const StoryScene* scene, const struct GameState* game_state) {
@@ -311,9 +330,7 @@ void render_current_scene(const StoryScene* scene, const struct GameState* game_
     }
 
     // --- NORMAL MODE: Standard Scrolling ---
-    #ifdef USE_CLEAR_SCREEN
     clear_screen();
-    #endif
     print_game_time(game_state->time_of_day);
     printf("\n========================================\n");
     g_render_line_counter += 2; // \n and separator
@@ -466,10 +483,12 @@ void enable_raw_mode() {
     raw.c_lflag &= ~(ECHO | ICANON);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
     
+    /* 
     if (is_mouse_supported()) {
         printf("\x1b[?1000h\x1b[?1006h"); // Enable mouse tracking
         fflush(stdout);
     }
+    */
 }
 
 void disable_raw_mode() {

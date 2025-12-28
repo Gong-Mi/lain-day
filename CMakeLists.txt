@@ -58,7 +58,7 @@ option(ENABLE_MAP_DEBUG_LOGGING "Enable debug logging for map loading and proces
 # When MASTER_DEBUG_SWITCH is OFF, this option serves as a debugging aid (keeping previous output for inspection).
 # Only effective if MASTER_DEBUG_SWITCH is ON.
 # Default: OFF (keeps previous output, useful for debugging by default).
-option(ENABLE_CLEAR_SCREEN "Enable clearing screen on each scene render" OFF)
+option(ENABLE_CLEAR_SCREEN "Enable clearing screen on each scene render" ON)
 
 # --- Compiler Cache ---
 option(USE_CCACHE "Use ccache to speed up compilation, if available" ON)
@@ -267,6 +267,7 @@ set(GAME_ENGINE_SOURCES
         src/render_utils.c
 
         src/game_paths.c
+        src/logger.c
 
         src/systems/embedded_navi.c
         src/systems/mail_system.c # New: Add mail system source file
@@ -346,6 +347,7 @@ target_compile_definitions(lain_day_c PUBLIC
     $<$<BOOL:${MASTER_DEBUG_SWITCH}>:$<$<BOOL:${ENABLE_DEBUG_LOGGING}>:USE_DEBUG_LOGGING>>
     $<$<BOOL:${MASTER_DEBUG_SWITCH}>:$<$<BOOL:${ENABLE_STRING_DEBUG_LOGGING}>:USE_STRING_DEBUG_LOGGING>>
     $<$<BOOL:${MASTER_DEBUG_SWITCH}>:$<$<BOOL:${ENABLE_MAP_DEBUG_LOGGING}>:USE_MAP_DEBUG_LOGGING>>
+    $<$<BOOL:${ENABLE_CLEAR_SCREEN}>:USE_CLEAR_SCREEN>
     $<$<BOOL:${CHARACTER_ALICE_ALIVE}>:CHARACTER_ALICE_ALIVE>
     $<$<BOOL:${CHARACTER_CHISA_ALIVE}>:CHARACTER_CHISA_ALIVE>
     $<$<BOOL:${CHARACTER_FATHER_ALIVE}>:CHARACTER_FATHER_ALIVE>

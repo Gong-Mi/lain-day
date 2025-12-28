@@ -2,6 +2,7 @@
 #include "string_table.h"
 #include "cJSON.h" // Still needed for other uses potentially, keep for now
 #include "cmap.h" // Include our new CMap header
+#include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -87,9 +88,7 @@ Location* get_location_by_id(const char* location_id) {
 }
 
 int load_map_data(const char* map_dir_path, GameState* game_state) {
-#ifdef USE_MAP_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Entering load_map_data (programmatic) for path: %s\n", map_dir_path); // Path is ignored now
-#endif
+    LOG_MAP_DEBUG("Entering load_map_data (programmatic) for path: %s", map_dir_path); // Path is ignored now
 
     if (game_state == NULL) {
         fprintf(stderr, "ERROR: GameState is NULL in load_map_data.\n");
@@ -103,9 +102,7 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
         return 0;
     }
 
-#ifdef USE_MAP_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: CMap created with size %d.\n", MAX_LOCATIONS);
-#endif
+    LOG_MAP_DEBUG("CMap created with size %d.", MAX_LOCATIONS);
 
     // Load locations programmatically
     if (!load_programmatic_map_data(game_state)) {
@@ -126,21 +123,17 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
             // new_loc should point to the location that was just added starting from prev_location_count
             Location* new_loc = &game_state->all_locations[prev_location_count + i]; 
             cmap_insert(game_state->location_map, new_loc);
-#ifdef USE_MAP_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
-#endif
+            LOG_MAP_DEBUG("Inserted dynamic location '%s' into CMap.", new_loc->id);
         }
         // DEBUG: Verify POI counts for newly added locations
-#ifdef USE_MAP_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: Verifying POIs for dynamically added locations:\n");
+        LOG_MAP_DEBUG("Verifying POIs for dynamically added locations:");
         for (int i = 0; i < rooms_added; ++i) {
             Location* loc = &game_state->all_locations[game_state->location_count - rooms_added + i];
-            fprintf(stderr, "DEBUG:   Location '%s' (pois_count: %d)\n", loc->id, loc->pois_count);
+            LOG_MAP_DEBUG("  Location '%s' (pois_count: %d)", loc->id, loc->pois_count);
             if (loc->pois_count > 0) {
-                fprintf(stderr, "DEBUG:     First POI: '%s' ('%s')\n", loc->pois[0].id, loc->pois[0].name);
+                LOG_MAP_DEBUG("    First POI: '%s' ('%s')", loc->pois[0].id, loc->pois[0].name);
             }
         }
-#endif
     }
 
     // --- Dynamically add Shibuya Street layout ---
@@ -151,9 +144,7 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
         for (int i = 0; i < rooms_added; ++i) {
             Location* new_loc = &game_state->all_locations[prev_location_count + i];
             cmap_insert(game_state->location_map, new_loc);
-#ifdef USE_MAP_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
-#endif
+            LOG_MAP_DEBUG("Inserted dynamic location '%s' into CMap.", new_loc->id);
         }
     }
 
@@ -165,9 +156,7 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
         for (int i = 0; i < rooms_added; ++i) {
             Location* new_loc = &game_state->all_locations[prev_location_count + i];
             cmap_insert(game_state->location_map, new_loc);
-#ifdef USE_MAP_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
-#endif
+            LOG_MAP_DEBUG("Inserted dynamic location '%s' into CMap.", new_loc->id);
         }
         // ... (debug code) ...
     }
@@ -180,9 +169,7 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
         for (int i = 0; i < rooms_added; ++i) {
             Location* new_loc = &game_state->all_locations[prev_location_count + i];
             cmap_insert(game_state->location_map, new_loc);
-#ifdef USE_MAP_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
-#endif
+            LOG_MAP_DEBUG("Inserted dynamic location '%s' into CMap.", new_loc->id);
         }
         // ... (debug code) ...
     }
@@ -195,9 +182,7 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
         for (int i = 0; i < rooms_added; ++i) {
             Location* new_loc = &game_state->all_locations[prev_location_count + i];
             cmap_insert(game_state->location_map, new_loc);
-#ifdef USE_MAP_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Inserted dynamic location '%s' into CMap.\n", new_loc->id);
-#endif
+            LOG_MAP_DEBUG("Inserted dynamic location '%s' into CMap.", new_loc->id);
         }
         // ... (debug code) ...
     }
@@ -247,9 +232,7 @@ int load_map_data(const char* map_dir_path, GameState* game_state) {
     }
 
 
-#ifdef USE_MAP_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Successfully loaded %d locations (programmatic + dynamic) .\n", game_state->location_count);
-#endif
+    LOG_MAP_DEBUG("Successfully loaded %d locations (programmatic + dynamic) .", game_state->location_count);
 
     return 1;
 }

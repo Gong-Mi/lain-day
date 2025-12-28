@@ -8,6 +8,7 @@
 #include <unistd.h> // For realpath, geteuid, getegid
 #include <pwd.h>    // For getpwuid
 #include <grp.h>    // For getgrgid
+#include "logger.h"
 
 void get_base_path(char* exe_path, char* base_path, size_t size) {
     char* exe_dir = dirname(exe_path);
@@ -64,24 +65,26 @@ void init_paths(char* argv0, GamePaths* paths) {
     char current_path[MAX_PATH_LENGTH];
     strncpy(current_path, dirname(resolved_path), MAX_PATH_LENGTH - 1);
 
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Effective User ID (EUID): %d", geteuid());
     struct passwd *pw = getpwuid(geteuid());
-    if (pw) fprintf(stderr, " (%s)", pw->pw_name);
-    fprintf(stderr, "\n");
+    if (pw) {
+        LOG_DEBUG("Effective User ID (EUID): %d (%s)", geteuid(), pw->pw_name);
+    } else {
+        LOG_DEBUG("Effective User ID (EUID): %d", geteuid());
+    }
 
-    fprintf(stderr, "DEBUG: Effective Group ID (EGID): %d", getegid());
     struct group *gr = getgrgid(getegid());
-    if (gr) fprintf(stderr, " (%s)", gr->gr_name);
-    fprintf(stderr, "\n");
+    if (gr) {
+        LOG_DEBUG("Effective Group ID (EGID): %d (%s)", getegid(), gr->gr_name);
+    } else {
+        LOG_DEBUG("Effective Group ID (EGID): %d", getegid());
+    }
 
     struct stat st_base;
     if (stat(current_path, &st_base) == 0) {
-        fprintf(stderr, "DEBUG: Permissions of base path '%s': %o\n", current_path, st_base.st_mode & 0777);
+        LOG_DEBUG("Permissions of base path '%s': %o", current_path, st_base.st_mode & 0777);
     } else {
-        fprintf(stderr, "DEBUG: Could not get permissions for base path '%s': %s\n", current_path, strerror(errno));
+        LOG_DEBUG("Could not get permissions for base path '%s': %s", current_path, strerror(errno));
     }
-#endif
 
 #if defined(USE_DEBUG_LOGGING)
     // In Debug mode, search upwards for a directory containing a ".git" folder

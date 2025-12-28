@@ -37,6 +37,7 @@ void flush_input_buffer();
 void restore_terminal_state();
 
 // Main scene rendering function
+void update_time_display_inplace(uint32_t time_of_day);
 void render_current_scene(const StoryScene* scene, const struct GameState* game_state);
 
 #endif // RENDER_UTILS_H

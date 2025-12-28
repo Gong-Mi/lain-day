@@ -26,16 +26,31 @@ bool is_valid_session_name(const char* name) {
 
 bool perform_boot_sequence(GameState* gs, int argc, char** argv, int* arg_index, char* session_file_path_out) {
     bool is_test_mode = false;
+    bool fast_boot = false;
+    int lang_choice = 2; // Default to Chinese
     int local_idx = *arg_index;
-    int lang_choice = 2; 
 
     while (local_idx < argc) {
         if (strcmp(argv[local_idx], "--test") == 0) {
             is_test_mode = true;
             local_idx++;
+        } else if (strcmp(argv[local_idx], "-d") == 0) {
+            fast_boot = true;
+            local_idx++;
         } else break;
     }
     *arg_index = local_idx;
+
+    // --- Fast Boot Path (Debug) ---
+    if (fast_boot) {
+        strncpy(gs->session_name, "debug_user", MAX_NAME_LENGTH - 1);
+        strcpy(session_file_path_out, "debug_char.json");
+        // Create debug character file if not exists
+        if (access(session_file_path_out, F_OK) == -1) {
+            write_string_to_file(CHARACTER_JSON_DATA, session_file_path_out);
+        }
+        return true; 
+    }
 
     enter_fullscreen_mode();
     if (!is_test_mode && *arg_index >= argc) {

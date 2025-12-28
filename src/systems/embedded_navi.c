@@ -10,6 +10,7 @@
 #include "linenoise.h"
 #include "flag_system.h"
 #include "ansi_colors.h" // Include ANSI color definitions
+#include "logger.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -196,10 +197,7 @@ static void handle_system_info() {
 // --- Main Interface Loop ---
 
 void enter_embedded_navi(GameState* game_state) {
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stdout, "DEBUG: Entering Embedded NAVI interface.\n");
-    fflush(stdout);
-#endif
+    LOG_DEBUG("Entering Embedded NAVI interface.");
     char line[MAX_LINE_LENGTH];
     int running = 1;
 
@@ -216,28 +214,16 @@ void enter_embedded_navi(GameState* game_state) {
 
         // Parse command
         if (strcmp(line, "exit") == 0 || strcmp(line, "0") == 0 || strcmp(line, "quit") == 0) {
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stdout, "DEBUG: NAVI command recognized: %s\n", line);
-            fflush(stdout);
-#endif
+            LOG_DEBUG("NAVI command recognized: %s", line);
             running = 0;
         } else if (strcmp(line, "mail") == 0 || strcmp(line, "1") == 0) {
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stdout, "DEBUG: NAVI command recognized: %s\n", line);
-            fflush(stdout);
-#endif
+            LOG_DEBUG("NAVI command recognized: %s", line);
             handle_mail(game_state);
         } else if (strcmp(line, "net") == 0 || strcmp(line, "2") == 0) {
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stdout, "DEBUG: NAVI command recognized: %s\n", line);
-            fflush(stdout);
-#endif
+            LOG_DEBUG("NAVI command recognized: %s", line);
             handle_network(game_state);
         } else if (strcmp(line, "sys") == 0 || strcmp(line, "3") == 0) {
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stdout, "DEBUG: NAVI command recognized: %s\n", line);
-            fflush(stdout);
-#endif
+            LOG_DEBUG("NAVI command recognized: %s", line);
             handle_system_info();
         } else if (strcmp(line, "mystery") == 0 || strcmp(line, "4") == 0) {
             enter_mystery_app(game_state);
@@ -252,8 +238,5 @@ void enter_embedded_navi(GameState* game_state) {
     printf("%sShutting down interface...\n%s", COLOR_NAVI_SYSTEM, ANSI_COLOR_RESET);
     usleep(300000);
     clear_screen();
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stdout, "DEBUG: Exiting Embedded NAVI interface.\n");
-    fflush(stdout);
-#endif
+    LOG_DEBUG("Exiting Embedded NAVI interface.");
 }

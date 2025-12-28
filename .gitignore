@@ -22,4 +22,4 @@ ecc_challenge
 experiments/ansi_renderer/view_image
 experiments/ansi_renderer/view_image_v2
 experiments/ansi_renderer/image.bin
-experiments/ansi_renderer/image.raw
+experiments/ansi_renderer/image.rawdebug_char.json

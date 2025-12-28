@@ -103,6 +103,11 @@ int load_player_state(const char* path, GameState* game_state) {
     }
 
     cJSON* location = cJSON_GetObjectItemCaseSensitive(root, "location");
+    if (cJSON_IsString(location)) {
+        strncpy(player_state->location, location->valuestring, MAX_NAME_LENGTH - 1);
+    } else {
+        strncpy(player_state->location, "iwakura_upper_hallway", MAX_NAME_LENGTH - 1);
+    }
 
     const cJSON *typewriter_delay_json = cJSON_GetObjectItemCaseSensitive(root, "typewriter_delay");
     if (cJSON_IsNumber(typewriter_delay_json)) {

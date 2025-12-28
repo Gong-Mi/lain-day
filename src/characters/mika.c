@@ -3,6 +3,7 @@
 #include "flag_system.h"
 #include "executor.h"
 #include "ecc_time.h"
+#include "logger.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h> // for rand()
@@ -106,9 +107,7 @@ CharacterMika* get_mika_module() {
 
 void mika_set_sanity(MikaSanityLevel level) {
     g_mika_module.sanity_level = level;
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stderr, "DEBUG: Mika Sanity set to %d\n", level);
-#endif
+    LOG_DEBUG("Mika Sanity set to %d", level);
 }
 
 void mika_move_to(const char* location_id) {
@@ -167,9 +166,7 @@ const char* mika_update_location_by_schedule(struct GameState* game_state) {
     // Update module state
     if (new_loc && (!g_mika_module.current_location_id || strcmp(g_mika_module.current_location_id, new_loc) != 0)) {
         g_mika_module.current_location_id = new_loc;
-#ifdef USE_DEBUG_LOGGING
-        fprintf(stderr, "DEBUG: Mika moved to %s (Sanity: %d)\n", new_loc, g_mika_module.sanity_level);
-#endif
+        LOG_DEBUG("Mika moved to %s (Sanity: %d)", new_loc, g_mika_module.sanity_level);
     }
     return g_mika_module.current_location_id;
 }

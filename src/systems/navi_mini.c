@@ -9,6 +9,7 @@
 #include "flag_system.h"
 #include "ansi_colors.h"
 #include "executor.h"       // Required to call execute_action
+#include "logger.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -85,10 +86,7 @@ static void print_menu() {
 // --- Main Interface Loop ---
 
 void enter_navi_mini(GameState* game_state) {
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stdout, "DEBUG: Entering NAVI mini interface.\n");
-    fflush(stdout);
-#endif
+    LOG_DEBUG("Entering NAVI mini interface.");
     char line[MAX_LINE_LENGTH];
     int running = 1;
 
@@ -124,8 +122,5 @@ void enter_navi_mini(GameState* game_state) {
     printf("%sShutting down interface...\n%s", COLOR_NAVI_SYSTEM, ANSI_COLOR_RESET);
     usleep(300000);
     // Do not clear screen, so the main game can re-render over it.
-#ifdef USE_DEBUG_LOGGING
-    fprintf(stdout, "DEBUG: Exiting NAVI mini interface.\n");
-    fflush(stdout);
-#endif
+    LOG_DEBUG("Exiting NAVI mini interface.");
 }

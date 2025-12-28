@@ -5,6 +5,7 @@
 #include "game_types.h"
 #include "flag_system.h"
 #include "time_utils.h" // Added for get_current_time_ms
+#include "logger.h"
 #include <stdlib.h> // For atoi
 
 // All scene init functions are declared here. They are defined in their respective data.c files.
@@ -107,33 +108,25 @@ static const struct {
 static const int num_scene_registrations = sizeof(scene_registrations) / sizeof(scene_registrations[0]);
 
 bool transition_to_scene(const char* target_story_file, StoryScene* scene, GameState* game_state) {
-#ifdef USE_DEBUG_LOGGING
     const char* scene_id_str = (target_story_file != NULL) ? target_story_file : "NULL";
-    fprintf(stderr, "DEBUG: Attempting to transition to scene: %s\n", scene_id_str);
-    fprintf(stderr, "DEBUG: transition_to_scene: scene ptr: %p\n", (void*)scene);
-#endif
+    LOG_DEBUG("Attempting to transition to scene: %s", scene_id_str);
+    LOG_DEBUG("transition_to_scene: scene ptr: %p", (void*)scene);
 
     if (target_story_file == NULL || scene == NULL) return false;
     
     for (int i = 0; i < num_scene_registrations; ++i) {
         if (strcmp(scene_registrations[i].id, target_story_file) == 0) {
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Scene '%s' found in dispatch table. Initializing...\n", target_story_file);
-#endif
+            LOG_DEBUG("Scene '%s' found in dispatch table. Initializing...", target_story_file);
             scene_registrations[i].func(scene);
             game_state->scene_start_ms = get_current_time_ms(); // Record scene start time
             game_state->last_printed_line_idx = -1; // Reset rendering progress
             game_state->current_dialogue_rows = 0;
-#ifdef USE_DEBUG_LOGGING
-            fprintf(stderr, "DEBUG: Successfully initialized scene '%s'.\n", target_story_file);
-#endif
+            LOG_DEBUG("Successfully initialized scene '%s'.", target_story_file);
             return true;
         }
     }
     
-#ifdef USE_DEBUG_LOGGING
     fprintf(stderr, "ERROR: Scene ID '%s' not found in scene registration table.\n", target_story_file);
-#endif
     return false;
 }
 
