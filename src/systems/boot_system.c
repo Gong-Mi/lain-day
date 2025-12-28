@@ -7,6 +7,7 @@
 #include "linenoise.h"
 #include "data_loader.h"
 #include "game_paths.h"
+#include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -185,13 +186,29 @@ bool perform_boot_sequence(GameState* gs, int argc, char** argv, int* arg_index,
         snprintf(session_dir, MAX_PATH_LENGTH, "%s/%s", gs->paths.session_root_dir, gs->session_name);
         snprintf(session_file_path_out, MAX_PATH_LENGTH, "%s/character.json", session_dir);
         
+        LOG_DEBUG("Target session directory: %s", session_dir);
+        LOG_DEBUG("Target character file: %s", session_file_path_out);
+
         struct stat st = {0};
         if (stat(session_dir, &st) == -1) {
-            mkdir(session_dir, 0700);
-            write_string_to_file(CHARACTER_JSON_DATA, session_file_path_out);
+            LOG_DEBUG("New session detected. Creating workspace...");
+            if (ensure_directory_exists_recursive(session_dir, 0700)) {
+                if (write_string_to_file(CHARACTER_JSON_DATA, session_file_path_out)) {
+                    LOG_DEBUG("Session initialization successful.");
+                } else {
+                    LOG_DEBUG("CRITICAL ERROR: Failed to write initial character data!");
+                    printf(ANSI_COLOR_RED "   Error: Failed to write session data. Check permissions.\n" ANSI_COLOR_RESET);
+                    return false;
+                }
+            } else {
+                LOG_DEBUG("CRITICAL ERROR: Failed to create session directory!");
+                printf(ANSI_COLOR_RED "   Error: Failed to create session directory.\n" ANSI_COLOR_RESET);
+                return false;
+            }
         } else {
             if (lang_choice == 1) printf("%s   Resuming session '%s'...%s\n", ANSI_COLOR_MID_GRAY, gs->session_name, ANSI_COLOR_RESET);
             else printf("%s   正在恢复会话 '%s'...%s\n", ANSI_COLOR_MID_GRAY, gs->session_name, ANSI_COLOR_RESET);
+            LOG_DEBUG("Existing session found. Continuing...");
             usleep(300000);
         }
     }

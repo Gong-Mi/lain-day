@@ -79,8 +79,20 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    load_player_state(character_file_path, game_state);
-    load_items_data(game_state);
+    LOG_DEBUG("Boot sequence complete. Character file path: %s", character_file_path);
+
+    if (!load_player_state(character_file_path, game_state)) {
+        fprintf(stderr, "ERROR: Failed to load player state from %s\n", character_file_path);
+        restore_terminal_state();
+        return 1;
+    }
+    
+    if (!load_items_data(game_state)) {
+        fprintf(stderr, "ERROR: Failed to load items data.\n");
+        restore_terminal_state();
+        return 1;
+    }
+
     load_map_data(NULL, game_state);
 
     if (game_state->current_story_file[0] == '\0') {

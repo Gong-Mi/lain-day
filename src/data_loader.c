@@ -6,6 +6,7 @@
 #include "string_id_names.h"
 #include "string_table.h"
 #include "characters/mika.h"
+#include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +23,7 @@ DataLoaderStatus read_entire_file(const char* path, char** buffer_ptr, long* len
 
     FILE *file = fopen(path, "rb");
     if (file == NULL) {
+        LOG_DEBUG("Failed to open file at path: %s", path);
         return DATA_LOADER_ERROR_FILE_OPEN;
     }
 
@@ -63,6 +65,8 @@ int load_string_table() {
 int load_player_state(const char* path, GameState* game_state) {
     if (game_state == NULL) return 0;
     
+    LOG_DEBUG("Attempting to load player state from: %s", path);
+
     game_state->flags = create_hash_table(128);
     if (game_state->flags == NULL) {
         return 0;
@@ -79,26 +83,44 @@ int load_player_state(const char* path, GameState* game_state) {
         return 0;
     }
 
-    cJSON *root = cJSON_ParseWithLength(json_string, length);
-    free(json_string); 
-
+    cJSON *root = cJSON_Parse(json_string);
+    
     if (root == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            LOG_DEBUG("cJSON Parse Error before: %s", error_ptr);
+        } else {
+            LOG_DEBUG("cJSON Parse Error: Unknown error");
+        }
+        free(json_string);
         return 0;
     }
+    free(json_string); 
+
+    LOG_DEBUG("JSON parsed successfully. Checking items...");
 
     cJSON* credit_level = cJSON_GetObjectItemCaseSensitive(root, "credit_level");
     if (cJSON_IsNumber(credit_level)) {
         player_state->credit_level = credit_level->valueint;
+        LOG_DEBUG("Loaded credit_level: %d", player_state->credit_level);
+    } else {
+        LOG_DEBUG("Failed to load credit_level");
     }
-
+    
+    cJSON *time_json = cJSON_GetObjectItemCaseSensitive(root, "time_of_day");
+    if (cJSON_IsNumber(time_json)) {
+        game_state->time_of_day = (uint32_t)time_json->valuedouble;
+        LOG_DEBUG("Loaded time_of_day: %u", game_state->time_of_day);
+    } else {
+        LOG_DEBUG("Failed to load time_of_day (Using default)");
+        const uint32_t default_start_time_units = (2 * 24 * 60 * 60 * 16) + (20 * 60 * 60 * 16);
+        game_state->time_of_day = encode_time_with_ecc(default_start_time_units);
+    }
     cJSON* persona_perm = cJSON_GetObjectItemCaseSensitive(root, "persona_permissions");
     if (cJSON_IsNumber(persona_perm)) {
         player_state->persona_permissions = (uint8_t)persona_perm->valueint;
     } else {
         // Default: Lain has full control (RWX), Shu is dormant (0)
-        // Or should it be balanced? Let's start with Lain Normal.
-        // Actually, based on prologue, maybe both exist? 
-        // Let's safe default to Lain RWX (7).
         player_state->persona_permissions = 7; 
     }
 
@@ -146,13 +168,13 @@ int load_player_state(const char* path, GameState* game_state) {
     if (cJSON_IsString(story_file)) strncpy(game_state->current_story_file, story_file->valuestring, MAX_PATH_LENGTH - 1);
     else strncpy(game_state->current_story_file, "SCENE_00_ENTRY", MAX_PATH_LENGTH - 1);
 
-    const cJSON *time_json = cJSON_GetObjectItemCaseSensitive(root, "time_of_day");
-    if (cJSON_IsNumber(time_json)) {
-        game_state->time_of_day = (uint32_t)time_json->valuedouble;
-    } else {
-        const uint32_t default_start_time_units = (2 * 24 * 60 * 60 * 16) + (20 * 60 * 60 * 16);
-        game_state->time_of_day = encode_time_with_ecc(default_start_time_units);
-    }
+    // time_of_day is already loaded above for debug logging purposes.
+    // If we need to reload it or if the logic flow requires it here, we can reuse 'time_json' variable if scope allows,
+    // or just rely on the fact it was loaded.
+    // However, looking at my previous edit, I added the loading logic right after credit_level.
+    // So I should remove the DUPLICATE loading block here.
+    
+    // Removing the duplicate block...
 
     const cJSON *doll_lain = cJSON_GetObjectItemCaseSensitive(root, "doll_state_lain_room");
     if (cJSON_IsNumber(doll_lain)) game_state->doll_state_lain_room = (int8_t)doll_lain->valueint;

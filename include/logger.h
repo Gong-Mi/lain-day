@@ -16,19 +16,19 @@ void logger_close();
 // --- Debug Macros ---
 
 #ifdef USE_DEBUG_LOGGING
-    #define LOG_DEBUG(fmt, ...) fprintf(stderr, "DEBUG: " fmt "\n", ##__VA_ARGS__)
+    #define LOG_DEBUG(fmt, ...) { fprintf(stderr, "DEBUG: " fmt "\n", ##__VA_ARGS__); logger_log("DEBUG: " fmt, ##__VA_ARGS__); }
 #else
     #define LOG_DEBUG(fmt, ...)
 #endif
 
 #ifdef USE_STRING_DEBUG_LOGGING
-    #define LOG_STRING_DEBUG(fmt, ...) fprintf(stderr, "DEBUG [STRING]: " fmt "\n", ##__VA_ARGS__)
+    #define LOG_STRING_DEBUG(fmt, ...) { fprintf(stderr, "DEBUG [STRING]: " fmt "\n", ##__VA_ARGS__); logger_log("DEBUG [STRING]: " fmt, ##__VA_ARGS__); }
 #else
     #define LOG_STRING_DEBUG(fmt, ...)
 #endif
 
 #ifdef USE_MAP_DEBUG_LOGGING
-    #define LOG_MAP_DEBUG(fmt, ...) fprintf(stderr, "DEBUG [MAP]: " fmt "\n", ##__VA_ARGS__)
+    #define LOG_MAP_DEBUG(fmt, ...) { fprintf(stderr, "DEBUG [MAP]: " fmt "\n", ##__VA_ARGS__); logger_log("DEBUG [MAP]: " fmt, ##__VA_ARGS__); }
 #else
     #define LOG_MAP_DEBUG(fmt, ...)
 #endif
