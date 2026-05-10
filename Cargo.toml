@@ -1,0 +1,15 @@
+[package]
+name = "lain-day"
+version = "0.2.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+serde_json = "1.0"
+thiserror = "1.0"
+crossterm = "0.28"
+rodio = "0.22.2"
+
+[dev-dependencies]
+pretty_assertions = "1.4"

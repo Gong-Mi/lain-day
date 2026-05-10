@@ -134,6 +134,7 @@ typedef struct {
 typedef struct {
     StringID text_id;
     char action_id[MAX_NAME_LENGTH];
+    char target_scene[MAX_NAME_LENGTH]; // Target scene declared in .ssl (fallback if executor has no special handling)
     Condition conditions[MAX_CONDITIONS_PER_CHOICE];
     int condition_count;
     uint32_t delay_ms; // Added: Delay before the choice becomes visible

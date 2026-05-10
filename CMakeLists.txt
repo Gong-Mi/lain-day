@@ -99,7 +99,7 @@ configure_file(
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -Os")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold") # Disabled: mold not available on Termux
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 
@@ -189,7 +189,7 @@ set(GENERATED_STRINGS_DATA_C "${PROJECT_BINARY_DIR}/src/generated_string_data.c"
 
 add_custom_command(
     OUTPUT ${GENERATED_STRINGS_H} ${GENERATED_STRINGS_NAMES_H} ${GENERATED_STRINGS_NAMES_C} ${GENERATED_STRINGS_DATA_C}
-    COMMAND /data/data/com.termux/files/usr/bin/python3.12 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py 
+    COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/generate_string_ids.py 
         ${GENERATED_STRINGS_H} 
         ${GENERATED_STRINGS_NAMES_H} 
         ${GENERATED_STRINGS_NAMES_C} 
@@ -230,7 +230,7 @@ foreach(ssl_file ${SSL_SOURCE_FILES})
     # Add custom command for each SSL file
     add_custom_command(
         OUTPUT ${GENERATED_SCENE_H} ${GENERATED_SCENE_C}
-        COMMAND /data/data/com.termux/files/usr/bin/python3.12 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/parse_scenes.py
+        COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/cmake/parse_scenes.py
             ${ssl_file}
             ${PROJECT_BINARY_DIR}/include/string_ids.h # Pass string_ids.h for validation
             ${GENERATED_SCENE_H}

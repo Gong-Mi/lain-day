@@ -163,7 +163,8 @@ def parse_and_validate_ssl(ssl_path, generated_c_header_path, generated_c_source
                 delay_ms = int(float(choice.get('delay', 0)) * 1000)
                 
                 # Basic choice initialization
-                f.write("    scene->choices[{}] = (StoryChoice){{ .text_id = {}, .action_id = \"{}\", .condition_count = 0, .delay_ms = {} }};\n".format(i, text_id, action_id, delay_ms))
+                target_scene = choice.get('target_scene', '')
+                f.write("    scene->choices[{}] = (StoryChoice){{ .text_id = {}, .action_id = \"{}\", .target_scene = \"{}\", .condition_count = 0, .delay_ms = {} }};\n".format(i, text_id, action_id, target_scene, delay_ms))
                 
                 # New conditions block
                 if 'conditions' in choice and isinstance(choice['conditions'], list):

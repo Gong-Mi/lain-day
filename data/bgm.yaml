@@ -1,0 +1,32 @@
+# BGM（背景音乐）配置文件
+# 将场景/位置映射到音频文件路径。
+#
+# 安装播放器（任选其一）：
+#   pkg install mpv          # 推荐，支持循环和音量控制
+#   pkg install play-audio   # 轻量，仅顺序播放
+#   pkg install termux-api   # 需配合 Termux:API 应用
+#
+# 音频文件应放在 data/ 目录下（相对路径）或绝对路径。
+
+enabled: true
+
+# 默认曲目（当场景/位置没有特定映射时播放）
+# default_track: bgm/ambient.ogg
+
+# 场景 → 曲目映射
+tracks:
+  SCENE_00_ENTRY: bgm/prologue.ogg
+  SCENE_01_LAIN_ROOM_BROKEN: bgm/lain_room.ogg
+  SCENE_02_DOWNSTAIRS: bgm/house_morning.ogg
+  SCENE_DAD_HUB: bgm/house_morning.ogg
+  SCENE_03_CHAPTER_ONE_INTRO: bgm/street_day.ogg
+  SCENE_06_TRAIN_SCENE: bgm/train_ride.ogg
+  SCENE_07_CLASSROOM: bgm/school.ogg
+  SCENE_09_CYBERIA: bgm/cyberia.ogg
+  SCENE_IWAKURA_LAINS_ROOM: bgm/lain_room.ogg
+
+# 位置 → 曲目映射（优先级低于场景特定映射）
+location_tracks:
+  iwakura_lains_room: bgm/lain_room.ogg
+  iwakura_upper_hallway: bgm/house_morning.ogg
+  iwakura_living_dining_kitchen: bgm/house_morning.ogg

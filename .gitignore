@@ -25,3 +25,7 @@ experiments/ansi_renderer/image.bin
 experiments/ansi_renderer/image.rawdebug_char.json
 include/logo_raw_data.h
 game_debug.log
+
+# Rust build artifacts
+target/
+
