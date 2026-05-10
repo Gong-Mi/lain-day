@@ -8,7 +8,7 @@ use std::collections::HashMap;
 use crate::characters::mika::MikaModule;
 
 /// 人格权限位掩码（RWX 模型）
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
 pub struct PersonaPermissions(pub u8);
 
 impl PersonaPermissions {
@@ -31,7 +31,7 @@ impl PersonaPermissions {
 }
 
 /// 玩家状态
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
 pub struct PlayerState {
     pub location: String,
     pub credit_level: i32,
@@ -41,7 +41,7 @@ pub struct PlayerState {
 }
 
 /// 游戏主状态 —— 可以被 Clone 用于测试快照
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct GameState {
     pub player: PlayerState,
     pub current_scene: String,
@@ -53,6 +53,8 @@ pub struct GameState {
     pub mika_sanity: i32,
     pub session_name: String,
     pub mika: MikaModule,
+    /// 进入当前场景时的 ECC 时间（用于 AutoEvent 计算）
+    pub scene_entry_time: u32,
 }
 
 impl Default for GameState {
@@ -68,6 +70,7 @@ impl Default for GameState {
             mika_sanity: 0,
             session_name: "default".to_string(),
             mika: MikaModule::new(),
+            scene_entry_time: crate::engine::time::encode(8 * 3600 * 16),
         }
     }
 }

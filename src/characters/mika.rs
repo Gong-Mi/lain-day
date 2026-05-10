@@ -6,7 +6,8 @@ use crate::engine::state::GameState;
 use crate::engine::time;
 
 /// 理智度级别
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum MikaSanity {
     Normal = 0,
     Irritated = 1,
@@ -42,7 +43,7 @@ const PARANOID_SCHEDULE: &[ScheduleEntry] = &[
 ];
 
 /// Mika 模块
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct MikaModule {
     pub current_location_id: String,
     pub is_manually_positioned: bool,

@@ -139,11 +139,34 @@ pub fn resolve_action(action_id: &str, state: &GameState, current_scene: &Scene)
 
     if let Some((scene, flag)) = standard {
         let mut cmds = vec![];
+
+        // 同步更新玩家位置（MoveTo）
+        if let Some(loc) = action_target_location(action_id) {
+            cmds.push(MoveTo(loc));
+        }
+
         if let Some((k, v)) = flag {
             cmds.push(SetFlag { key: k.into(), value: v.into() });
         }
         cmds.push(TransitionTo(scene.into()));
         return cmds;
+    }
+
+    // --- 辅助：动作对应的目标地点 ---
+    fn action_target_location(action_id: &str) -> Option<String> {
+        match action_id {
+            "downstairs" | "living_area" | "prologue_go_downstairs" => {
+                Some("iwakura_living_dining_kitchen".into())
+            }
+            "upstairs" | "upper_hallway" => Some("iwakura_upper_hallway".into()),
+            "lains_room" => Some("iwakura_lains_room".into()),
+            "hallway" | "house" => Some("iwakura_lower_hallway".into()),
+            "outside" => Some("iwakura_front_yard".into()),
+            "enter_mika_room" => Some("iwakura_mikas_room".into()),
+            "bathroom" => Some("iwakura_bathroom".into()),
+            "study" => Some("iwakura_study".into()),
+            _ => None,
+        }
     }
 
     // --- Fallback：检查当前场景的选项声明的 target_scene ---

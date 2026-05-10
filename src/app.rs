@@ -13,6 +13,7 @@ use crossterm::event::{KeyCode, KeyEvent};
 
 use crate::assets::Assets;
 use crate::bgm::BgmManager;
+use crate::engine::commands::{self};
 use crate::engine::state::GameState;
 use crate::engine::time;
 use crate::narrative::command::{apply_commands, Command};
@@ -31,6 +32,12 @@ pub struct App {
     running: bool,
     #[allow(dead_code)]
     bgm_manager: BgmManager,
+    /// 命令输入模式
+    command_mode: bool,
+    /// 命令输入缓冲区
+    command_buffer: String,
+    /// 命令执行结果（等待显示）
+    command_result: Option<Vec<String>>,
 }
 
 impl App {
@@ -57,6 +64,9 @@ impl App {
             scene_start: Instant::now(),
             running: true,
             bgm_manager,
+            command_mode: false,
+            command_buffer: String::new(),
+            command_result: None,
         })
     }
 
@@ -78,18 +88,38 @@ impl App {
                 }
             };
 
+            // 检查自动事件
+            if let Some(target) = check_auto_events(&mut self.state, &scene) {
+                self.state.current_scene = target;
+                self.scene_start = Instant::now();
+                self.state.scene_entry_time = self.state.time_of_day;
+                let _ = self.bgm_manager.on_scene_changed(&self.state.current_scene);
+                continue;
+            }
+
             let elapsed = self.scene_start.elapsed().as_millis() as u64;
 
             // 渲染
             self.renderer
                 .render_scene(&scene, &self.assets, &self.state, elapsed)?;
 
+            // 显示命令执行结果
+            if let Some(lines) = self.command_result.take() {
+                self.show_command_result(&lines)?;
+                continue;
+            }
+
+            // 命令模式下在底部显示命令行
+            if self.command_mode {
+                self.render_command_line()?;
+            }
+
             // 处理输入
             if crossterm::event::poll(Duration::from_millis(16))? {
                 match crossterm::event::read()? {
                     crossterm::event::Event::Key(key) => {
                         // Takeover 模式下，如果对话还没放完，抑制输入
-                        if scene.is_takeover {
+                        if scene.is_takeover && !self.command_mode {
                             let all_lines_done = scene
                                 .dialogue
                                 .iter()
@@ -104,7 +134,9 @@ impl App {
                         self.handle_input(key, &scene)?;
                     }
                     crossterm::event::Event::Mouse(mouse) => {
-                        self.handle_mouse(mouse, &scene, elapsed)?;
+                        if !self.command_mode {
+                            self.handle_mouse(mouse, &scene, elapsed)?;
+                        }
                     }
                     _ => {}
                 }
@@ -118,9 +150,36 @@ impl App {
     }
 
     fn handle_input(&mut self, key: KeyEvent, scene: &crate::narrative::scene::Scene) -> io::Result<()> {
+        if self.command_mode {
+            match key.code {
+                KeyCode::Esc => {
+                    self.command_mode = false;
+                    self.command_buffer.clear();
+                }
+                KeyCode::Enter => {
+                    let input = self.command_buffer.clone();
+                    self.command_buffer.clear();
+                    self.command_mode = false;
+                    self.execute_command(&input, scene)?;
+                }
+                KeyCode::Backspace => {
+                    self.command_buffer.pop();
+                }
+                KeyCode::Char(c) => {
+                    self.command_buffer.push(c);
+                }
+                _ => {}
+            }
+            return Ok(());
+        }
+
         match key.code {
             KeyCode::Char('q') | KeyCode::Char('Q') => {
                 self.running = false;
+            }
+            KeyCode::Char('/') | KeyCode::Char(':') => {
+                self.command_mode = true;
+                self.command_buffer.clear();
             }
             KeyCode::Char(c) if c.is_ascii_digit() => {
                 let num = c.to_digit(10).unwrap() as usize;
@@ -189,6 +248,7 @@ impl App {
             // 场景切换时重置计时并切换 BGM
             if cmds.iter().any(|c| matches!(c, Command::TransitionTo(_))) {
                 self.scene_start = Instant::now();
+                self.state.scene_entry_time = self.state.time_of_day;
                 let _ = self.bgm_manager.on_scene_changed(&self.state.current_scene);
             }
 
@@ -202,6 +262,7 @@ impl App {
                             navi_mini::NaviResult::ReturnTo(scene) => {
                                 self.state.current_scene = scene;
                                 self.scene_start = Instant::now();
+                                self.state.scene_entry_time = self.state.time_of_day;
                             }
                             navi_mini::NaviResult::OpenBrowser => {
                                 crate::systems::browser::run_browser(&self.assets)?;
@@ -233,6 +294,109 @@ impl App {
                     _ => {}
                 }
             }
+        }
+
+        Ok(())
+    }
+
+    /// 在屏幕底部渲染命令输入行
+    fn render_command_line(&self) -> io::Result<()> {
+        use crossterm::cursor::MoveTo;
+        use crossterm::ExecutableCommand;
+        let (_, h) = self.renderer.term_size;
+        let row = h.saturating_sub(1);
+        let mut stdout = io::stdout();
+        stdout.execute(MoveTo(0, row))?;
+        print!("\x1b[7m> {}\x1b[0m", self.command_buffer);
+        stdout.flush()?;
+        Ok(())
+    }
+
+    /// 显示命令执行结果，等待按键继续
+    fn show_command_result(&mut self, lines: &[String]) -> io::Result<()> {
+        self.renderer.clear()?;
+        let mut stdout = io::stdout();
+        for line in lines {
+            println!("{}", line);
+        }
+        println!("\n[按任意键继续]");
+        stdout.flush()?;
+
+        // 等待任意键
+        loop {
+            if let crossterm::event::Event::Key(_) = crossterm::event::read()? {
+                break;
+            }
+        }
+        Ok(())
+    }
+
+    /// 执行自由文本命令
+    fn execute_command(&mut self, input: &str, scene: &crate::narrative::scene::Scene) -> io::Result<()> {
+        let parsed = commands::parse(input);
+        let output = commands::execute(&parsed, &mut self.state, &self.assets, scene);
+
+        // 应用命令输出中的 Command
+        if !output.commands.is_empty() {
+            apply_commands(&output.commands, &mut self.state);
+
+            // 同步 renderer
+            self.renderer.typewriter_delay =
+                Duration::from_secs_f32(self.state.typewriter_delay);
+
+            // 场景切换处理
+            if output.commands.iter().any(|c| matches!(c, Command::TransitionTo(_))) {
+                self.scene_start = Instant::now();
+                self.state.scene_entry_time = self.state.time_of_day;
+                let _ = self.bgm_manager.on_scene_changed(&self.state.current_scene);
+            }
+
+            // 子系统命令处理（复用 handle_choice 中的逻辑）
+            for cmd in &output.commands {
+                match cmd {
+                    Command::EnterNaviMini => {
+                        let result = navi_mini::run_navi_mini(&self.assets, &mut self.state)?;
+                        navi_mini::exit_navi()?;
+                        match result {
+                            navi_mini::NaviResult::ReturnTo(scene) => {
+                                self.state.current_scene = scene;
+                                self.scene_start = Instant::now();
+                                self.state.scene_entry_time = self.state.time_of_day;
+                            }
+                            navi_mini::NaviResult::OpenBrowser => {
+                                crate::systems::browser::run_browser(&self.assets)?;
+                                self.renderer.clear()?;
+                            }
+                            navi_mini::NaviResult::ViewFiles => {
+                                crate::systems::file_manager::run_file_manager(&self.assets)?;
+                                self.renderer.clear()?;
+                            }
+                            navi_mini::NaviResult::NoOp => {}
+                        }
+                    }
+                    Command::EnterTrain => {
+                        crate::systems::train::run_ticket_machine()?;
+                        self.renderer.clear()?;
+                    }
+                    Command::EnterMystery => {
+                        let _solved = crate::systems::mystery::run_mystery_app()?;
+                        self.renderer.clear()?;
+                    }
+                    Command::EnterMail => {
+                        let maildir = std::path::PathBuf::from("data/mail");
+                        let mut mailbox = crate::systems::mail::Mailbox::new();
+                        let _ = mailbox.load_from_dir(&maildir);
+                        crate::systems::mail::run_mail_app(&mut mailbox, &maildir)?;
+                        self.renderer.clear()?;
+                    }
+                    _ => {}
+                }
+            }
+        }
+
+        // 显示结果
+        if !output.lines.is_empty() {
+            self.command_result = Some(output.lines.clone());
         }
 
         Ok(())
@@ -280,16 +444,237 @@ impl App {
     }
 
     fn init_map(&mut self) {
-        let upper = Location {
+        use crate::world::location::Poi;
+
+        // 辅助函数：从字符串表获取文本，fallback 到硬编码
+        let s = |id: &str, _fallback: &str| -> String {
+            self.assets.get_string(id).to_string()
+        };
+
+        // --- 1. 前院 ---
+        let front_yard = Location {
+            id: "iwakura_front_yard".into(),
+            name: s("MAP_LOCATION_FRONT_YARD_NAME", "前院"),
+            description: s("MAP_LOCATION_FRONT_YARD_DESC", "岩仓家的前院。"),
+            pois: vec![
+                Poi {
+                    id: "mailbox".into(),
+                    name: s("MAP_POI_FRONT_YARD_MAILBOX_NAME", "邮箱"),
+                    description: s("MAP_POI_FRONT_YARD_MAILBOX_DESC", "一个老旧的邮箱。"),
+                    examine_action_id: None,
+                    view_scene_id: Some("SCENE_EXAMINE_MAILBOX".into()),
+                },
+                Poi {
+                    id: "doorbell".into(),
+                    name: s("MAP_POI_FRONT_YARD_DOORBELL_NAME", "门铃"),
+                    description: s("MAP_POI_FRONT_YARD_DOORBELL_DESC", "门铃按钮。"),
+                    examine_action_id: None,
+                    view_scene_id: Some("SCENE_EXAMINE_DOORBELL".into()),
+                },
+            ],
+            connections: vec![
+                Connection {
+                    action_id: "house".into(),
+                    target_location_id: "iwakura_lower_hallway".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_LOWER_HALLWAY".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+                Connection {
+                    action_id: "street".into(),
+                    target_location_id: "miyanosaka_street".into(),
+                    target_scene_id: None,
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+            ],
+        };
+
+        // --- 2. 下走廊 ---
+        let lower_hallway = Location {
+            id: "iwakura_lower_hallway".into(),
+            name: s("MAP_LOCATION_LOWER_HALLWAY_NAME", "下走廊"),
+            description: s("MAP_LOCATION_LOWER_HALLWAY_DESC", "一楼的走廊。"),
+            pois: vec![
+                Poi {
+                    id: "shoe_rack".into(),
+                    name: s("MAP_POI_LOWER_HALLWAY_SHOE_RACK_NAME", "鞋架"),
+                    description: s("MAP_POI_LOWER_HALLWAY_SHOE_RACK_DESC", "放满了家人的鞋子。"),
+                    examine_action_id: None,
+                    view_scene_id: Some("SCENE_EXAMINE_SHOE_RACK".into()),
+                },
+                Poi {
+                    id: "telephone".into(),
+                    name: s("MAP_POI_LOWER_HALLWAY_TELEPHONE_NAME", "电话"),
+                    description: s("MAP_POI_LOWER_HALLWAY_TELEPHONE_DESC", "一台老式电话。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "umbrella_stand".into(),
+                    name: s("MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_NAME", "伞架"),
+                    description: s("MAP_POI_LOWER_HALLWAY_UMBRELLA_STAND_DESC", "几把折叠伞。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+            ],
+            connections: vec![
+                Connection {
+                    action_id: "outside".into(),
+                    target_location_id: "iwakura_front_yard".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_FRONT_YARD".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+                Connection {
+                    action_id: "living_area".into(),
+                    target_location_id: "iwakura_living_dining_kitchen".into(),
+                    target_scene_id: Some("SCENE_02_DOWNSTAIRS".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+                Connection {
+                    action_id: "bathroom".into(),
+                    target_location_id: "iwakura_bathroom".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_BATHROOM".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+                Connection {
+                    action_id: "upstairs".into(),
+                    target_location_id: "iwakura_upper_hallway".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_UPPER_HALLWAY".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+                Connection {
+                    action_id: "study".into(),
+                    target_location_id: "iwakura_study".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_STUDY".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+            ],
+        };
+
+        // --- 3. 客厅-餐厅-厨房 ---
+        let living_dining_kitchen = Location {
+            id: "iwakura_living_dining_kitchen".into(),
+            name: s("MAP_LOCATION_LIVING_DINING_KITCHEN_NAME", "客厅/厨房"),
+            description: s("MAP_LOCATION_LIVING_DINING_KITCHEN_DESC", "客厅连接着开放式厨房。"),
+            pois: vec![
+                Poi {
+                    id: "sofa".into(),
+                    name: s("MAP_POI_LIVING_DINING_KITCHEN_SOFA_NAME", "沙发"),
+                    description: s("MAP_POI_LIVING_DINING_KITCHEN_SOFA_DESC", "一张旧沙发。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "tv".into(),
+                    name: s("MAP_POI_LIVING_DINING_KITCHEN_TV_NAME", "电视"),
+                    description: s("MAP_POI_LIVING_DINING_KITCHEN_TV_DESC", "老式显像管电视。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "dining_table".into(),
+                    name: s("MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_NAME", "餐桌"),
+                    description: s("MAP_POI_LIVING_DINING_KITCHEN_DINING_TABLE_DESC", "四人座餐桌。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "refrigerator".into(),
+                    name: s("MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_NAME", "冰箱"),
+                    description: s("MAP_POI_LIVING_DINING_KITCHEN_REFRIGERATOR_DESC", "双门冰箱。"),
+                    examine_action_id: None,
+                    view_scene_id: Some("SCENE_EXAMINE_FRIDGE".into()),
+                },
+                Poi {
+                    id: "dad".into(),
+                    name: s("MAP_POI_LIVING_DINING_KITCHEN_DAD_NAME", "爸爸"),
+                    description: s("MAP_POI_LIVING_DINING_KITCHEN_DAD_DESC", "爸爸坐在沙发上。"),
+                    examine_action_id: Some("talk_to_dad".into()),
+                    view_scene_id: None,
+                },
+            ],
+            connections: vec![
+                Connection {
+                    action_id: "hallway".into(),
+                    target_location_id: "iwakura_lower_hallway".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_LOWER_HALLWAY".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+            ],
+        };
+
+        // --- 4. 浴室 ---
+        let bathroom = Location {
+            id: "iwakura_bathroom".into(),
+            name: s("MAP_LOCATION_BATHROOM_NAME", "浴室"),
+            description: s("MAP_LOCATION_BATHROOM_DESC", "家里有浴缸的浴室。"),
+            pois: vec![
+                Poi {
+                    id: "sink".into(),
+                    name: s("MAP_POI_BATHROOM_SINK_NAME", "洗手池"),
+                    description: s("MAP_POI_BATHROOM_SINK_DESC", "白色陶瓷洗手池。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "bathtub".into(),
+                    name: s("MAP_POI_BATHROOM_BATHTUB_NAME", "浴缸"),
+                    description: s("MAP_POI_BATHROOM_BATHTUB_DESC", "一个旧浴缸。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "mirror".into(),
+                    name: s("MAP_POI_BATHROOM_MIRROR_NAME", "镜子"),
+                    description: s("MAP_POI_BATHROOM_MIRROR_DESC", "镜子上有水渍。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "shower".into(),
+                    name: s("MAP_POI_BATHROOM_SHOWER_NAME", "淋浴"),
+                    description: s("MAP_POI_BATHROOM_SHOWER_DESC", "淋浴喷头。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+            ],
+            connections: vec![
+                Connection {
+                    action_id: "hallway".into(),
+                    target_location_id: "iwakura_lower_hallway".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_LOWER_HALLWAY".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+            ],
+        };
+
+        // --- 5. 上走廊 ---
+        let upper_hallway = Location {
             id: "iwakura_upper_hallway".into(),
-            name: "上走廊".into(),
-            description: "二楼的走廊，尽头是lain的房间。".into(),
-            pois: vec![],
+            name: s("MAP_LOCATION_UPPER_HALLWAY_NAME", "上走廊"),
+            description: s("MAP_LOCATION_UPPER_HALLWAY_DESC", "二楼的走廊，尽头是lain的房间。"),
+            pois: vec![
+                Poi {
+                    id: "painting".into(),
+                    name: s("MAP_POI_UPPER_HALLWAY_PAINTING_NAME", "油画"),
+                    description: s("MAP_POI_UPPER_HALLWAY_PAINTING_DESC", "一幅看不懂的抽象画。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+            ],
             connections: vec![
                 Connection {
                     action_id: "downstairs".into(),
-                    target_location_id: "iwakura_living_dining_kitchen".into(),
-                    target_scene_id: Some("SCENE_02_DOWNSTAIRS".into()),
+                    target_location_id: "iwakura_lower_hallway".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_LOWER_HALLWAY".into()),
                     requires_flag: None,
                     denied_scene_id: None,
                 },
@@ -300,30 +685,65 @@ impl App {
                     requires_flag: None,
                     denied_scene_id: None,
                 },
-            ],
-        };
-
-        let lower = Location {
-            id: "iwakura_living_dining_kitchen".into(),
-            name: "客厅/厨房".into(),
-            description: "客厅连接着开放式厨房。".into(),
-            pois: vec![],
-            connections: vec![
                 Connection {
-                    action_id: "upstairs".into(),
-                    target_location_id: "iwakura_upper_hallway".into(),
-                    target_scene_id: Some("SCENE_IWAKURA_UPPER_HALLWAY".into()),
+                    action_id: "enter_mika_room".into(),
+                    target_location_id: "iwakura_mikas_room".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_MIKAS_ROOM".into()),
                     requires_flag: None,
-                    denied_scene_id: None,
+                    denied_scene_id: Some("SCENE_MIKA_ROOM_LOCKED".into()),
                 },
             ],
         };
 
+        // --- 6. Lain 的房间 ---
         let lain_room = Location {
             id: "iwakura_lains_room".into(),
-            name: "lain的房间".into(),
-            description: "房间里很暗，只有Navi屏幕的微光。".into(),
-            pois: vec![],
+            name: s("MAP_LOCATION_LAINS_ROOM_NAME_IWAKURA", "lain的房间"),
+            description: s("MAP_LOCATION_LAINS_ROOM_DESC_IWAKURA", "房间里很暗，只有Navi屏幕的微光。"),
+            pois: vec![
+                Poi {
+                    id: "navi_computer".into(),
+                    name: s("MAP_POI_LAINS_ROOM_NAVI_COMPUTER_NAME", "Navi"),
+                    description: s("MAP_POI_LAINS_ROOM_NAVI_COMPUTER_DESC", "Lain 的个人电脑。"),
+                    examine_action_id: Some("use_phone_navi".into()),
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "navi_mini".into(),
+                    name: s("MAP_POI_LAIN_ROOM_PC_NAME", "Navi Mini"),
+                    description: s("MAP_POI_LAIN_ROOM_PC_DESC", "桌面电脑。"),
+                    examine_action_id: Some("use_desktop_navi".into()),
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "bed".into(),
+                    name: s("MAP_POI_LAINS_ROOM_BED_NAME_IWAKURA", "床"),
+                    description: s("MAP_POI_LAINS_ROOM_BED_DESC_IWAKURA", "单人床，被子凌乱。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "window".into(),
+                    name: s("MAP_POI_LAINS_ROOM_WINDOW_NAME", "窗户"),
+                    description: s("MAP_POI_LAINS_ROOM_WINDOW_DESC", "窗外是夜空。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "toy_dog".into(),
+                    name: s("MAP_POI_LAINS_ROOM_TOY_DOG_NAME", "玩具狗"),
+                    description: s("MAP_POI_LAINS_ROOM_TOY_DOG_DESC", "一只毛绒玩具狗。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "bookshelf".into(),
+                    name: s("MAP_POI_LAINS_ROOM_BOOKSHELF_NAME_IWAKURA", "书架"),
+                    description: s("MAP_POI_LAINS_ROOM_BOOKSHELF_DESC_IWAKURA", "塞满了电脑杂志。"),
+                    examine_action_id: Some("examine_bookshelf".into()),
+                    view_scene_id: None,
+                },
+            ],
             connections: vec![
                 Connection {
                     action_id: "upper_hallway".into(),
@@ -335,19 +755,130 @@ impl App {
             ],
         };
 
-        self.assets.locations.insert(upper.id.clone(), upper);
-        self.assets.locations.insert(lower.id.clone(), lower);
-        self.assets.locations.insert(lain_room.id.clone(), lain_room);
+        // --- 7. 美香的房间 ---
+        let mikas_room = Location {
+            id: "iwakura_mikas_room".into(),
+            name: s("MAP_LOCATION_MIKAS_ROOM_NAME", "美香的房间"),
+            description: s("MAP_LOCATION_MIKAS_ROOM_DESC", "姐姐美香的房间。"),
+            pois: vec![
+                Poi {
+                    id: "desk".into(),
+                    name: s("MAP_POI_MIKAS_ROOM_DESK_NAME", "书桌"),
+                    description: s("MAP_POI_MIKAS_ROOM_DESK_DESC", "书桌上放着化妆品。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "wardrobe".into(),
+                    name: s("MAP_POI_MIKAS_ROOM_WARDROBE_NAME", "衣柜"),
+                    description: s("MAP_POI_MIKAS_ROOM_WARDROBE_DESC", "姐姐的衣柜。"),
+                    examine_action_id: Some("examine_mika_wardrobe".into()),
+                    view_scene_id: None,
+                },
+            ],
+            connections: vec![
+                Connection {
+                    action_id: "upper_hallway".into(),
+                    target_location_id: "iwakura_upper_hallway".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_UPPER_HALLWAY".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+            ],
+        };
+
+        // --- 8. 书房 ---
+        let study = Location {
+            id: "iwakura_study".into(),
+            name: s("MAP_LOCATION_STUDY_NAME", "书房"),
+            description: s("MAP_LOCATION_STUDY_DESC", "爸爸的书房。"),
+            pois: vec![
+                Poi {
+                    id: "bookshelf".into(),
+                    name: s("MAP_POI_STUDY_BOOKSHELF_NAME", "书架"),
+                    description: s("MAP_POI_STUDY_BOOKSHELF_DESC", "专业书籍。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+                Poi {
+                    id: "desk".into(),
+                    name: s("MAP_POI_STUDY_DESK_NAME", "书桌"),
+                    description: s("MAP_POI_STUDY_DESK_DESC", "爸爸的工作台。"),
+                    examine_action_id: None,
+                    view_scene_id: None,
+                },
+            ],
+            connections: vec![
+                Connection {
+                    action_id: "hallway".into(),
+                    target_location_id: "iwakura_lower_hallway".into(),
+                    target_scene_id: Some("SCENE_IWAKURA_LOWER_HALLWAY".into()),
+                    requires_flag: None,
+                    denied_scene_id: None,
+                },
+            ],
+        };
+
+        // 插入所有地点
+        for loc in [front_yard, lower_hallway, living_dining_kitchen, bathroom, upper_hallway, lain_room, mikas_room, study] {
+            self.assets.locations.insert(loc.id.clone(), loc);
+        }
     }
 }
 
 // =============================================================================
-// 集成测试
+// 自动事件检查
 // =============================================================================
-#[cfg(test)]
+/// 检查自动事件
+///
+/// 基于进入场景后的经过秒数，自动触发场景跳转。
+/// 防止循环：如果 auto_event 设置了 flag，且该 flag 已为 "1"，则跳过。
+fn check_auto_events(
+    gs: &mut GameState,
+    scene: &crate::narrative::scene::Scene,
+) -> Option<String> {
+    use crate::engine::time;
+    use crate::narrative::conditions::check_all;
+
+    let decoded_current = time::decode(gs.time_of_day);
+    let decoded_entry = time::decode(gs.scene_entry_time);
+    let elapsed = if decoded_current.data >= decoded_entry.data {
+        decoded_current.data - decoded_entry.data
+    } else {
+        0
+    };
+    let elapsed_seconds = elapsed / 16;
+
+    for event in &scene.auto_events {
+        // 防止循环
+        if let Some(ref flag) = event.flag_set {
+            if gs.get_flag(flag) == Some("1") {
+                continue;
+            }
+        }
+
+        if (elapsed_seconds as u64) < event.wait_time {
+            continue;
+        }
+
+        if check_all(&event.conditions, gs) {
+            if let Some(ref flag) = event.flag_set {
+                gs.set_flag(flag, "1");
+            }
+            return Some(event.target_scene.clone());
+        }
+    }
+
+    None
+}
+
 mod tests {
     use super::*;
     use crate::narrative::command::Command;
+    use std::path::PathBuf;
+
+    
+    
 
     #[test]
     fn test_app_new_loads_data() {

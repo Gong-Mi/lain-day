@@ -2,6 +2,8 @@
 //!
 //! 使用 crossterm 实现跨平台终端控制。
 
+pub mod image;
+
 use std::io::{self, stdout, Write};
 use std::thread;
 use std::time::Duration;
@@ -40,6 +42,10 @@ pub struct Renderer {
     pub term_size: (u16, u16),
     /// 当前帧选项的屏幕位置（用于鼠标点击）
     pub choice_positions: Vec<ChoicePosition>,
+    /// Takeover 模式下对话区占用的行数（含时间行）
+    pub current_dialogue_rows: u16,
+    /// Takeover 模式是否已完全同步（所有行+选项已渲染完毕）
+    pub takeover_synced: bool,
 }
 
 impl Default for Renderer {
@@ -52,6 +58,8 @@ impl Default for Renderer {
             printed_lines: 0,
             term_size: terminal::size().unwrap_or((80, 24)),
             choice_positions: vec![],
+            current_dialogue_rows: 0,
+            takeover_synced: false,
         }
     }
 }
@@ -95,6 +103,14 @@ impl Renderer {
         Ok(())
     }
 
+    /// 清空输入事件缓冲（对应 C 版 tcflush + flush_input_buffer）
+    pub fn flush_input(&self) -> io::Result<()> {
+        while event::poll(Duration::from_millis(0))? {
+            let _ = event::read()?;
+        }
+        Ok(())
+    }
+
     /// 渲染完整场景
     pub fn render_scene(
         &mut self,
@@ -108,6 +124,8 @@ impl Renderer {
         if scene_changed {
             self.last_scene_id = scene.scene_id.clone();
             self.printed_lines = 0;
+            self.current_dialogue_rows = 0;
+            self.takeover_synced = false;
         }
 
         if scene.is_takeover {
@@ -161,36 +179,82 @@ impl Renderer {
         scene_changed: bool,
     ) -> io::Result<()> {
         if scene_changed {
+            // A. 初始进入或 Resize：全量重绘
             self.clear()?;
             self.print_time(gs)?;
+            self.current_dialogue_rows = 1; // 时间行占 1 行
+
+            for i in 0..scene.dialogue.len() {
+                if elapsed_ms >= scene.dialogue[i].delay_ms() {
+                    self.print_dialogue_line(&scene.dialogue[i], assets)?;
+                    self.current_dialogue_rows += 1;
+                    self.printed_lines = i + 1;
+                } else {
+                    break;
+                }
+            }
+
+            let choice_rows = self.render_choices(scene, assets, gs, elapsed_ms)?;
+            self.current_dialogue_rows += choice_rows;
+
             stdout().flush()?;
+            return Ok(());
         }
 
-        // 计算当前应该显示多少行
-        let visible_lines = scene
-            .dialogue
-            .iter()
-            .take_while(|line| elapsed_ms >= line.delay_ms())
-            .count();
-
-        // 增量注入：只打印新出现的行
-        for i in self.printed_lines..visible_lines {
+        // B. 增量注入
+        let mut new_lines = 0;
+        for i in self.printed_lines..scene.dialogue.len() {
             let line = &scene.dialogue[i];
-            self.print_dialogue_line(line, assets)?;
-            stdout().flush()?;
-            self.printed_lines = i + 1;
+            if elapsed_ms >= line.delay_ms() {
+                self.print_dialogue_line(line, assets)?;
+                stdout().flush()?;
+                self.printed_lines = i + 1;
+                new_lines += 1;
+            } else {
+                break;
+            }
         }
+        self.current_dialogue_rows += new_lines;
 
-        // 所有对话显示完毕后，显示选项
-        if self.printed_lines >= scene.dialogue.len() && !scene.choices.is_empty() {
-            // 清除之前可能残留的选项（简单方案：重绘选项区）
-            self.render_choices(scene, assets, gs, elapsed_ms)?;
+        // C. 所有对话显示完毕后：刷新选项 + 清空输入 + 恢复交互
+        let all_done = self.printed_lines >= scene.dialogue.len();
+        if all_done && !self.takeover_synced {
+            self.flush_input()?; // 清空播放期间的所有按键噪声
+
+            if !scene.choices.is_empty() {
+                // 清除并重新绘制选项区，确保状态正确
+                let choice_rows = self.render_choices(scene, assets, gs, elapsed_ms)?;
+                self.current_dialogue_rows += choice_rows;
+            }
+
+            stdout().flush()?;
+            self.takeover_synced = true;
         }
 
         Ok(())
     }
 
+    /// 原地更新时间显示（对应 C 版 update_time_display_inplace）
+    pub fn update_time_display(&self, gs: &GameState) -> io::Result<()> {
+        let mut stdout = stdout();
+        stdout.queue(cursor::SavePosition)?;
+        stdout.queue(cursor::MoveTo(0, 0))?;
+        stdout.queue(Clear(ClearType::UntilNewLine))?;
+        self.print_time_raw(gs)?;
+        stdout.queue(cursor::RestorePosition)?;
+        stdout.flush()?;
+        Ok(())
+    }
+
+    /// 打印时间（带换行）
     fn print_time(&self, gs: &GameState) -> io::Result<()> {
+        self.print_time_raw(gs)?;
+        println!();
+        Ok(())
+    }
+
+    /// 仅打印时间内容，不换行
+    fn print_time_raw(&self, gs: &GameState) -> io::Result<()> {
         let decoded = time::decode(gs.time_of_day);
         let (h, m) = time::to_hm(decoded.data);
 
@@ -202,7 +266,7 @@ impl Renderer {
                 print!("\x1b[33m[{:02}:{:02}]\x1b[0m", h, m);
             }
         }
-        println!(" \x1b[90m[U:{}]\x1b[0m", decoded.data);
+        print!(" \x1b[90m[U:{}]\x1b[0m", decoded.data);
         Ok(())
     }
 
@@ -274,14 +338,16 @@ impl Renderer {
         assets: &Assets,
         _gs: &GameState,
         elapsed_ms: u64,
-    ) -> io::Result<()> {
+    ) -> io::Result<u16> {
         self.choice_positions.clear();
+        let mut rows: u16 = 0;
 
         if scene.choices.is_empty() {
-            return Ok(());
+            return Ok(rows);
         }
 
         println!("\n--- Choices ---");
+        rows += 2; // 空行 + 分隔线
 
         let mut visible_idx = 1;
         for (i, choice) in scene.choices.iter().enumerate() {
@@ -297,10 +363,12 @@ impl Renderer {
                 row,
             });
             visible_idx += 1;
+            rows += 1;
         }
 
         println!("---------------");
-        Ok(())
+        rows += 1;
+        Ok(rows)
     }
 
     /// 非阻塞检查按键（用于主循环）
