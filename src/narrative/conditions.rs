@@ -177,7 +177,9 @@ mod tests {
     #[test]
     fn test_hour_range() {
         let mut gs = GameState::default();
-        // 默认时间是早上8点
+        // 明确设为早上8点（不依赖默认值）
+        gs.time_of_day = time::encode(8 * 3600 * 16);
+
         let cond = Condition {
             hour_start: 20,
             hour_end: 23,

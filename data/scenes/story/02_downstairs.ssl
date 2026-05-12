@@ -1,0 +1,15 @@
+scene_id: SCENE_02_DOWNSTAIRS
+name_text_id: TEXT_SCENE_NAME_02_DOWNSTAIRS
+location_id: iwakura_living_dining_kitchen
+description: |
+  你下了楼。
+
+  客厅里弥漫着一种压抑的气氛。
+  爸爸坐在沙发上看报纸，妈妈背对着你在厨房忙碌。
+  他们的争吵声虽然压低了，但还是能隐约听到。
+
+  电视开着，但音量调得很低。
+  餐桌上放着没收拾的早餐餐具。
+
+dialogue: []
+choices: []

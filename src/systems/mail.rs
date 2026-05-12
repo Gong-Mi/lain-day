@@ -37,6 +37,16 @@ impl Mailbox {
         Self::default()
     }
 
+    /// 是否有未读邮件
+    pub fn has_unread(&self) -> bool {
+        self.emails.iter().any(|e| !e.is_read && !e.is_deleted)
+    }
+
+    /// 未读邮件数量
+    pub fn unread_count(&self) -> usize {
+        self.emails.iter().filter(|e| !e.is_read && !e.is_deleted).count()
+    }
+
     /// 从目录加载邮件
     pub fn load_from_dir(&mut self, maildir_path: &Path) -> io::Result<()> {
         self.emails.clear();
@@ -123,18 +133,29 @@ impl Mailbox {
         }
     }
 
-    /// 标记已读
-    pub fn mark_as_read(&mut self, email_id: u32) {
+    /// 标记已读（同时持久化：重命名文件 U → R）
+    pub fn mark_as_read(&mut self, email_id: u32, maildir_path: &Path) -> io::Result<()> {
         if let Some(e) = self.emails.iter_mut().find(|e| e.id == email_id) {
             if e.is_deleted {
                 println!(
                     "\x1b[31mEmail #{} is deleted and cannot be marked as read.\x1b[0m",
                     email_id
                 );
-                return;
+                return Ok(());
             }
             if !e.is_read {
                 e.is_read = true;
+                let old_path = maildir_path.join(&e.filename);
+                let new_filename = if let Some(pos) = e.filename.rfind(',') {
+                    format!("{}R", &e.filename[..pos + 1])
+                } else {
+                    format!("{},R", e.filename)
+                };
+                let new_path = maildir_path.join(&new_filename);
+                if old_path.exists() {
+                    fs::rename(&old_path, &new_path)?;
+                    e.filename = new_filename;
+                }
                 println!("\x1b[32mEmail #{} marked as read.\x1b[0m", email_id);
             } else {
                 println!("\x1b[33mEmail #{} was already read.\x1b[0m", email_id);
@@ -145,6 +166,7 @@ impl Mailbox {
                 email_id
             );
         }
+        Ok(())
     }
 
     /// 删除邮件（重命名文件）
@@ -297,7 +319,7 @@ pub fn run_mail_app(mailbox: &mut Mailbox, maildir_path: &Path) -> io::Result<Ma
                     stdout.execute(MoveTo(0, 0))?;
                     print_header()?;
                     mailbox.display_email(id);
-                    mailbox.mark_as_read(id);
+                    let _ = mailbox.mark_as_read(id, maildir_path);
                     print_prompt()?;
                 }
                 KeyCode::Char('m') | KeyCode::Char('M') => {
@@ -307,7 +329,7 @@ pub fn run_mail_app(mailbox: &mut Mailbox, maildir_path: &Path) -> io::Result<Ma
                     stdout.execute(Clear(ClearType::All))?;
                     stdout.execute(MoveTo(0, 0))?;
                     print_header()?;
-                    mailbox.mark_as_read(id);
+                    let _ = mailbox.mark_as_read(id, maildir_path);
                     mailbox.display_list();
                     print_prompt()?;
                 }

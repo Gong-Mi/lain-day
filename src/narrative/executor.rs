@@ -24,6 +24,19 @@ pub fn resolve_action(action_id: &str, state: &GameState, current_scene: &Scene)
         "use_desktop_navi" => return vec![EnterNaviMini],
         "exit_story" => return vec![NoOp],
         "use_ticket_machine" => return vec![EnterTrain],
+        "talk_to_sister" => {
+            let scene_id = match state.get_flag("sister_mood") {
+                Some("cold") => "SCENE_04A_TALK_TO_SISTER_COLD",
+                Some("curious") => "SCENE_04B_TALK_TO_SISTER_CURIOUS",
+                _ => "SCENE_04C_TALK_TO_SISTER_DEFAULT",
+            };
+            let mut cmds = vec![TransitionTo(scene_id.into())];
+            if !state.has_item("mobile_phone") {
+                cmds.push(AcquireItem { item_id: "mobile_phone".into(), quantity: 1 });
+            }
+            return cmds;
+        }
+        "open_mail_client" => return vec![EnterMail],
         _ => {}
     }
 
@@ -80,6 +93,16 @@ pub fn resolve_action(action_id: &str, state: &GameState, current_scene: &Scene)
                 TransitionTo("SCENE_EXAMINE_FRIDGE".into()),
             ];
         }
+        "examine_hamlet" => {
+            if state.has_item("key_mika_room") {
+                return vec![TransitionTo("SCENE_IWAKURA_LAINS_ROOM".into())];
+            }
+            return vec![
+                SetFlag { key: "found_hamlet_key".into(), value: "1".into() },
+                AcquireItem { item_id: "key_mika_room".into(), quantity: 1 },
+                TransitionTo("SCENE_IWAKURA_LAINS_ROOM".into()),
+            ];
+        }
         _ => {}
     }
 
@@ -112,6 +135,7 @@ pub fn resolve_action(action_id: &str, state: &GameState, current_scene: &Scene)
         "get_milk" => Some(("SCENE_02J_GET_MILK_ENDPROLOGUE", Some(("sister_mood", "normal")))),
         "mom_reply_fine" => Some(("SCENE_02F_MOM_REPLY_FINE_ENDPROLOGUE", Some(("sister_mood", "normal")))),
         "mom_reply_silent" => Some(("SCENE_02G_MOM_REPLY_SILENT_ENDPROLOGUE", Some(("sister_mood", "cold")))),
+        "talk_to_mom" => Some(("SCENE_02D_TALK_TO_MOM_NORMAL", None)),
         "start_chapter_one" => Some(("SCENE_03_CHAPTER_ONE_INTRO", None)),
         "talk_to_dad" => Some(("SCENE_DAD_HUB", None)),
         "talk_to_sister_cold" => Some(("SCENE_04A_TALK_TO_SISTER_COLD", None)),

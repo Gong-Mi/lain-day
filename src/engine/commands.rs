@@ -32,6 +32,8 @@ pub enum ParsedCommand {
     Navi,
     /// 调试时间
     DebugTime,
+    /// 邮件客户端
+    Mail,
     /// 调试场景跳转
     DebugScene { scene_id: String },
     /// 保存进度
@@ -118,6 +120,7 @@ pub fn parse(input: &str) -> ParsedCommand {
         "help" => ParsedCommand::Help,
         "time" => ParsedCommand::Time,
         "navi" => ParsedCommand::Navi,
+        "mail" => ParsedCommand::Mail,
         "debug_time" => ParsedCommand::DebugTime,
         "debug_scene" => {
             if parts.len() >= 2 {
@@ -160,10 +163,29 @@ pub fn execute(
         ParsedCommand::Move { destination } => cmd_move(gs, assets, current_scene, destination),
         ParsedCommand::Help => cmd_help(gs),
         ParsedCommand::Time => cmd_time(gs),
-        ParsedCommand::Navi => CommandOutput {
-            lines: vec!["进入 NAVI 系统...".into()],
-            commands: vec![Command::EnterNaviMini],
-        },
+        ParsedCommand::Navi => {
+            let has_navi = gs.has_item("mobile_phone") || gs.has_item("handi_navi");
+            if !has_navi {
+                CommandOutput::message("你摸了摸口袋——手机不在身上。")
+            } else {
+                CommandOutput {
+                    lines: vec!["进入 NAVI 系统...".into()],
+                    commands: vec![Command::EnterNaviMini],
+                }
+            }
+        }
+        ParsedCommand::Mail => {
+            let has_navi = gs.has_item("mobile_phone") || gs.has_item("handi_navi");
+            let at_desktop = gs.player.location == "iwakura_lains_room";
+            if !has_navi && !at_desktop {
+                CommandOutput::message("你摸了摸口袋——手机不在身上。附近也没有可以使用的设备。")
+            } else {
+                CommandOutput {
+                    lines: vec!["打开邮件客户端...".into()],
+                    commands: vec![Command::EnterMail],
+                }
+            }
+        }
         ParsedCommand::DebugTime => cmd_debug_time(gs),
         ParsedCommand::DebugScene { scene_id } => CommandOutput::with_transition(scene_id.clone()),
         ParsedCommand::Save { name } => cmd_save(gs, name.as_deref()),

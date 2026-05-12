@@ -9,5 +9,7 @@ choices:
     action_id: "BROWSE_THE_WIRED"
   - text_id: TEXT_PC_DESKTOP_CHOICE_FILES
     action_id: "VIEW_LOCAL_FILES"
+  - text_id: TEXT_PC_DESKTOP_CHOICE_MAIL
+    action_id: "open_mail_client"
   - text_id: TEXT_PC_DESKTOP_CHOICE_LOG_OFF
     action_id: "exit_story"

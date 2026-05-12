@@ -169,6 +169,38 @@ impl Renderer {
         Ok(())
     }
 
+    /// 地点默认视图 —— 当玩家移动到新地点但没有对应剧情场景时显示
+    ///
+    /// 显示地点名称、描述和命令提示。不渲染对话/选项。
+    pub fn render_location_view(
+        &mut self,
+        assets: &Assets,
+        gs: &GameState,
+    ) -> io::Result<()> {
+        self.clear()?;
+        self.print_time(gs)?;
+        println!("========================================");
+
+        if let Some(loc) = assets.get_location(&gs.player.location) {
+            println!("Location: {}", loc.name);
+            println!("========================================");
+            // 显示地点描述（支持多行）
+            for line in loc.description.lines() {
+                if !line.trim().is_empty() {
+                    println!("{}", line);
+                }
+            }
+        } else {
+            println!("Location: {}", gs.player.location);
+            println!("========================================");
+            println!("你站在一个未知的地方。");
+        }
+
+        println!("\n\x1b[90m[输入 / 或 : 输入命令互动]\x1b[0m");
+        stdout().flush()?;
+        Ok(())
+    }
+
     /// Takeover 模式：沉浸式逐行注入
     fn render_takeover(
         &mut self,

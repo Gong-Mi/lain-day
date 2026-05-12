@@ -62,7 +62,8 @@ impl Default for GameState {
         Self {
             player: PlayerState::default(),
             current_scene: "SCENE_00_ENTRY".to_string(),
-            time_of_day: crate::engine::time::encode(8 * 3600 * 16), // 第0天早上8点
+            // C 版 data_loader.c: 第2天晚上20:00 = (2 * 24 * 3600 * 16) + (20 * 3600 * 16)
+            time_of_day: crate::engine::time::encode((2 * 24 * 3600 * 16) + (20 * 3600 * 16)),
             flags: HashMap::new(),
             typewriter_delay: 0.04,
             doll_state_lain_room: 0,
@@ -70,7 +71,8 @@ impl Default for GameState {
             mika_sanity: 0,
             session_name: "default".to_string(),
             mika: MikaModule::new(),
-            scene_entry_time: crate::engine::time::encode(8 * 3600 * 16),
+            // 同步 scene_entry_time
+            scene_entry_time: crate::engine::time::encode((2 * 24 * 3600 * 16) + (20 * 3600 * 16)),
         }
     }
 }
@@ -104,6 +106,11 @@ impl GameState {
         if !self.player.unlocked_commands.contains(&c) {
             self.player.unlocked_commands.push(c);
         }
+    }
+
+    /// 检查是否持有指定物品
+    pub fn has_item(&self, item_id: &str) -> bool {
+        self.player.inventory.iter().any(|(id, _)| id == item_id)
     }
 }
 

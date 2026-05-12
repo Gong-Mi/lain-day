@@ -33,10 +33,10 @@ choices:
     target_scene: SCENE_01_LAIN_ROOM_BROKEN
     delay: 0.0
   - text_id: TEXT_CHOICE_GO_DOWNSTAIRS_OUTLINE
-    action_id: downstairs
+    action_id: prologue_go_downstairs
     target_scene: SCENE_02_DOWNSTAIRS
     delay: 0.0
   - text_id: TEXT_CHOICE_WAIT_ONE_MINUTE_DOWN_OUTLINE
-    action_id: downstairs
+    action_id: prologue_go_downstairs
     target_scene: SCENE_02_DOWNSTAIRS
     delay: 60.0

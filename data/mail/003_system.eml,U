@@ -1,0 +1,8 @@
+Subject: System Alert
+From: navi@localhost
+
+WARNING: Unauthorized access detected.
+Memory segment 0x7A3F has been accessed by external protocol.
+
+Recommended action: None.
+System will continue.
