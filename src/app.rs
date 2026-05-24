@@ -48,6 +48,12 @@ impl App {
     pub fn new(data_dir: PathBuf, boot_config: Option<&BootConfig>) -> Result<Self, Box<dyn std::error::Error>> {
         let assets = Assets::load_from_data_dir(&data_dir)?;
         let mut state = GameState::default();
+
+        // 序章时间：第3天 20:00~22:00 之间随机
+        // base = 第2天结束 + 20小时
+        let base = (2 * 24 * 3600 * 16) + (20 * 3600 * 16);
+        let random_offset = fastrand::u32(0..=(2 * 3600 * 16));
+        state.time_of_day = crate::engine::time::encode(base + random_offset);
         if let Some(cfg) = boot_config {
             state.session_name = cfg.session_name.clone();
             state.set_flag("lang", match cfg.lang {
