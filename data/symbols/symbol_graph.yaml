@@ -1,0 +1,277 @@
+# Symbol Graph —— 符号关系数据库 v0.1
+# 所有权重为基准值（0.0~1.0），运行时由游戏事件动态调整
+# 比例不确定 = 同一条边在不同上下文下权重会浮动
+
+symbols:
+  # ============================================================
+  # 千砂视觉符号
+  # ============================================================
+  chisa_braids:
+    category: Visual
+    interpretations:
+      - "秩序的符号：将混乱的头发编织成逻辑的辫子"
+      - "伪装的盾牌：好学生、认真、守纪律的保护色"
+      - "仪式的残余：每天清晨重复的自我约束"
+    base_weight: 1.0
+
+  chisa_glasses:
+    category: Visual
+    interpretations:
+      - "分析的符号：理性、研究狂、挑战者号事故的深度阅读者"
+      - "隔绝的屏障：物理上与心理上的一层高透光墙"
+      - "矫正的渴望：试图看清世界，却发现世界不愿被看清"
+    base_weight: 1.0
+
+  chisa_shoes_aligned:
+    category: Visual
+    interpretations:
+      - "优雅关机：向物理世界告别的最后一条指令"
+      - "秩序的终点：连死亡都被编排进日程表"
+      - "未完成的出门：鞋尖朝外，像一个人只是暂时离开"
+    base_weight: 1.0
+
+  # ============================================================
+  # Lain 核心身份符号
+  # ============================================================
+  lain_shadow:
+    category: Identity
+    interpretations:
+      - "影性：被现实约束的无力、沉默、观察"
+      - "虚假现实中的囚徒"
+      - "只能躲在角落的存在"
+    base_weight: 1.0
+
+  lain_god:
+    category: Identity
+    interpretations:
+      - "神性：Wired中的纯净意识，全能、危险、非人"
+      - "不受物理规律约束的潜能"
+      - "参考实现：主干分支，无个性化记忆"
+    base_weight: 1.0
+
+  lain_bear_pajamas:
+    category: Visual
+    interpretations:
+      - "物理温暖的最后堡垒"
+      - "拒绝长大的仪式"
+      - "毛茸茸的隔绝层"
+    base_weight: 0.8
+
+  # ============================================================
+  # 时间与系统符号
+  # ============================================================
+  time_12days:
+    category: System
+    interpretations:
+      - "过渡硬件的寿命：80286的24位地址总线，注定被淘汰"
+      - "一个少女崩解的心理真实时间"
+      - "轮回的极限：超出则归零"
+    base_weight: 1.0
+
+  time_ecc_error:
+    category: System
+    interpretations:
+      - "数据腐败的美学：不可纠正的错误 = 叙事入口"
+      - "现实的裂缝：当校验失败时，真实漏了进来"
+      - "记忆的篡改：被改写的过去"
+    base_weight: 1.0
+
+  protocol_suspend:
+    category: System
+    interpretations:
+      - "暂时的休战：不是结束，只是暂停"
+      - "低功耗模式：另一个意识并未消失，只是休眠"
+      - "未完成的谈判"
+    base_weight: 0.9
+
+  # ============================================================
+  # 地点符号
+  # ============================================================
+  location_cyberia:
+    category: Spatial
+    interpretations:
+      - "现实的缝隙：白天是意大利餐厅，晚上是地下俱乐部"
+      - "牛奶与咖啡：非酒精的庇护所"
+      - "过渡空间：不属于学校也不属于家庭"
+    base_weight: 1.0
+
+  location_corridor:
+    category: Spatial
+    interpretations:
+      - "拉长的感知：不是物理长度，是信号衰减"
+      - "决定的临界点：左还是右，上楼下楼"
+      - "被遗忘的名字：门上的便签，被刮掉的字迹"
+    base_weight: 0.9
+
+  location_navi_room:
+    category: Spatial
+    interpretations:
+      - "赛博蝶蛹：被电子设备包裹的茧"
+      - "旧电器发热的味道：不属于现实世界的呼吸"
+      - "飘窗上的另一个自己"
+    base_weight: 1.0
+
+  # ============================================================
+  # 动作与事件符号
+  # ============================================================
+  action_hug:
+    category: Action
+    interpretations:
+      - "确认真实：体温是唯一可信的协议"
+      - "溺水者的稻草：抓住不放，因为害怕下沉"
+      - "短暂的连接：知道会断开，所以抱得更紧"
+    base_weight: 0.85
+
+  action_read_email:
+    category: Action
+    interpretations:
+      - "接收诅咒：打开即被标记"
+      - "延迟加载的记忆：从深层目录中提取"
+      - "无法拒收的连接"
+    base_weight: 0.8
+
+relations:
+  # ============================================================
+  # 千砂：视觉符号的交叉效果
+  # ============================================================
+  - from: chisa_braids
+    to: chisa_glasses
+    type: CrossEffect
+    base_weight: 0.95
+    context: null
+    note: "共同构建'标准好学生'的刻板印象，内在痛苦越大，张力越强"
+
+  - from: chisa_braids
+    to: order
+    type: Metaphor
+    base_weight: 0.9
+    context: null
+
+  - from: chisa_braids
+    to: chaos
+    type: Opposition
+    base_weight: 0.85
+    context: "internal"
+    note: "辫子对抗的是内心的散发（混乱）"
+
+  - from: chisa_glasses
+    to: analysis
+    type: Metaphor
+    base_weight: 0.85
+    context: null
+
+  - from: chisa_glasses
+    to: isolation
+    type: Metaphor
+    base_weight: 0.75
+    context: null
+
+  - from: chisa_shoes_aligned
+    to: protocol_suspend
+    type: Resonance
+    base_weight: 0.8
+    context: null
+    note: "鞋尖朝外 = 协议中止，都是'有序的退出'"
+
+  # ============================================================
+  # Lain：神性与影性的张力
+  # ============================================================
+  - from: lain_shadow
+    to: lain_god
+    type: Opposition
+    base_weight: 1.0
+    context: null
+    note: "刃与心，同一枚硬币的两面"
+
+  - from: lain_shadow
+    to: location_navi_room
+    type: Containment
+    base_weight: 0.85
+    context: null
+    note: "影性被约束在物理空间（房间）中"
+
+  - from: lain_god
+    to: location_navi_room
+    type: Reflection
+    base_weight: 0.7
+    context: "wired_level > 3"
+    note: "神性在深层Wired中将房间重构为神庙"
+
+  - from: lain_bear_pajamas
+    to: lain_shadow
+    type: Reinforcement
+    base_weight: 0.8
+    context: null
+    note: "小熊睡衣是影性的具象化"
+
+  - from: lain_bear_pajamas
+    to: action_hug
+    type: Resonance
+    base_weight: 0.75
+    context: null
+    note: "Alice给帽子 = 外部世界对小熊睡衣的回应"
+
+  # ============================================================
+  # 时间：溢出与故障
+  # ============================================================
+  - from: time_12days
+    to: time_ecc_error
+    type: Causality
+    base_weight: 0.9
+    context: "day > 12"
+    note: "溢出导致数据损坏，损坏触发叙事"
+
+  - from: time_ecc_error
+    to: lain_god
+    type: Revelation
+    base_weight: 0.7
+    context: "double_bit_error"
+    note: "校验失败时，神性泄漏进现实"
+
+  # ============================================================
+  # 地点：Cyberia 作为中转站
+  # ============================================================
+  - from: location_cyberia
+    to: location_corridor
+    type: Parallel
+    base_weight: 0.65
+    context: null
+    note: "Cyberia和走廊都是'过渡空间'，前者温暖，后者冰冷"
+
+  - from: location_cyberia
+    to: action_hug
+    type: Container
+    base_weight: 0.6
+    context: null
+    note: "拥抱发生在Cyberia和教室，一个是自愿连接，一个是恐惧连接"
+
+  - from: location_corridor
+    to: location_navi_room
+    type: Threshold
+    base_weight: 0.9
+    context: null
+    note: "走廊→房间：从公共到私密，从现实到Wired"
+
+  # ============================================================
+  # 千砂与 Lain 的对位
+  # ============================================================
+  - from: chisa_braids
+    to: lain_bear_pajamas
+    type: Opposition
+    base_weight: 0.7
+    context: null
+    note: "千砂的秩序 vs Lain的混沌（散发/睡衣）"
+
+  - from: chisa_glasses
+    to: lain_shadow
+    type: Mirror
+    base_weight: 0.6
+    context: null
+    note: "千砂通过分析来隔离，Lain通过沉默来隔离"
+
+  - from: chisa_shoes_aligned
+    to: lain_god
+    type: Foreshadowing
+    base_weight: 0.5
+    context: "chapter_3"
+    note: "千砂的'优雅关机'预示Lain最终的重置世界"
