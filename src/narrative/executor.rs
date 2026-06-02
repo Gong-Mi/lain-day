@@ -73,7 +73,7 @@ pub fn resolve_action(action_id: &str, state: &GameState, current_scene: &Scene)
         }
         "gunshot_exit" => {
             return vec![
-                TransitionTo("SCENE_00_ENTRY".into()),
+                TransitionTo("SCENE_23_POLICE_STATION".into()),
                 // 时间重置由 Apply 层处理
                 AdvanceTime(0), // 占位，实际在 apply 层特殊处理
                 SetFlag { key: "TIME_GLITCH_ACTIVE".into(), value: "0".into() },
@@ -158,6 +158,8 @@ pub fn resolve_action(action_id: &str, state: &GameState, current_scene: &Scene)
         "set_font_speed_slow" => Some(("SCENE_SIDE_STORIES_ADJUST_FONT_INTERVAL", Some(("typewriter_delay", "0.07")))),
         "connect_to_regional" => Some(("SCENE_SIDE_STORIES_NETWORK_STATUS", Some(("network_status.scope", "地区局域网")))),
         "connect_to_national" => Some(("SCENE_SIDE_STORIES_NETWORK_STATUS", Some(("network_status.scope", "全国互联网")))),
+        "go_home_after_police" => Some(("SCENE_24_WAY_HOME_ANOMALY", None)),
+        "walk_home_anomaly" => Some(("SCENE_IWAKURA_LAINS_ROOM", None)), // 占位符：后续衔接到家中的异常场景
         _ => None,
     };
 

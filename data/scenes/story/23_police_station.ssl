@@ -1,0 +1,41 @@
+scene_id: SCENE_23_POLICE_STATION
+name_text_id: TEXT_SCENE_NAME_23_POLICE_STATION
+location_id: shibuya_police_station
+is_takeover: true
+
+dialogue:
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_POLICE_STATION_DESC1
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_POLICE_STATION_DESC2
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_POLICE_STATION_DESC3
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_POLICE_STATION_DESC4
+  - speaker: SPEAKER_PARENT
+    text_id: TEXT_POLICE_SORRY_DELAY
+  - speaker: SPEAKER_PARENT
+    text_id: TEXT_POLICE_ROUTINE
+  - speaker: SPEAKER_LAIN
+    text_id: TEXT_LAIN_CAN_I_GO
+  - speaker: SPEAKER_PARENT
+    text_id: TEXT_POLICE_SURE_BUT
+  - speaker: SPEAKER_PARENT
+    text_id: TEXT_POLICE_PHONE_CHECK
+  - speaker: SPEAKER_PARENT
+    text_id: TEXT_POLICE_PSYCH_ADVICE
+  - speaker: SPEAKER_PARENT
+    text_id: TEXT_POLICE_BOSS_MESSAGE
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_LAIN_WRITE_ADDRESS_ACTION
+  - speaker: SPEAKER_PARENT
+    text_id: TEXT_POLICE_ADDRESS_ERROR
+  - speaker: SPEAKER_PARENT
+    text_id: TEXT_POLICE_DISMISSAL
+  - speaker: SPEAKER_PARENT
+    text_id: TEXT_POLICE_BIG_SISTER
+
+choices:
+  - text_id: TEXT_CHOICE_LEAVE_POLICE
+    action_id: go_home_after_police
+    target_scene: SCENE_24_WAY_HOME_ANOMALY

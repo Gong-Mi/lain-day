@@ -1,0 +1,16 @@
+scene_id: SCENE_24_WAY_HOME_ANOMALY
+name_text_id: TEXT_SCENE_NAME_24_WAY_HOME_ANOMALY
+location_id: shibuya_street_anomaly
+is_takeover: true
+
+dialogue:
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_WAY_HOME_ANOMALY_DESC1
+  - speaker: SPEAKER_ALICE
+    text_id: TEXT_ALICE_BYE1
+  - speaker: SPEAKER_NONE
+    text_id: TEXT_WAY_HOME_ANOMALY_DESC2
+
+choices:
+  - text_id: TEXT_CHOICE_CONTINUE
+    action_id: walk_home_anomaly
